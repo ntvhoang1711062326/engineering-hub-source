@@ -34,8 +34,35 @@
     short: extra.short || '',
     desc: extra.desc || '',
     specs: extra.specs || {},
+    vehicleImages: {}, // { 'Vario': 'assets/img/…jpg' } — ảnh riêng theo dòng xe
     active: true,
   });
+
+  /* Tự gợi ý ảnh theo dòng xe từ caption TikTok: caption phải nhắc tới dòng xe VÀ loại đèn của sản phẩm */
+  const VEH_RE = {
+    'Vario': /vario/, 'Air Blade': /\b(ab|air ?blade)\b/, 'Vision': /vision/, 'SH': /\bsh\b(?! ?mode)/, 'SH Mode': /sh ?mode/,
+    'Lead': /\blead\b/, 'Scoopy': /scoopy/, 'Future': /future/, 'NVX': /nvx/, 'Click': /click/, 'Vespa': /vespa/,
+  };
+  const KW = [['kenzo'], ['aozoom', 'ex3'], ['cb150'], ['sharingan', 'sharigan', 'mắt xoay'], ['audi'], ['hậu'], ['bi cầu', 'bicau'], ['zhipat'], ['bimini', 'bi mini'], ['chóa'], ['bảng led']];
+  function suggestVehicleImages(p) {
+    const media = window.TIKTOK_MEDIA || [];
+    const name = p.name.toLowerCase();
+    const kws = KW.filter(g => g.some(k => name.includes(k)));
+    const out = {};
+    if (!kws.length) return out;
+    p.vehicles.forEach(v => {
+      const re = VEH_RE[v]; if (!re) return;
+      let best = null, bestScore = 0;
+      media.forEach(m => {
+        const cap = (m.cap || '').toLowerCase();
+        if (!re.test(cap)) return;
+        const score = kws.filter(g => g.some(k => cap.includes(k))).length;
+        if (score > bestScore || (score === bestScore && best && m.views > best.views)) { best = m; bestScore = score; }
+      });
+      if (best && bestScore) out[v] = img(best.id);
+    });
+    return out;
+  }
 
   /* Giá bên dưới là GIÁ MẪU — chỉnh lại trong trang Admin */
   const PRODUCTS = [
@@ -164,6 +191,7 @@
     }),
   ];
   PRODUCTS.forEach(p => {
+    p.vehicleImages = suggestVehicleImages(p);
     if (!p.desc) p.desc = `${p.name} — ${p.short}\n\nSản phẩm được TS SUPERLIGHT tuyển chọn và lắp đặt trực tiếp tại shop. Test sáng miễn phí trước khi lắp, bảo hành ${p.warranty}, hỗ trợ đổi mới 7 ngày nếu lỗi nhà sản xuất.\n\nGiá tuỳ đời xe — liên hệ Hotline/Zalo để được báo giá và tư vấn. Đặt chỗ online, cọc trước để giữ hàng và lịch lắp.`;
   });
 
@@ -216,7 +244,7 @@
   };
 
   const seed = () => ({
-    version: 2,
+    version: 3,
     categories: CATEGORIES,
     vehicles: VEHICLES,
     products: PRODUCTS,
@@ -235,6 +263,7 @@
         this.data = raw ? JSON.parse(raw) : seed();
       } catch (e) { this.data = seed(); }
       this.migrate();
+      this.migrate3();
       return this.data;
     },
     /* v2: bỏ giao hàng, chuyển sang đặt chỗ + cọc */
@@ -250,6 +279,14 @@
       d.version = 2;
       try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
     },
+    /* v3: ảnh theo dòng xe */
+    migrate3() {
+      const d = this.data;
+      if ((d.version || 1) >= 3) return;
+      d.products.forEach(p => { if (!p.vehicleImages) p.vehicleImages = suggestVehicleImages(p); });
+      d.version = 3;
+      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+    },
     save() {
       try { localStorage.setItem(KEY, JSON.stringify(this.data)); return true; }
       catch (e) { alert('Không lưu được dữ liệu (bộ nhớ trình duyệt đầy?). Hãy dùng ảnh nhỏ hơn.'); return false; }
@@ -257,6 +294,8 @@
     reset() { this.data = seed(); this.save(); },
     product(id) { return this.data.products.find(p => p.id === id); },
     category(id) { return this.data.categories.find(c => c.id === id); },
+    /* Ảnh sản phẩm theo dòng xe đã chọn (không có thì dùng ảnh đại diện) */
+    imageFor(p, vehicle) { return (vehicle && p.vehicleImages?.[vehicle]) || p.image; },
 
     /* Giá hiệu lực: ưu tiên giá flash sale nếu còn hạn */
     flashItem(pid) {

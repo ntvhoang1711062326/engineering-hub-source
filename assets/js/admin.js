@@ -261,10 +261,11 @@
   function productForm(p, preset = {}) {
     const isNew = !p;
     const d = p ? JSON.parse(JSON.stringify(p)) : {
-      id: DB.uid('p'), name: '', cat: D().categories[0].id, vehicles: [], price: 0, oldPrice: 0, image: '', gallery: [], video: '', tiktok: '',
+      id: DB.uid('p'), name: '', cat: D().categories[0].id, vehicles: [], price: 0, oldPrice: 0, image: '', gallery: [], vehicleImages: {}, video: '', tiktok: '',
       stock: 10, sold: 0, rating: 5, featured: false, isNew: true, warranty: '12 tháng', short: '', desc: '', specs: {}, active: true,
       ...preset,
     };
+    if (!d.vehicleImages) d.vehicleImages = {};
     const videos = MEDIA.filter(m => m.video);
     const m = modal(`
       <div class="m-head">${isNew ? 'Thêm sản phẩm mới' : 'Sửa: ' + esc(d.name)}</div>
@@ -290,6 +291,10 @@
               <div class="hint">Ảnh vuông hoặc dọc, sẽ tự thu nhỏ khi tải lên.</div>
             </div>
           </div>
+        </div>
+        <div class="field" style="margin-top:12px"><label>Ảnh theo dòng xe</label>
+          <div class="hint" style="margin:0 0 6px">Khách chọn dòng xe ở trang chi tiết thì ảnh chính đổi sang ảnh này. Để trống thì dùng ảnh đại diện.</div>
+          <div class="veh-imgs" id="pVehImgs"></div>
         </div>
         <div class="field" style="margin-top:12px"><label>Ảnh phụ (gallery)</label>
           <div class="gal" id="pGal"></div>
@@ -318,8 +323,22 @@
       $$('[data-rg]', m).forEach(b => b.onclick = () => { d.gallery.splice(+b.dataset.rg, 1); drawGal(); });
     };
     drawGal();
+    const drawVehImgs = () => {
+      const vs = $$('input[name=veh]:checked', m).map(x => x.value).filter(v => v !== 'Tất cả dòng xe');
+      $('#pVehImgs', m).innerHTML = vs.map(v => `
+        <div class="vi">
+          <img src="${esc(d.vehicleImages[v] || d.image)}" class="${d.vehicleImages[v] ? '' : 'dim'}" alt="">
+          <b>${esc(v)}</b>
+          <button type="button" class="ib" data-vpick="${esc(v)}">${d.vehicleImages[v] ? 'Đổi ảnh' : 'Chọn ảnh'}</button>
+          ${d.vehicleImages[v] ? `<button type="button" class="ib" data-vrm="${esc(v)}" style="color:var(--sale)">Xoá</button>` : ''}
+        </div>`).join('') || '<span class="muted" style="font-size:12.5px">Tick dòng xe tương thích ở trên để gán ảnh</span>';
+      $$('[data-vpick]', m).forEach(b => b.onclick = () => pickImage(url => { d.vehicleImages[b.dataset.vpick] = url; drawVehImgs(); }));
+      $$('[data-vrm]', m).forEach(b => b.onclick = () => { delete d.vehicleImages[b.dataset.vrm]; drawVehImgs(); });
+    };
+    drawVehImgs();
+    $$('input[name=veh]', m).forEach(i => i.onchange = drawVehImgs);
     $('#pickMain', m).onclick = () => pickImage((url, meta) => {
-      d.image = url; $('#pImg', m).src = url;
+      d.image = url; $('#pImg', m).src = url; drawVehImgs();
       if (meta) { const f = $('#pForm', m); if (!f.tiktok.value) f.tiktok.value = `https://www.tiktok.com/@ts.superlight/video/${meta.id}`; if (meta.video && !f.video.value) f.video.value = `assets/video/${meta.id}.mp4`; }
     });
     $('#pickGal', m).onclick = () => pickImage(urls => { d.gallery.push(...urls); drawGal(); }, { multi: true });
@@ -339,6 +358,7 @@
         featured: f.featured.checked, isNew: f.isNew.checked, active: f.active.checked,
       });
       if (!d.vehicles.length) d.vehicles = ['Tất cả dòng xe'];
+      d.vehicleImages = Object.fromEntries(Object.entries(d.vehicleImages).filter(([v]) => d.vehicles.includes(v)));
       if (isNew) D().products.unshift(d);
       else D().products[D().products.findIndex(x => x.id === d.id)] = d;
       if (DB.save()) { m.remove(); toast(isNew ? 'Đã thêm sản phẩm <b>✓</b>' : 'Đã lưu <b>✓</b>'); route(); }

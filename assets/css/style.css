@@ -240,6 +240,8 @@ select.sort { border: 1.5px solid var(--line); border-radius: 8px; padding: 8px 
 .opt { display: flex; gap: 8px; flex-wrap: wrap; }
 .opt button { border: 1.5px solid var(--line); background: #fff; border-radius: 8px; padding: 7px 12px; font-size: 13px; font-weight: 600; }
 .opt button.on { border-color: var(--brand-2); background: #fff6de; color: #8a4a00; }
+.opt button:has(img) { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px 4px 4px; }
+.opt button img { width: 28px; height: 28px; border-radius: 5px; object-fit: cover; }
 .qty { display: inline-flex; border: 1.5px solid var(--line); border-radius: 8px; overflow: hidden; background: #fff; }
 .qty button { border: 0; background: #f5f5f5; width: 34px; font-size: 16px; }
 .qty input { width: 46px; text-align: center; border: 0; outline: none; padding: 7px 0; -moz-appearance: textfield; }

@@ -22,7 +22,7 @@
     remove(idx) { this.items.splice(idx, 1); this.save(); },
     clear() { this.items = []; this.save(); },
     count() { return this.items.reduce((s, i) => s + i.qty, 0); },
-    lines() { return this.items.map(i => ({ ...i, p: DB.product(i.pid) })); },
+    lines() { return this.items.map(i => { const p = DB.product(i.pid); return { ...i, p, img: DB.imageFor(p, i.vehicle) }; }); },
   };
   // Tiền cọc cố định cho mỗi lượt đặt chỗ (Admin → Cài đặt)
   const deposit = () => Number(S().deposit) || 0;
@@ -374,7 +374,9 @@
     setNav(p.cat);
     const pr = DB.priceOf(p);
     const cat = DB.category(p.cat);
-    const media = [{ type: 'img', src: p.image }, ...(p.video ? [{ type: 'video', src: p.video, poster: p.image }] : []), ...p.gallery.map(src => ({ type: 'img', src }))];
+    const vehImgs = p.vehicles.map(v => DB.imageFor(p, v));
+    const srcs = [...new Set([p.image, ...vehImgs, ...p.gallery])];
+    const media = [{ type: 'img', src: p.image }, ...(p.video ? [{ type: 'video', src: p.video, poster: p.image }] : []), ...srcs.slice(1).map(src => ({ type: 'img', src }))];
     const related = activeProducts().filter(x => x.id !== p.id && (x.cat === p.cat || x.vehicles.some(v => p.vehicles.includes(v)))).slice(0, 5);
     const vehicles = p.vehicles;
     let selVeh = vehicles.length === 1 ? vehicles[0] : '';
@@ -383,8 +385,8 @@
       <nav class="crumbs"><a href="#/">Trang chủ</a><span><a href="#/category/${p.cat}">${esc(cat?.name || '')}</a></span><span>${esc(p.name)}</span></nav>
       <section class="panel pd">
         <div class="pd-gallery">
-          <div class="main" id="pdMain"><img src="${esc(p.image)}" alt="${esc(p.name)}"></div>
-          ${media.length > 1 ? `<div class="thumbs">${media.map((m, i) => `<button class="${i === 0 ? 'on' : ''} ${m.type === 'video' ? 'is-video' : ''}" data-media="${i}"><img src="${esc(m.poster || m.src)}" alt=""></button>`).join('')}</div>` : ''}
+          <div class="main" id="pdMain"><img src="${esc(DB.imageFor(p, selVeh))}" alt="${esc(p.name)}"></div>
+          ${media.length > 1 ? `<div class="thumbs">${media.map((m, i) => `<button class="${m.type === 'img' && m.src === DB.imageFor(p, selVeh) ? 'on' : ''} ${m.type === 'video' ? 'is-video' : ''}" data-media="${i}"><img src="${esc(m.poster || m.src)}" alt=""></button>`).join('')}</div>` : ''}
         </div>
         <div class="pd-info">
           <h1>${esc(p.name)}</h1>
@@ -397,7 +399,7 @@
           <div class="pd-price"><b>${PRICE_TEXT}</b><span class="muted" style="font-size:14px">Gọi/Zalo <a href="tel:${esc(S().hotline)}">${phoneFmt(S().hotline)}</a> để được báo giá</span></div>
           <p>${esc(p.short)}</p>
           <div class="pd-row"><label>Dòng xe</label>
-            <div class="opt" id="vehOpt">${vehicles.map(v => `<button class="${v === selVeh ? 'on' : ''}" data-veh="${esc(v)}">${esc(v)}</button>`).join('')}</div>
+            <div class="opt" id="vehOpt">${vehicles.map(v => `<button class="${v === selVeh ? 'on' : ''}" data-veh="${esc(v)}">${p.vehicleImages?.[v] ? `<img src="${esc(p.vehicleImages[v])}" alt="">` : ''}${esc(v)}</button>`).join('')}</div>
           </div>
           <div class="pd-row"><label>Số lượng</label>
             <div class="qty"><button data-q="-1">−</button><input id="pdQty" type="number" value="1" min="1" max="99"><button data-q="1">+</button></div>
@@ -438,14 +440,20 @@
       ${related.length ? `<section class="section"><div class="section-head"><h3>Sản phẩm liên quan</h3></div>${grid(related)}</section>` : ''}`;
 
     if (pr.flash) startCountdowns();
-    $$('[data-media]').forEach(b => b.onclick = () => {
-      $$('[data-media]').forEach(x => x.classList.remove('on')); b.classList.add('on');
-      const m = media[+b.dataset.media];
+    const showMedia = i => {
+      $$('[data-media]').forEach(x => x.classList.toggle('on', +x.dataset.media === i));
+      const m = media[i];
       $('#pdMain').innerHTML = m.type === 'video'
         ? `<video src="${esc(m.src)}" poster="${esc(m.poster)}" controls autoplay playsinline></video>`
         : `<img src="${esc(m.src)}" alt="">`;
+    };
+    $$('[data-media]').forEach(b => b.onclick = () => showMedia(+b.dataset.media));
+    // Chọn dòng xe → đổi ảnh chính sang ảnh của dòng xe đó
+    $$('[data-veh]').forEach(b => b.onclick = () => {
+      $$('[data-veh]').forEach(x => x.classList.remove('on')); b.classList.add('on'); selVeh = b.dataset.veh;
+      const src = DB.imageFor(p, selVeh);
+      showMedia(media.findIndex(m => m.type === 'img' && m.src === src));
     });
-    $$('[data-veh]').forEach(b => b.onclick = () => { $$('[data-veh]').forEach(x => x.classList.remove('on')); b.classList.add('on'); selVeh = b.dataset.veh; });
     const qty = $('#pdQty');
     $$('[data-q]').forEach(b => b.onclick = () => { qty.value = Math.max(1, Math.min(99, (+qty.value || 1) + +b.dataset.q)); });
     const add = () => {
@@ -493,7 +501,7 @@
           <h3 style="margin:0 0 14px">Sản phẩm đặt chỗ (${Cart.count()})</h3>
           ${lines.map((l, i) => `
             <div class="cart-item">
-              <a href="#/product/${l.p.id}"><img src="${esc(l.p.image)}" alt=""></a>
+              <a href="#/product/${l.p.id}"><img src="${esc(l.img)}" alt=""></a>
               <div>
                 <a class="nm" href="#/product/${l.p.id}">${esc(l.p.name)}</a>
                 ${l.vehicle ? `<div class="vh">Dòng xe: ${esc(l.vehicle)}</div>` : ''}
@@ -580,7 +588,7 @@
 
     $('#summaryAction').innerHTML = `
       <div class="mini-items" style="margin:12px 0;border-top:1px solid var(--line);padding-top:8px">
-        ${Cart.lines().map(l => `<div class="it"><img src="${esc(l.p.image)}" alt=""><div>${esc(l.p.name)}<br><small class="muted">x${l.qty}${l.vehicle ? ' · ' + esc(l.vehicle) : ''}</small></div></div>`).join('')}
+        ${Cart.lines().map(l => `<div class="it"><img src="${esc(l.img)}" alt=""><div>${esc(l.p.name)}<br><small class="muted">x${l.qty}${l.vehicle ? ' · ' + esc(l.vehicle) : ''}</small></div></div>`).join('')}
       </div>
       <button class="btn btn-brand btn-block btn-lg" type="submit">Đặt chỗ &amp; cọc ${fmt(deposit())}</button>
       <p class="muted" style="font-size:12px;text-align:center;margin:8px 0 0">Bằng việc đặt chỗ, bạn đồng ý với chính sách đặt cọc của ${esc(s.shopName)}</p>
@@ -605,7 +613,7 @@
         type: 'booking',
         createdAt: new Date().toISOString(),
         customer: f, appointment: appt, payment: pay,
-        items: Cart.lines().map(l => ({ pid: l.p.id, name: l.p.name, image: l.p.image, qty: l.qty, vehicle: l.vehicle })),
+        items: Cart.lines().map(l => ({ pid: l.p.id, name: l.p.name, image: l.img, qty: l.qty, vehicle: l.vehicle })),
         deposit: deposit(), total: deposit(),
         paymentStatus: 'unpaid', status: 'new',
       };
