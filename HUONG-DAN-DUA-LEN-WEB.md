@@ -42,9 +42,8 @@ Xem lịch sử chạy / lỗi: tab **Actions** của repo trên GitHub.
    - **Permissions → Repository permissions → Contents:** `Read and write`
 3. **Generate token** → copy chuỗi `github_pat_…` (chỉ hiện 1 lần).
 
-### Nhập vào Admin
-1. Mở `admin.html` trên máy → **Cài đặt → Xuất bản lên web (GitHub Pages)**.
-2. Dán token → **Lưu & kiểm tra kết nối** → thấy "✓ Kết nối GitHub thành công".
+### Đăng nhập Admin
+Mở `admin.html` → dán token vào ô **GitHub token** → **Đăng nhập**. Token này dùng luôn cho **🚀 Xuất bản lên web** và **🔄 Đồng bộ TikTok** (đổi token / repo ở **Cài đặt → Xuất bản lên web**).
 
 > Token chỉ lưu trong trình duyệt trên máy này. **Không** gửi token cho người khác, không dán vào file của dự án.
 
@@ -58,10 +57,10 @@ Xem lịch sử chạy / lỗi: tab **Actions** của repo trên GitHub.
 
 ## 6. Dùng Admin trên máy khác / cài lại trình duyệt
 
-Dữ liệu nháp nằm trong trình duyệt. Ở máy mới: mở `admin.html` → nhập token (bước 4) → **Cài đặt → ⤓ Lấy bản đang chạy trên web về** → sửa tiếp như bình thường.
+Dữ liệu nháp nằm trong trình duyệt. Ở máy mới: mở `admin.html` → đăng nhập bằng token (bước 4) → **Cài đặt → ⤓ Lấy bản đang chạy trên web về** → sửa tiếp như bình thường.
 Nên thỉnh thoảng bấm **⬇ Xuất dữ liệu (.json)** ở Cài đặt để sao lưu.
 
 ## Lưu ý
 
 - **Nếu bạn (hoặc người khác) sửa code bằng `git` trên máy:** chạy `git pull` trước khi sửa/push, vì Admin cũng tạo commit trên GitHub.
-- **`admin.html` cũng có trên web** (GitHub Pages đưa cả repo lên) nhưng không có dữ liệu thật: không có token thì không xuất bản được. Đăng nhập `admin / superlight` chỉ là lớp che tạm.
+- **`admin.html` cũng có trên web** (GitHub Pages đưa cả repo lên) nhưng chỉ vào được bằng GitHub token có quyền ghi repo — không có mật khẩu nào viết trong code. Bấm **⎋ Đăng xuất** để xoá token khỏi máy dùng chung.

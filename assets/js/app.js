@@ -120,7 +120,7 @@
       <li class="nav-item"><a href="${zaloLink()}" target="_blank" rel="noopener">Liên hệ</a></li>`;
     $('#footer').innerHTML = `
       <div>
-        <a href="#/" class="logo" style="margin-bottom:12px"><img class="logo-img" src="assets/img/logo2.png" alt="TS SUPERLIGHT"></a>
+        <a href="#/" class="logo" style="margin-bottom:12px"><img class="logo-img" src="assets/img/logo2.webp" alt="TS SUPERLIGHT"></a>
         <p>${esc(s.slogan)}. Lắp đặt, test sáng miễn phí tại shop — bảo hành rõ ràng, liên hệ để được báo giá.</p>
         <div class="social">
           <a href="${esc(ttTop())}" target="_blank" rel="noopener">TikTok</a>

@@ -1,7 +1,5 @@
 /* ============ TS SUPERLIGHT — Admin app ============
-   Đăng nhập demo: admin / superlight
-   LƯU Ý: đăng nhập phía trình duyệt chỉ để demo giao diện.
-   Khi đưa lên mạng thật cần backend có xác thực.
+   Đăng nhập bằng GitHub token có quyền ghi repo (GitHub kiểm tra) — không có mật khẩu viết trong code.
    =================================================== */
 (function () {
   const $ = (s, r = document) => r.querySelector(s);
@@ -9,7 +7,6 @@
   const root = $('#root');
   const D = () => DB.data;
   const MEDIA = () => DB.media();
-  const DEMO_USER = 'admin', DEMO_PASS = 'superlight';
 
   const THEMES = { amber: 'Vàng cam', cyan: 'Xanh neon', red: 'Đỏ' };
 
@@ -210,26 +207,37 @@
     };
   }
 
-  /* ---------------- Login ---------------- */
-  function isAuthed() { try { return sessionStorage.getItem('tsl_admin') === '1'; } catch (e) { return false; } }
+  /* ---------------- Login ----------------
+     Không có mật khẩu viết sẵn trong code: vào Admin bằng chính GitHub token có quyền ghi repo
+     (token dùng để Xuất bản / Đồng bộ TikTok). GitHub kiểm tra token → chỉ chủ repo vào được. */
+  function isAuthed() { return GH.ready(); }
   function renderLogin() {
+    const c = GH.cfg();
     root.innerHTML = `
       <div class="login">
         <form class="login-box" id="loginForm">
-          <div class="logo"><img class="logo-img" src="assets/img/logo2.png" alt="TS SUPERLIGHT"><span class="logo-text"><small style="color:var(--muted)">Trang quản trị</small></span></div>
-          <div class="field"><label>Tài khoản</label><input id="lu" autocomplete="username" value="admin"></div>
-          <div class="field"><label>Mật khẩu</label><input id="lp" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+          <div class="logo"><img class="logo-img" src="assets/img/logo2.webp" alt="TS SUPERLIGHT"><span class="logo-text"><small style="color:var(--muted)">Trang quản trị</small></span></div>
+          <div class="field"><label>GitHub token (quyền Contents: Read and write)</label><input id="lt" type="password" autocomplete="off" placeholder="github_pat_…"></div>
+          <div class="field"><label>Repo</label><input id="lr" value="${esc(c.owner + '/' + c.repo)}"></div>
           <div class="msg err" id="lmsg" style="margin-top:8px"></div>
           <button class="btn btn-brand btn-block btn-lg" style="margin-top:12px">Đăng nhập</button>
-          <div class="note">Demo: <b>admin</b> / <b>superlight</b><br><a href="index.html" style="color:var(--brand-2)">← Về trang bán hàng</a></div>
+          <div class="note">Token chỉ lưu trong trình duyệt trên máy này. Cách tạo token: file <b>HUONG-DAN-DUA-LEN-WEB.md</b> mục 4.<br><a href="index.html" style="color:var(--brand-2)">← Về trang bán hàng</a></div>
         </form>
       </div>`;
-    $('#loginForm').onsubmit = e => {
+    $('#loginForm').onsubmit = async e => {
       e.preventDefault();
-      if ($('#lu').value.trim() === DEMO_USER && $('#lp').value === DEMO_PASS) {
-        try { sessionStorage.setItem('tsl_admin', '1'); } catch (err) {}
+      const [owner, repo] = $('#lr').value.trim().split('/'), token = $('#lt').value.trim(), msg = $('#lmsg'), btn = e.target.querySelector('button');
+      if (!token || !owner || !repo) { msg.textContent = 'Nhập GitHub token và repo dạng tài-khoản/tên-repo'; return; }
+      btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Đang kiểm tra với GitHub…';
+      GH.setCfg({ ...GH.cfg(), owner, repo, token });
+      try {
+        const r = await GH.api('');
+        if (!r.permissions?.push) throw new Error('Token chưa có quyền ghi repo này (Contents: Read and write)');
         renderShell(); route();
-      } else $('#lmsg').textContent = 'Sai tài khoản hoặc mật khẩu';
+      } catch (err) {
+        GH.setCfg({ ...GH.cfg(), token: '' });
+        msg.className = 'msg err'; msg.textContent = '✕ ' + err.message; btn.disabled = false;
+      }
     };
   }
 
@@ -242,7 +250,7 @@
     root.innerHTML = `
       <div class="adm">
         <aside class="adm-side" id="side">
-          <a href="#/dashboard" class="logo"><img class="logo-img" src="assets/img/logo2.png" alt="TS SUPERLIGHT"><span class="logo-text"><small class="role">Admin</small></span></a>
+          <a href="#/dashboard" class="logo"><img class="logo-img" src="assets/img/logo2.webp" alt="TS SUPERLIGHT"><span class="logo-text"><small class="role">Admin</small></span></a>
           <ul class="adm-menu" id="admMenu"></ul>
           <div class="pub-box" id="pubBox"></div>
           <div class="foot">
@@ -258,7 +266,11 @@
       </div>`;
     $('#burger').onclick = () => $('#side').classList.toggle('open');
     $('#side').onclick = e => { if (e.target.closest('a')) $('#side').classList.remove('open'); };
-    $('#logout').onclick = e => { e.preventDefault(); try { sessionStorage.removeItem('tsl_admin'); } catch (err) {} renderLogin(); };
+    $('#logout').onclick = e => {
+      e.preventDefault();
+      if (!confirm('Đăng xuất sẽ xoá GitHub token khỏi trình duyệt này (bản nháp vẫn giữ). Lần sau cần nhập lại token. Tiếp tục?')) return;
+      GH.setCfg({ ...GH.cfg(), token: '' }); renderLogin();
+    };
   }
   function drawMenu(cur) {
     $('#admMenu').innerHTML = MENU.map(([k, i, t]) => `<li><a href="#/${k}" class="${k === cur ? 'on' : ''}"><i>${i}</i>${t}</a></li>`).join('');

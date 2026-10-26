@@ -55,7 +55,7 @@
     { id: 'kenzo-tro-sang', name: 'Trợ sáng Kenzo', icon: '✧', desc: 'Trợ sáng, bi mini, bóng LED Kenzo' },
   ];
   const K = (id, name, cat, price, short, desc, extra = {}) => ({
-    id, name, cat, vehicles: ['Tất cả dòng xe'], price, oldPrice: 0, image: `assets/img/kenzo/${id}.jpg`,
+    id, name, cat, vehicles: ['Tất cả dòng xe'], price, oldPrice: 0, image: `assets/img/kenzo/${id}.webp`,
     gallery: [], video: '', tiktok: '', stock: 20, sold: 0, rating: 5,
     featured: !!extra.featured, isNew: !!extra.isNew, warranty: 'Theo chính sách Kenzo',
     short, desc: `${name} — ${short}\n\n${desc}\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.`,
@@ -89,7 +89,7 @@
     { id: 'titan-bong-led', name: 'Bóng LED Titan Moto', icon: '✦', desc: 'Bóng LED, Bi LED mini Titan Moto' },
   ];
   const T = (id, name, cat, price, short, extra = {}) => ({
-    id, name, cat, vehicles: ['Tất cả dòng xe'], price, oldPrice: extra.oldPrice || 0, image: `assets/img/titan/${id}.jpg`,
+    id, name, cat, vehicles: ['Tất cả dòng xe'], price, oldPrice: extra.oldPrice || 0, image: `assets/img/titan/${id}.webp`,
     gallery: [], video: '', tiktok: '', stock: 20, sold: 0, rating: 5, featured: false, isNew: false, warranty: extra.warranty,
     short, desc: `${name} — ${short}
 
@@ -143,7 +143,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
   // Mã video TikTok tăng dần theo thời gian đăng → mã lớn hơn = video mới hơn
   const newestFirst = (a, b) => b.id.length - a.id.length || b.id.localeCompare(a.id);
 
-  const kimg = id => `assets/img/kenzo/${id}.jpg`;
+  const kimg = id => `assets/img/kenzo/${id}.webp`;
   const BANNERS = [
     { id: 'b1', title: 'Bi LED Kenzo S600 Pro V3', subtitle: 'Chip LED 12 nhân, tăng sáng 25%, City Mode — lắp đặt & test sáng tại shop', image: kimg('kz-s600-pro-v3'), video: '', cta: 'Xem chi tiết', link: '#/product/kz-s600-pro-v3', active: true, theme: 'amber' },
     { id: 'b2', title: 'Kenzo S500 Pro V2', subtitle: 'Nâng cấp mạnh mẽ, giá không đổi — Bi LED chính hãng Kenzo', image: kimg('kz-s500-pro-v2'), video: '', cta: 'Khám phá', link: '#/product/kz-s500-pro-v2', active: true, theme: 'cyan' },
@@ -188,7 +188,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
   };
 
   const seed = () => ({
-    version: 10,
+    version: 11,
     categories: [...KENZO_CATEGORIES, ...TITAN_CATEGORIES],
     vehicles: VEHICLES,
     products: [...KENZO_PRODUCTS, ...TITAN_PRODUCTS],
@@ -218,6 +218,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       this.migrate8();
       this.migrate9();
       this.migrate10();
+      this.migrate11();
       if (this.data.settings.tiktok2 == null) this.data.settings.tiktok2 = SETTINGS.tiktok2;
       return this.data;
     },
@@ -319,6 +320,19 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       delete d.promos.coupons;
       ['deposit', 'bankName', 'bankAccount', 'bankOwner'].forEach(k => delete d.settings[k]);
       d.version = 10;
+      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+    },
+    /* v11: ảnh sản phẩm Kenzo / Titan chuyển sang WebP 800px (nhẹ hơn ~60%) → đổi đường dẫn .jpg → .webp */
+    migrate11() {
+      const d = this.data;
+      if ((d.version || 1) >= 11) return;
+      const fix = u => typeof u === 'string' ? u.replace(/^(assets\/img\/(?:kenzo|titan)\/[^/]+)\.jpg$/, '$1.webp') : u;
+      d.products.forEach(p => {
+        p.image = fix(p.image); p.gallery = (p.gallery || []).map(fix);
+        Object.keys(p.vehicleImages || {}).forEach(v => { p.vehicleImages[v] = fix(p.vehicleImages[v]); });
+      });
+      [...(d.banners || []), ...(d.sideAds || []), d.promos.popup].forEach(x => { if (x) x.image = fix(x.image); });
+      d.version = 11;
       try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
     },
     save() {
