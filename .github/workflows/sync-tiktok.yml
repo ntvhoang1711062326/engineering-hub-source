@@ -1,0 +1,40 @@
+# Đồng bộ video TikTok lên web: tự chạy mỗi 6 giờ, hoặc khi bấm "🔄 Đồng bộ TikTok" ở Admin
+# (Admin ghi file .github/sync-tiktok-request → workflow này chạy → ghi assets/data/tiktok.json + ảnh bìa)
+name: Đồng bộ TikTok
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/sync-tiktok-request']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-tiktok
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Cài sharp (thu nhỏ ảnh bìa)
+        run: npm install --no-save --no-package-lock sharp@0.33.5
+      - name: Lấy video mới từ TikTok
+        run: node scripts/sync-tiktok.mjs
+      - name: Đưa lên web
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/data/tiktok.json assets/img
+          if git diff --cached --quiet; then echo "Không có gì mới"; exit 0; fi
+          git commit -m "Đồng bộ video TikTok"
+          for i in 1 2 3; do git pull --rebase origin main && git push && exit 0; sleep 5; done
+          exit 1

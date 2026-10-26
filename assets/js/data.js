@@ -8,6 +8,7 @@
 (function () {
   const KEY = 'tsl_db_v1';                     // bản nháp của Admin
   const CATALOG_URL = 'assets/data/catalog.json';
+  const TIKTOK_FEED_URL = 'assets/data/tiktok.json'; // GitHub Actions tự đồng bộ video TikTok vào đây
   const CATALOG_CACHE = 'tsl_catalog_cache';   // bản catalog khách tải gần nhất (hiện ngay khi mở lại)
   const CATALOG_KEYS = ['version', 'categories', 'vehicles', 'products', 'banners', 'sideAds', 'promos', 'settings', 'tiktok', 'tiktokChannels'];
   const IS_ADMIN = !!window.IS_ADMIN;
@@ -364,9 +365,20 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       return { price, compare: compare > price ? compare : 0, flash: !!fi };
     },
     /* Video TikTok theo dòng xe: tự phân loại từ caption (dùng chung cho trang khách + Admin) */
-    // media.js là danh sách gốc; data.tiktok = video mới / số liệu mới từ nút "Đồng bộ TikTok" ở Admin
+    /* Video TikTok: media.js (danh sách gốc) < data.tiktok (đồng bộ cũ trong bản nháp Admin)
+       < assets/data/tiktok.json (GitHub tự đồng bộ — mới nhất, ghi đè caption / lượt xem) */
+    feed: null,
+    async loadFeed() {
+      try {
+        const res = await fetch(`${TIKTOK_FEED_URL}?t=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        this.feed = await res.json();
+        window.dispatchEvent(new Event('db-changed'));
+      } catch (e) { /* chưa có file / mất mạng → dùng danh sách gốc */ }
+    },
     media() {
-      const sync = new Map((this.data.tiktok || []).map(x => [x.id, x]));
+      const sync = new Map();
+      [...(this.data.tiktok || []), ...(this.feed?.videos || [])].forEach(x => sync.set(x.id, { ...sync.get(x.id), ...x }));
       const base = (window.TIKTOK_MEDIA || []).map(m => sync.has(m.id) ? { ...m, ...sync.get(m.id) } : m);
       const known = new Set(base.map(m => m.id));
       const added = [...sync.values()].filter(x => !known.has(x.id)).map(x => ({ cap: '', views: 0, likes: 0, video: false, ...x }));
@@ -381,7 +393,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       const s = this.data.settings, users = [s.tiktok, s.tiktok2 ?? SETTINGS.tiktok2].map(u => (String(u || '').match(/@([\w.]+)/) || [])[1]).filter(Boolean);
       return [...new Set(users)].map(user => ({
         user, name: '@' + user, followers: 0, likes: 0, avatar: '',
-        ...(window.TIKTOK_CHANNELS || []).find(c => c.user === user), ...(this.data.tiktokChannels || {})[user],
+        ...(window.TIKTOK_CHANNELS || []).find(c => c.user === user), ...(this.data.tiktokChannels || {})[user], ...this.feed?.channels?.[user],
         url: 'https://www.tiktok.com/@' + user,
       }));
     },
@@ -405,6 +417,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
   window.esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   DB.load();
   DB.refresh();
+  DB.loadFeed();
   // Trên máy shop: tab Admin sửa nháp → tab xem trước cập nhật ngay
   window.addEventListener('storage', e => { if (e.key === KEY && (IS_ADMIN || IS_LOCAL)) { DB.load(); window.dispatchEvent(new Event('db-changed')); } });
 })();

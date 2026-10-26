@@ -23,19 +23,6 @@
   DB.save = () => { const ok = dbSave(); drawPublish(); return ok; };
   const pill = ([t, c]) => `<span class="pill ${c}">${t}</span>`;
 
-  /* ---------------- Google Apps Script: đọc hộ TikTok cho nút "Đồng bộ TikTok" ----------------
-     Trình duyệt không đọc thẳng được TikTok (bị chặn CORS). URL Web App chỉ lưu trên máy admin. */
-  const SCRIPT_CFG = 'tsl_sheet'; // giữ tên khoá cũ để không phải nhập lại URL
-  const Script = {
-    url() { let c = {}; try { c = JSON.parse(localStorage.getItem(SCRIPT_CFG)) || {}; } catch (e) {} return c.url || ''; },
-    setUrl(url) { try { localStorage.setItem(SCRIPT_CFG, JSON.stringify({ url })); } catch (e) {} },
-    async call(params) {
-      const res = await fetch(`${this.url()}?${new URLSearchParams(params)}`);
-      const data = await res.json();
-      if (!data.ok) throw new Error(data.error || 'Lỗi không xác định');
-      return data;
-    },
-  };
   /* ---------------- Xuất bản lên web: ghi assets/data/catalog.json (+ ảnh tải lên) vào GitHub ----------------
      GitHub Pages tự đưa bản mới lên web sau ~1 phút. Token chỉ lưu trên máy admin. */
   const GH_CFG = 'tsl_github', PUBLISHED = 'tsl_published';
@@ -284,7 +271,7 @@
   function viewDashboard() {
     const ps = D().products, on = ps.filter(p => p.active), low = on.filter(p => p.stock <= 5);
     const f = D().promos.flash, flashOn = f.active && new Date(f.endsAt) > new Date();
-    const vids = MEDIA(), synced = D().settings.tiktokSyncedAt;
+    const vids = MEDIA(), synced = syncedAt();
     const latest = [...vids].sort((a, b) => b.id.length - a.id.length || b.id.localeCompare(a.id)).slice(0, 6);
     $('#view').innerHTML = `
       <div class="kpis">
@@ -687,38 +674,33 @@
     };
   }
   /* ---------------- Đồng bộ TikTok ----------------
-     Nhờ Apps Script lấy ~12 video mới nhất từ trang nhúng của kênh. Video mới được thêm vào thư viện, video cũ cập nhật caption + lượt xem. */
+     Ghi file .github/sync-tiktok-request lên GitHub → workflow "Đồng bộ TikTok" chạy (~1 phút): lấy video mới
+     của các kênh ở Cài đặt, lưu ảnh bìa + assets/data/tiktok.json → web khách tự hiện, không cần Xuất bản.
+     GitHub cũng tự chạy mỗi 6 giờ. Trình duyệt không đọc thẳng được TikTok nên phải nhờ GitHub. */
+  const syncedAt = () => DB.feed?.syncedAt || D().settings.tiktokSyncedAt;
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
   async function syncTikTok() {
-    if (!Script.url()) { location.hash = '#/settings'; return toast('Đồng bộ TikTok chạy qua Google Apps Script — nhập <b>URL Web App</b> ở Cài đặt trước'); }
-    const btn = $('#ttSync'); if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Đang đồng bộ…'; }
+    if (!GH.ready()) { location.hash = '#/settings'; return toast('Đồng bộ TikTok chạy trên GitHub — nhập <b>GitHub token</b> ở Cài đặt → Xuất bản lên web trước'); }
+    const btn = $('#ttSync');
+    const status = html => { if (btn?.isConnected) btn.innerHTML = html; };
+    if (btn) btn.disabled = true;
     try {
-      const base = new Set((window.TIKTOK_MEDIA || []).map(m => m.id));
-      const sync = new Map((D().tiktok || []).map(x => [x.id, x]));
-      const infos = D().tiktokChannels || (D().tiktokChannels = {});
-      let added = 0, updated = 0;
-      const errs = [];
-      for (const { user } of DB.channels()) {
-        if (btn) btn.innerHTML = `⏳ Đang đồng bộ @${esc(user)}…`;
-        let res;
-        try { res = await Script.call({ action: 'tiktok', user, known: MEDIA().map(m => m.id).join(',') }); } catch (e) { errs.push(`@${esc(user)}: ${esc(e.message)}`); continue; }
-        if (res.info) infos[user] = { ...infos[user], ...Object.fromEntries(Object.entries(res.info).filter(([, v]) => v)) };
-        res.videos.filter(v => /^\d{8,25}$/.test(v.id)).forEach(v => {
-          const x = sync.get(v.id);
-          if (x || base.has(v.id)) { updated++; sync.set(v.id, { ...x, id: v.id, cap: v.cap, views: v.views }); }
-          else if (v.cover) { added++; sync.set(v.id, { id: v.id, cap: v.cap, views: v.views, likes: 0, video: false, ch: user, cover: v.cover }); }
-        });
+      status('⏳ Đang gửi yêu cầu…');
+      const id = Date.now().toString(36);
+      await GH.commit(new Map([['.github/sync-tiktok-request', b64utf8(id + '\n')]]), 'Yêu cầu đồng bộ TikTok từ Admin');
+      // Chờ GitHub chạy xong (thường 40–90 giây), tối đa ~4 phút
+      let feed = null;
+      for (let t = 0; t < 48 && feed?.request !== id; t++) {
+        status(`⏳ GitHub đang lấy video… ${t * 5}s`);
+        await sleep(5000);
+        feed = await GH.api(`/contents/assets/data/tiktok.json?ref=${encodeURIComponent(GH.cfg().branch)}`, { raw: true }).then(JSON.parse).catch(() => null);
       }
-      if (errs.length && !added && !updated) throw new Error(errs.join(' · '));
-      // Ảnh bìa gốc ~250KB → thu về cỡ ảnh bìa có sẵn (~960px) cho nhẹ bản nháp
-      await Promise.all([...sync.values()].filter(x => x.cover?.length > 150000).map(async x => { x.cover = await shrinkImage(x.cover, 960).catch(() => x.cover); }));
-      D().tiktok = [...sync.values()];
-      D().settings.tiktokSyncedAt = new Date().toISOString();
-      if (!DB.save()) throw new Error('bộ nhớ trình duyệt đầy');
-      toast((added ? `Đã thêm <b>${added} video mới</b>, cập nhật ${updated} video — bấm 🚀 Xuất bản để đưa lên web` : `Không có video mới · đã cập nhật lượt xem ${updated} video`) + (errs.length ? `<br>Lỗi: ${errs.join(' · ')}` : ''));
-      drawPublish();
-      if (location.hash === '#/media') viewMedia();
+      if (feed?.request !== id) throw new Error('GitHub chưa chạy xong — đợi vài phút rồi tải lại trang (xem tab Actions trên GitHub)');
+      DB.feed = feed;
+      window.dispatchEvent(new Event('db-changed'));
+      toast(`${feed.added ? `Đã thêm <b>${feed.added} video mới</b>` : 'Không có video mới'} · cập nhật ${feed.updated} video — web khách tự hiện sau ~1 phút${feed.error ? `<br>Lỗi: ${esc(feed.error)}` : ''}`);
     } catch (e) { toast('Đồng bộ TikTok lỗi: ' + esc(e.message)); }
-    if (btn && btn.isConnected) { btn.disabled = false; btn.innerHTML = '🔄 Đồng bộ TikTok'; }
+    if (btn?.isConnected) { btn.disabled = false; btn.innerHTML = '🔄 Đồng bộ TikTok'; }
   }
 
   /* ---------------- Media library ---------------- */
@@ -727,7 +709,7 @@
     $('#view').innerHTML = `
       <div class="card-a">
         <h3>Ảnh & video từ TikTok ${DB.channels().map(c => '@' + esc(c.user)).join(' · ')}<span class="sp"></span><button class="btn btn-brand" id="ttSync">🔄 Đồng bộ TikTok</button>${DB.channels().map(c => `<a class="ib" href="${esc(c.url)}" target="_blank">@${esc(c.user)} ↗</a>`).join(' ')}</h3>
-        <p class="muted" style="margin-top:-6px">${MEDIA().length} ảnh bìa video · ${MEDIA().filter(m => m.video).length} video đã tải về · <span class="pill green">Đang dùng</span> = ảnh đã gắn vào sản phẩm. Bấm vào ảnh để tạo nhanh sản phẩm.${D().settings.tiktokSyncedAt ? ` · Đồng bộ lần cuối: ${new Date(D().settings.tiktokSyncedAt).toLocaleString('vi-VN')}` : ''}</p>
+        <p class="muted" style="margin-top:-6px">${MEDIA().length} ảnh bìa video · ${MEDIA().filter(m => m.video).length} video đã tải về · <span class="pill green">Đang dùng</span> = ảnh đã gắn vào sản phẩm. Bấm vào ảnh để tạo nhanh sản phẩm.${syncedAt() ? ` · Đồng bộ lần cuối: ${dt(syncedAt())} (GitHub tự đồng bộ mỗi 6 giờ)` : ''}</p>
         <div class="bar-tools"><input id="mq" placeholder="Lọc theo caption…"><select id="mc"><option value="">Mọi kênh</option>${[...new Set(MEDIA().map(x => DB.chOf(x)))].map(u => `<option value="${esc(u)}">@${esc(u)} (${MEDIA().filter(x => DB.chOf(x) === u).length})</option>`).join('')}</select><select id="mv"><option value="">Mọi dòng xe (${MEDIA().length})</option>${DB.videoVehicleList().map(v => [v, DB.videosFor(v).length]).filter(([, n]) => n).map(([v, n]) => `<option value="${esc(v)}">${esc(v)} (${n})</option>`).join('')}<option value="-">Chưa rõ dòng xe (${MEDIA().filter(x => !DB.videoVehiclesOf(x).length).length})</option></select><select id="mf"><option value="">Tất cả</option><option value="unused">Chưa dùng</option><option value="video">Có video</option></select></div>
         <p class="muted" style="margin:0 0 10px;font-size:12.5px">Dòng xe được tự nhận từ caption (vd: “Ab”, “Airbalde” → Air Blade; “Fuled” → Future) — giống mục <b>Video theo xe</b> trên trang bán hàng.</p>
         <div class="lib" id="mGrid"></div>
@@ -787,18 +769,8 @@
         </div>
       </div>
       <div style="display:flex;gap:10px;margin:14px 0"><button class="btn btn-brand btn-lg" id="sSave">Lưu cài đặt</button></div>
-      <div class="card-a" id="scriptCard"><h3>Google Apps Script — đồng bộ TikTok</h3>
-        <p class="muted" style="margin-top:-6px">Nút <b>🔄 Đồng bộ TikTok</b> nhờ Apps Script đọc video mới trên TikTok. Dán URL Web App (kết thúc bằng /exec) — chỉ lưu trên máy này. Hướng dẫn cài: file <b>HUONG-DAN-APPS-SCRIPT.md</b>.</p>
-        <div class="form-grid">
-          <div class="field full"><label>URL Web App</label><input id="scUrl" value="${esc(Script.url())}" placeholder="https://script.google.com/macros/s/…/exec"></div>
-        </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-          <button class="btn btn-brand" id="scSave">Lưu &amp; kiểm tra kết nối</button>
-          <span id="scMsg" class="msg" style="align-self:center;margin:0"></span>
-        </div>
-      </div>
       <div class="card-a" id="ghCard"><h3>Xuất bản lên web (GitHub Pages)</h3>
-        <p class="muted" style="margin-top:-6px">Sửa sản phẩm, banner, khuyến mãi, cài đặt… ở Admin chỉ lưu nháp trên máy này. Bấm <b>🚀 Xuất bản lên web</b> (thanh bên trái) để đưa lên web khách — khoảng 1 phút sau khách thấy. Token chỉ lưu trên máy này. Hướng dẫn tạo token: file <b>HUONG-DAN-DUA-LEN-WEB.md</b>.</p>
+        <p class="muted" style="margin-top:-6px">Sửa sản phẩm, banner, khuyến mãi, cài đặt… ở Admin chỉ lưu nháp trên máy này. Bấm <b>🚀 Xuất bản lên web</b> (thanh bên trái) để đưa lên web khách — khoảng 1 phút sau khách thấy. Token này cũng dùng cho nút <b>🔄 Đồng bộ TikTok</b>. Token chỉ lưu trên máy này. Hướng dẫn tạo token: file <b>HUONG-DAN-DUA-LEN-WEB.md</b>.</p>
         <div class="form-grid g3">
           <div class="field"><label>Tài khoản GitHub</label><input id="ghOwner" value="${esc(GH.cfg().owner)}"></div>
           <div class="field"><label>Repo</label><input id="ghRepo" value="${esc(GH.cfg().repo)}"></div>
@@ -838,14 +810,6 @@
       drawPublish();
     };
     $('#ghPull').onclick = pullLive;
-    $('#scSave').onclick = async () => {
-      Script.setUrl($('#scUrl').value.trim());
-      const msg = $('#scMsg');
-      if (!Script.url()) { msg.className = 'msg err'; msg.textContent = 'Nhập URL Web App'; return; }
-      msg.className = 'msg'; msg.textContent = 'Đang kiểm tra…';
-      try { await Script.call({ action: 'ping' }); msg.className = 'msg ok'; msg.textContent = '✓ Kết nối thành công — dùng được Đồng bộ TikTok'; }
-      catch (e) { msg.className = 'msg err'; msg.textContent = '✕ ' + e.message; }
-    };
     $('#bkExport').onclick = () => {
       const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(D(), null, 2)], { type: 'application/json' }));
       a.download = `tsl-backup-${new Date().toISOString().slice(0, 10)}.json`; a.click();

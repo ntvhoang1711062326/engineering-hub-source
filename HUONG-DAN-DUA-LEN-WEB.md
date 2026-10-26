@@ -25,9 +25,11 @@ Mỗi khi nhánh `main` có commit mới (từ Admin hoặc `git push`), GitHub 
    - `www`: bản ghi **CNAME** → `ntvhoang1711062326.github.io`
 3. Chờ DNS cập nhật (vài phút đến vài giờ) → quay lại **Settings → Pages** → tick **Enforce HTTPS**.
 
-## 3. Đồng bộ video TikTok (tuỳ chọn)
+## 3. Đồng bộ video TikTok (tự động)
 
-Làm theo **HUONG-DAN-APPS-SCRIPT.md** (dán script, triển khai, dán URL vào Admin → Cài đặt).
+Không cần cài gì thêm: GitHub tự lấy video mới của các kênh ở **Admin → Cài đặt → Link TikTok** **mỗi 6 giờ** (workflow `.github/workflows/sync-tiktok.yml`, chạy `scripts/sync-tiktok.mjs`).
+Muốn lấy ngay: Admin → **Thư viện TikTok** → **🔄 Đồng bộ TikTok** (dùng chung GitHub token ở mục 4) → chờ ~1 phút là video mới lên web, **không cần bấm Xuất bản**.
+Xem lịch sử chạy / lỗi: tab **Actions** của repo trên GitHub.
 
 ## 4. Kết nối Admin với GitHub để "Xuất bản lên web" (làm 1 lần)
 

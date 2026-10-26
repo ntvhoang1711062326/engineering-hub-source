@@ -18,13 +18,12 @@ python -m http.server 8000
 | `admin.html`, `assets/js/admin.js` | Admin: sản phẩm, danh mục, banner, Flash Sale, thư viện TikTok (+ đồng bộ), cài đặt, **🚀 Xuất bản lên web** |
 | `assets/data/catalog.json` | Dữ liệu web khách đang dùng — Admin ghi file này lên GitHub khi xuất bản |
 | `assets/js/data.js` | Dữ liệu mặc định + lớp dữ liệu (Admin: nháp trong localStorage; khách: đọc `catalog.json`) |
-| `google-apps-script/Code.gs` | Google Apps Script đọc hộ TikTok cho nút **🔄 Đồng bộ TikTok** |
-| `assets/js/media.js` | Danh sách video TikTok gốc (108 video @ts.superlight + 10 video @_superlightshop_) và thông tin 2 kênh; video mới từ nút **🔄 Đồng bộ TikTok** nằm trong `catalog.json` (`tiktok`) |
+| `scripts/sync-tiktok.mjs`, `.github/workflows/sync-tiktok.yml` | GitHub tự đồng bộ video TikTok mỗi 6 giờ hoặc khi bấm **🔄 Đồng bộ TikTok** ở Admin → ghi `assets/data/tiktok.json` + ảnh bìa |
+| `assets/js/media.js` | Danh sách video TikTok gốc (108 video @ts.superlight + 10 video @_superlightshop_) và thông tin 2 kênh; video mới đồng bộ nằm trong `assets/data/tiktok.json` |
 | `assets/img/`, `assets/video/` | Ảnh/video TikTok, ảnh sản phẩm Kenzo (`kenzo/`), ảnh tải lên từ Admin (`uploads/`) |
 
 ## Đưa lên web & vận hành
 - **HUONG-DAN-DUA-LEN-WEB.md** — GitHub Pages, tên miền riêng, token để Admin xuất bản.
-- **HUONG-DAN-APPS-SCRIPT.md** — cài Apps Script cho nút Đồng bộ TikTok.
 
 ## Lưu ý
 - Đăng nhập admin chỉ là lớp che phía trình duyệt, **không bảo mật**; xuất bản lên web được bảo vệ bằng GitHub token (chỉ lưu trên máy admin).
