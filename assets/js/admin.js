@@ -39,9 +39,16 @@
       });
       if (!res.ok) {
         const msg = (await res.json().catch(() => ({}))).message || res.statusText;
-        throw new Error(res.status === 401 ? 'Token sai hoặc đã hết hạn' : res.status === 404 ? 'Không tìm thấy repo/nhánh — hoặc token chưa được cấp quyền repo này' : res.status === 403 ? 'Token chưa có quyền ghi (Contents: Read and write)' : `${res.status} ${msg}`);
+        throw new Error(res.status === 401 ? 'Token sai hoặc đã hết hạn' : res.status === 404 ? 'Không tìm thấy repo/nhánh — hoặc token chưa được cấp quyền repo này' : res.status === 403 ? `Token chưa có quyền ghi — sửa token: Contents = Read and write (GitHub: ${msg})` : `${res.status} ${msg}`);
       }
       return raw ? res.text() : res.json();
+    },
+    // Kiểm tra token GHI được thật: tạo 1 blob rỗng (không gắn vào commit nào, GitHub tự dọn).
+    // Không dùng permissions.push của repo — đó là quyền của tài khoản, không phải của token.
+    async checkWrite() {
+      await this.api('');
+      await this.api(`/git/ref/heads/${this.cfg().branch}`);
+      await this.api('/git/blobs', { method: 'POST', body: { content: '', encoding: 'utf-8' } });
     },
     // Ghi nhiều file trong 1 commit (Git Data API)
     async commit(files, message) {
@@ -231,8 +238,7 @@
       btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Đang kiểm tra với GitHub…';
       GH.setCfg({ ...GH.cfg(), owner, repo, token });
       try {
-        const r = await GH.api('');
-        if (!r.permissions?.push) throw new Error('Token chưa có quyền ghi repo này (Contents: Read and write)');
+        await GH.checkWrite();
         renderShell(); route();
       } catch (err) {
         GH.setCfg({ ...GH.cfg(), token: '' });
@@ -809,9 +815,7 @@
       if (!GH.ready()) { msg.className = 'msg err'; msg.textContent = 'Nhập GitHub token'; return; }
       msg.className = 'msg'; msg.textContent = 'Đang kiểm tra…';
       try {
-        const r = await GH.api('');
-        if (!r.permissions?.push) throw new Error('Token chưa có quyền ghi (Contents: Read and write)');
-        await GH.api(`/git/ref/heads/${GH.cfg().branch}`);
+        await GH.checkWrite();
         msg.className = 'msg ok'; msg.textContent = '✓ Kết nối GitHub thành công — có thể xuất bản';
       } catch (e) { msg.className = 'msg err'; msg.textContent = '✕ ' + e.message; }
       drawPublish();
