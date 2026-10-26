@@ -209,11 +209,6 @@
       </section>
 
       <section class="section">
-        <div class="section-head"><h3>Video lắp đèn theo dòng xe</h3><a href="#/videos">Tất cả video →</a></div>
-        ${vehicleChips('')}
-      </section>
-
-      <section class="section">
         <div class="section-head"><h3>Sản phẩm nổi bật</h3><a href="#/category/all">Xem tất cả →</a></div>
         ${grid(featured.slice(0, 10))}
       </section>
@@ -226,6 +221,11 @@
           ${grid(list.slice(0, 5))}
         </section>` : '';
       }).join('')}
+
+      <section class="section">
+        <div class="section-head"><h3>Video lắp đèn theo dòng xe</h3><a href="#/videos">Tất cả video →</a></div>
+        ${vehicleChips('')}
+      </section>
 
       ${DB.channels().map(c => tiktokRail(c)).join('')}`;
 

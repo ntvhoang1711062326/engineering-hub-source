@@ -387,7 +387,8 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
     allVideos() { return this.media().sort(newestFirst); },
     // Video mới đồng bộ chưa xuất bản: ảnh bìa còn nằm trong bản nháp (data:…)
     cover(m) { return m.cover || img(m.id); },
-    /* Kênh TikTok: link ở Cài đặt (tiktok, tiktok2) + thông tin kênh (media.js, số liệu mới từ Đồng bộ) */
+    /* Kênh TikTok: link ở Cài đặt (tiktok, tiktok2) + thông tin kênh (media.js, số liệu mới từ Đồng bộ).
+       Kênh nhiều người theo dõi hiện trước (trang chủ, chân trang, trang video) */
     chOf(m) { return m.ch || 'ts.superlight'; },
     channels() {
       const s = this.data.settings, users = [s.tiktok, s.tiktok2 ?? SETTINGS.tiktok2].map(u => (String(u || '').match(/@([\w.]+)/) || [])[1]).filter(Boolean);
@@ -395,7 +396,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
         user, name: '@' + user, followers: 0, likes: 0, avatar: '',
         ...(window.TIKTOK_CHANNELS || []).find(c => c.user === user), ...(this.data.tiktokChannels || {})[user], ...this.feed?.channels?.[user],
         url: 'https://www.tiktok.com/@' + user,
-      }));
+      })).sort((a, b) => b.followers - a.followers);
     },
     channelVideos(user) { return this.media().filter(m => this.chOf(m) === user).sort(newestFirst); },
     // Dòng xe trong Admin + nhóm "Ô tô" (có video lắp cho Innova, CRV…)
