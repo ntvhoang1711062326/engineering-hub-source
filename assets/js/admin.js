@@ -11,11 +11,6 @@
   const MEDIA = () => DB.media();
   const DEMO_USER = 'admin', DEMO_PASS = 'superlight';
 
-  const STATUS = {
-    new: ['Mới', 'blue'], confirmed: ['Đã xác nhận', 'violet'], shipping: ['Đã hẹn lắp', 'amber'],
-    done: ['Hoàn thành', 'green'], cancelled: ['Đã huỷ', 'red'],
-  };
-  const PAYN = { cod: 'COD / tại shop', bank: 'Chuyển khoản', momo: 'MoMo', vnpay: 'VNPay', zalopay: 'ZaloPay' };
   const THEMES = { amber: 'Vàng cam', cyan: 'Xanh neon', red: 'Đỏ' };
 
   function toast(html) {
@@ -28,45 +23,18 @@
   DB.save = () => { const ok = dbSave(); drawPublish(); return ok; };
   const pill = ([t, c]) => `<span class="pill ${c}">${t}</span>`;
 
-  /* ---------------- Google Sheets: tải đơn khách đặt trên web về máy này ----------------
-     URL + mã bí mật (ADMIN_KEY) chỉ lưu trên máy admin, không nằm trong file tải lên web. */
-  const SHEET_CFG = 'tsl_sheet';
-  const Sheet = {
-    lastSync: null,
-    cfg() {
-      let c = {}; try { c = JSON.parse(localStorage.getItem(SHEET_CFG)) || {}; } catch (e) {}
-      return { url: c.url || window.SHOP_CONFIG?.orderEndpoint || '', key: c.key || '' };
-    },
-    setCfg(c) { try { localStorage.setItem(SHEET_CFG, JSON.stringify(c)); } catch (e) {} },
-    ready() { const c = this.cfg(); return !!(c.url && c.key); },
-    async call(params, body) {
-      const { url, key } = this.cfg();
-      const res = body
-        ? await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ ...body, key }) })
-        : await fetch(`${url}?${new URLSearchParams({ ...params, key })}`);
+  /* ---------------- Google Apps Script: đọc hộ TikTok cho nút "Đồng bộ TikTok" ----------------
+     Trình duyệt không đọc thẳng được TikTok (bị chặn CORS). URL Web App chỉ lưu trên máy admin. */
+  const SCRIPT_CFG = 'tsl_sheet'; // giữ tên khoá cũ để không phải nhập lại URL
+  const Script = {
+    url() { let c = {}; try { c = JSON.parse(localStorage.getItem(SCRIPT_CFG)) || {}; } catch (e) {} return c.url || ''; },
+    setUrl(url) { try { localStorage.setItem(SCRIPT_CFG, JSON.stringify({ url })); } catch (e) {} },
+    async call(params) {
+      const res = await fetch(`${this.url()}?${new URLSearchParams(params)}`);
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || 'Lỗi không xác định');
       return data;
     },
-    // Gộp đơn trên Sheets vào dữ liệu admin (Sheets là bản chính); đơn mới về thì trừ kho như lúc khách đặt
-    async pull() {
-      const { orders } = await this.call({ action: 'list' });
-      const local = new Map(D().orders.map(o => [o.id, o]));
-      let added = 0;
-      orders.forEach(r => {
-        if (!local.has(r.id)) {
-          added++;
-          r.items.forEach(i => { const p = DB.product(i.pid); if (p) { p.stock = Math.max(0, p.stock - i.qty); p.sold += i.qty; } });
-        }
-        local.set(r.id, { ...local.get(r.id), ...r });
-      });
-      D().orders = [...local.values()].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
-      DB.save();
-      this.lastSync = new Date();
-      return { added, total: orders.length };
-    },
-    push(o) { return this.call(null, { action: 'update', id: o.id, status: o.status, paymentStatus: o.paymentStatus }); },
-    remove(id) { return this.call(null, { action: 'delete', id }); },
   };
   /* ---------------- Xuất bản lên web: ghi assets/data/catalog.json (+ ảnh tải lên) vào GitHub ----------------
      GitHub Pages tự đưa bản mới lên web sau ~1 phút. Token chỉ lưu trên máy admin. */
@@ -165,7 +133,7 @@
     try {
       const cat = await GH.fetchCatalog();
       if (!cat.products) throw new Error('File catalog.json trên web không hợp lệ');
-      DB.data = { ...DB.data, ...cat, orders: D().orders };
+      DB.data = { ...DB.data, ...cat };
       delete DB.data.publishedAt;
       DB.save(); markPublished(); toast('Đã lấy bản đang chạy trên web về <b>✓</b>'); route();
     } catch (e) { toast('Không lấy được: ' + esc(e.message)); }
@@ -180,26 +148,9 @@
     $('#pubBtn').onclick = publish;
   }
 
-  async function syncOrders(silent) {
-    if (!Sheet.ready()) { if (!silent) toast('Chưa kết nối Google Sheets — vào <b>Cài đặt</b> để nhập URL &amp; mã bí mật'); return; }
-    const btn = $('#syncSheet'); if (btn) { btn.disabled = true; btn.textContent = '⟳ Đang tải…'; }
-    try {
-      const r = await Sheet.pull();
-      toast(r.added ? `Đã tải <b>${r.added}</b> đơn mới từ Google Sheets` : 'Đơn hàng đã cập nhật mới nhất <b>✓</b>');
-      if (location.hash.startsWith('#/orders') || location.hash.startsWith('#/dashboard') || !location.hash) route();
-    } catch (e) {
-      toast('Không tải được đơn: ' + esc(e.message));
-      if (btn) { btn.disabled = false; btn.textContent = '⟳ Tải đơn từ Google Sheets'; }
-    }
-  }
   const dt = s => new Date(s).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   const num = v => Number(String(v).replace(/[^\d]/g, '')) || 0;
   const catName = id => DB.category(id)?.name || id;
-  // Lịch hẹn của đơn đặt chỗ (đơn cũ trước khi bỏ giao hàng thì hiện hình thức nhận hàng)
-  const apptText = o => o.appointment?.date
-    ? `📅 ${o.appointment.time || ''} ${new Date(o.appointment.date + 'T00:00').toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}`
-    : o.delivery === 'ship' ? '🚚 Giao hàng (đơn cũ)' : '🔧 Lắp tại shop';
-  const paidPill = o => o.paymentStatus === 'paid' ? pill([o.type === 'booking' ? 'Đã cọc' : 'Đã thanh toán', 'green']) : pill([o.type === 'booking' ? 'Chưa cọc' : 'Chưa thanh toán', 'gray']);
 
   /* ---------------- Modal (2 lớp: form + chọn ảnh) ---------------- */
   function modal(html, { id = 'modal', wide } = {}) {
@@ -297,7 +248,7 @@
 
   /* ---------------- Shell ---------------- */
   const MENU = [
-    ['dashboard', '📊', 'Tổng quan'], ['products', '💡', 'Sản phẩm'], ['categories', '📂', 'Danh mục'], ['orders', '🧾', 'Đơn hàng'],
+    ['dashboard', '📊', 'Tổng quan'], ['products', '💡', 'Sản phẩm'], ['categories', '📂', 'Danh mục'],
     ['banners', '🖼', 'Banner & Quảng cáo'], ['promos', '🏷', 'Khuyến mãi'], ['media', '🎬', 'Thư viện TikTok'], ['settings', '⚙', 'Cài đặt'],
   ];
   function renderShell() {
@@ -323,8 +274,7 @@
     $('#logout').onclick = e => { e.preventDefault(); try { sessionStorage.removeItem('tsl_admin'); } catch (err) {} renderLogin(); };
   }
   function drawMenu(cur) {
-    const newOrders = D().orders.filter(o => o.status === 'new').length;
-    $('#admMenu').innerHTML = MENU.map(([k, i, t]) => `<li><a href="#/${k}" class="${k === cur ? 'on' : ''}"><i>${i}</i>${t}${k === 'orders' && newOrders ? `<span class="cnt">${newOrders}</span>` : ''}</a></li>`).join('');
+    $('#admMenu').innerHTML = MENU.map(([k, i, t]) => `<li><a href="#/${k}" class="${k === cur ? 'on' : ''}"><i>${i}</i>${t}</a></li>`).join('');
     $('#admTitle').textContent = MENU.find(m => m[0] === cur)?.[2] || '';
     $('#admTopActions').innerHTML = '';
     drawPublish();
@@ -332,38 +282,23 @@
 
   /* ---------------- Dashboard ---------------- */
   function viewDashboard() {
-    const orders = D().orders, valid = orders.filter(o => o.status !== 'cancelled');
-    const revenue = valid.filter(o => o.status === 'done' || o.paymentStatus === 'paid').reduce((s, o) => s + o.total, 0);
-    const pending = valid.filter(o => o.status !== 'done').reduce((s, o) => s + o.total, 0);
-    const low = D().products.filter(p => p.active && p.stock <= 5);
-    const days = [...Array(7)].map((_, i) => { const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - 6 + i); return d; });
-    const perDay = days.map(d => valid.filter(o => { const t = new Date(o.createdAt); return t >= d && t < new Date(+d + 864e5); }).reduce((s, o) => s + o.total, 0));
-    const max = Math.max(1, ...perDay);
-    const top = [...D().products].sort((a, b) => b.sold - a.sold).slice(0, 6);
-    const short = n => n >= 1e6 ? (n / 1e6).toFixed(1).replace('.0', '') + 'tr' : n >= 1e3 ? Math.round(n / 1e3) + 'k' : n;
+    const ps = D().products, on = ps.filter(p => p.active), low = on.filter(p => p.stock <= 5);
+    const f = D().promos.flash, flashOn = f.active && new Date(f.endsAt) > new Date();
+    const vids = MEDIA(), synced = D().settings.tiktokSyncedAt;
+    const latest = [...vids].sort((a, b) => b.id.length - a.id.length || b.id.localeCompare(a.id)).slice(0, 6);
     $('#view').innerHTML = `
       <div class="kpis">
-        <div class="kpi"><small>Tiền cọc đã thu</small><b>${fmt(revenue)}</b><span>Đơn hoàn thành hoặc đã cọc</span></div>
-        <div class="kpi"><small>Đang xử lý</small><b>${fmt(pending)}</b><span>${valid.filter(o => o.status !== 'done').length} đơn chưa hoàn thành</span></div>
-        <div class="kpi"><small>Đặt chỗ mới</small><b>${orders.filter(o => o.status === 'new').length}</b><span>Tổng ${orders.length} đơn</span></div>
-        <div class="kpi"><small>Sản phẩm</small><b>${D().products.filter(p => p.active).length}</b><span>${low.length ? `<b style="color:var(--sale)">${low.length}</b> sắp hết hàng` : 'Tồn kho ổn định'}</span></div>
-      </div>
-      <div class="two">
-        <div class="card-a">
-          <h3>Tiền cọc 7 ngày qua</h3>
-          <div class="bars">${perDay.map((v, i) => `<div class="b" title="${fmt(v)}"><em>${v ? short(v) : ''}</em><i style="height:${Math.round(v / max * 120)}px"></i><small>${days[i].toLocaleDateString('vi-VN', { weekday: 'short' })}</small></div>`).join('')}</div>
-          ${!orders.length ? '<p class="muted" style="text-align:center;margin:10px 0 0">Chưa có lượt đặt chỗ. Hãy thử đặt chỗ 1 lần ở trang khách.</p>' : ''}
-        </div>
-        <div class="card-a"><h3>Bán chạy nhất</h3><div class="top-list">
-          ${top.map(p => `<div class="r"><img src="${esc(p.image)}" alt=""><div>${esc(p.name)}</div><b>${p.sold}</b></div>`).join('')}
-        </div></div>
+        <div class="kpi"><small>Sản phẩm đang hiện</small><b>${on.length}</b><span>Tổng ${ps.length} · ${low.length ? `<b style="color:var(--sale)">${low.length}</b> sắp hết hàng` : 'tồn kho ổn định'}</span></div>
+        <div class="kpi"><small>Danh mục</small><b>${D().categories.length}</b><span><a href="#/categories">Quản lý danh mục →</a></span></div>
+        <div class="kpi"><small>Video TikTok</small><b>${vids.length}</b><span>${synced ? 'Đồng bộ ' + dt(synced) : 'Chưa đồng bộ'}</span></div>
+        <div class="kpi"><small>Flash Sale</small><b>${flashOn ? f.items.length + ' SP' : 'Tắt'}</b><span>${flashOn ? 'Kết thúc ' + dt(f.endsAt) : '<a href="#/promos">Bật Flash Sale →</a>'}</span></div>
       </div>
       <div class="card-a" style="margin-top:14px">
-        <h3>Đặt chỗ gần đây<span class="sp"></span><a href="#/orders" class="ib">Tất cả →</a></h3>
-        ${ordersTable(orders.slice(0, 6))}
+        <h3>Video TikTok mới nhất<span class="sp"></span><a href="#/media" class="ib">Thư viện →</a></h3>
+        <div class="lib">${latest.map(x => `<div class="it"><img src="${esc(DB.cover(x))}" loading="lazy" alt=""><div class="cap">👁 ${x.views.toLocaleString('vi-VN')} · ${esc(x.cap || '—')}</div></div>`).join('')}</div>
       </div>
       ${low.length ? `<div class="card-a"><h3>⚠ Sắp hết hàng</h3>${productsTable(low)}</div>` : ''}`;
-    bindOrderRows(); bindProductRows();
+    bindProductRows();
   }
 
   /* ---------------- Products ---------------- */
@@ -536,118 +471,6 @@
       else D().products[D().products.findIndex(x => x.id === d.id)] = d;
       if (DB.save()) { m.remove(); toast(isNew ? 'Đã thêm sản phẩm <b>✓</b>' : 'Đã lưu <b>✓</b>'); route(); }
     };
-  }
-
-  /* ---------------- Orders ---------------- */
-  let oFilter = { q: '', status: '' };
-  function ordersTable(list) {
-    if (!list.length) return '<div class="empty">Chưa có đơn hàng</div>';
-    return `<div class="tbl-wrap"><table class="tbl">
-      <thead><tr><th>Mã đơn</th><th>Thời gian</th><th>Khách hàng</th><th>Lịch hẹn</th><th>Tiền cọc</th><th class="num">Số tiền</th><th>Trạng thái</th><th></th></tr></thead>
-      <tbody>${list.map(o => `<tr>
-        <td><b>${esc(o.id)}</b><br><small class="muted">${o.items.reduce((s, i) => s + i.qty, 0)} sản phẩm</small></td>
-        <td>${dt(o.createdAt)}</td>
-        <td>${esc(o.customer.name)}<br><small class="muted">${esc(o.customer.phone)}</small></td>
-        <td>${esc(apptText(o))}</td>
-        <td>${esc(PAYN[o.payment])}<br>${paidPill(o)}</td>
-        <td class="num"><b>${fmt(o.total)}</b></td>
-        <td>${pill(STATUS[o.status])}</td>
-        <td class="acts"><button class="ib" data-order="${esc(o.id)}">Chi tiết</button></td>
-      </tr>`).join('')}</tbody></table></div>`;
-  }
-  function bindOrderRows() { $$('[data-order]').forEach(b => b.onclick = () => orderDetail(b.dataset.order)); }
-  function viewOrders() {
-    $('#admTopActions').innerHTML = `<button class="btn btn-brand" id="syncSheet">⟳ Tải đơn từ Google Sheets</button> <button class="btn btn-outline" id="exportCsv">⬇ Xuất Excel (CSV)</button>`;
-    $('#exportCsv').onclick = exportCsv;
-    $('#syncSheet').onclick = () => syncOrders();
-    if (Sheet.ready() && !Sheet.lastSync) setTimeout(() => syncOrders(true)); // tự tải khi mở trang lần đầu
-    const draw = () => {
-      const q = oFilter.q.toLowerCase();
-      const list = D().orders.filter(o => (!oFilter.status || o.status === oFilter.status) && (!q || o.id.toLowerCase().includes(q) || o.customer.name.toLowerCase().includes(q) || o.customer.phone.includes(q)));
-      $('#oTable').innerHTML = ordersTable(list); bindOrderRows();
-    };
-    const counts = Object.fromEntries(Object.keys(STATUS).map(k => [k, D().orders.filter(o => o.status === k).length]));
-    $('#view').innerHTML = `
-      <div class="sheet-note ${Sheet.ready() ? 'ok' : ''}">${Sheet.ready()
-        ? `📗 Đơn khách đặt trên web được lưu ở Google Sheets.${Sheet.lastSync ? ` Lần tải gần nhất: <b>${Sheet.lastSync.toLocaleTimeString('vi-VN')}</b>.` : ''} Đổi trạng thái đơn ở đây sẽ cập nhật lên Sheets.`
-        : '⚠ Chưa kết nối Google Sheets nên chưa thấy được đơn khách đặt trên web. Vào <a href="#/settings">Cài đặt → Google Sheets</a> để nhập URL &amp; mã bí mật.'}</div>
-      <div class="card-a">
-        <div class="bar-tools">
-          <input id="oq" placeholder="Tìm mã đơn, tên, số điện thoại…" value="${esc(oFilter.q)}">
-          <div class="chips" id="oChips">
-            <button class="chip ${!oFilter.status ? 'on' : ''}" data-st="">Tất cả (${D().orders.length})</button>
-            ${Object.entries(STATUS).map(([k, [t]]) => `<button class="chip ${oFilter.status === k ? 'on' : ''}" data-st="${k}">${t} (${counts[k]})</button>`).join('')}
-          </div>
-        </div>
-        <div id="oTable"></div>
-      </div>`;
-    $('#oq').oninput = e => { oFilter.q = e.target.value; draw(); };
-    $$('#oChips [data-st]').forEach(b => b.onclick = () => { oFilter.status = b.dataset.st; $$('#oChips .chip').forEach(x => x.classList.toggle('on', x === b)); draw(); });
-    draw();
-  }
-  function orderDetail(id) {
-    const o = D().orders.find(x => x.id === id);
-    const c = o.customer;
-    const m = modal(`
-      <div class="m-head">Đơn hàng ${esc(o.id)} · ${pill(STATUS[o.status])}</div>
-      <div class="m-body">
-        <div class="form-grid">
-          <div class="card-a" style="box-shadow:none;border:1px solid var(--line)"><h3>Khách hàng</h3>
-            <b>${esc(c.name)}</b><br>☎ <a href="tel:${esc(c.phone)}">${esc(c.phone)}</a> · <a href="https://zalo.me/${esc(c.phone)}" target="_blank" style="color:#0068ff">Zalo</a>
-            ${c.email ? `<br>✉ ${esc(c.email)}` : ''}
-            <br>${o.delivery === 'ship' ? `🚚 ${esc([c.address, c.district, c.province].filter(Boolean).join(', '))}` : `🔧 Lắp đặt tại shop${o.appointment ? ` · ${esc(apptText(o))}` : ''}`}
-            ${c.note ? `<br><br><i>Ghi chú: ${esc(c.note)}</i>` : ''}
-          </div>
-          <div class="card-a" style="box-shadow:none;border:1px solid var(--line)"><h3>${o.type === 'booking' ? 'Tiền cọc' : 'Thanh toán'}</h3>
-            ${esc(PAYN[o.payment])} · ${paidPill(o)}<br>
-            <small class="muted">Đặt lúc ${dt(o.createdAt)}${o.paidAt ? ` · Thanh toán ${dt(o.paidAt)}` : ''}</small>
-            <div class="summary" style="margin-top:8px">
-              ${o.type === 'booking' ? `
-              <div class="row total"><span>Tiền cọc</span><span>${fmt(o.deposit)}</span></div>
-              <small class="muted">Giá sản phẩm: báo giá khi liên hệ — trừ tiền cọc khi thanh toán tại shop.</small>` : `
-              <div class="row"><span>Tạm tính</span><span>${fmt(o.subtotal)}</span></div>
-              ${o.discount ? `<div class="row"><span>Giảm (${esc(o.coupon)})</span><span>−${fmt(o.discount)}</span></div>` : ''}
-              <div class="row"><span>Vận chuyển</span><span>${o.ship ? fmt(o.ship) : 'Miễn phí'}</span></div>
-              <div class="row total"><span>Tổng</span><span>${fmt(o.total)}</span></div>`}
-            </div>
-          </div>
-        </div>
-        <div class="mini-items" style="margin-top:14px">
-          ${o.items.map(i => `<div class="it"><img src="${esc(i.image)}" alt=""><div>${esc(i.name)}<br><small class="muted">${i.price != null ? `${fmt(i.price)} × ` : 'SL: '}${i.qty}${i.vehicle ? ' · ' + esc(i.vehicle) : ''}</small></div>${i.price != null ? `<b>${fmt(i.price * i.qty)}</b>` : ''}</div>`).join('')}
-        </div>
-        <div class="form-grid" style="margin-top:14px">
-          <div class="field"><label>Trạng thái đơn</label><select id="oStatus">${Object.entries(STATUS).map(([k, [t]]) => `<option value="${k}" ${o.status === k ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
-          <div class="field"><label>Thanh toán</label><select id="oPay"><option value="unpaid">${o.type === 'booking' ? 'Chưa cọc' : 'Chưa thanh toán'}</option><option value="paid" ${o.paymentStatus === 'paid' ? 'selected' : ''}>${o.type === 'booking' ? 'Đã cọc' : 'Đã thanh toán'}</option></select></div>
-        </div>
-      </div>
-      <div class="m-foot"><button class="btn btn-outline" id="oDel" style="margin-right:auto;color:var(--sale)">Xoá đơn</button><button class="btn btn-outline" data-close>Đóng</button><button class="btn btn-brand" id="oSave">Cập nhật</button></div>`);
-    $('#oSave', m).onclick = async () => {
-      const st = $('#oStatus', m).value, pay = $('#oPay', m).value;
-      if (Sheet.ready()) {
-        const b = $('#oSave', m); b.disabled = true; b.textContent = 'Đang lưu lên Sheets…';
-        try { await Sheet.push({ id: o.id, status: st, paymentStatus: pay }); }
-        catch (e) { b.disabled = false; b.textContent = 'Cập nhật'; return toast('Không cập nhật được lên Google Sheets: ' + esc(e.message)); }
-      }
-      if (st === 'cancelled' && o.status !== 'cancelled') o.items.forEach(i => { const p = DB.product(i.pid); if (p) { p.stock += i.qty; p.sold = Math.max(0, p.sold - i.qty); } });
-      o.status = st;
-      if (pay === 'paid' && o.paymentStatus !== 'paid') o.paidAt = new Date().toISOString();
-      o.paymentStatus = pay;
-      save('Đã cập nhật đơn <b>✓</b>'); m.remove(); route();
-    };
-    $('#oDel', m).onclick = async () => {
-      if (!confirm(Sheet.ready() ? 'Xoá vĩnh viễn đơn này (xoá cả trên Google Sheets)?' : 'Xoá vĩnh viễn đơn này?')) return;
-      if (Sheet.ready()) {
-        try { await Sheet.remove(o.id); } catch (e) { return toast('Không xoá được trên Google Sheets: ' + esc(e.message)); }
-      }
-      D().orders = D().orders.filter(x => x.id !== o.id); save('Đã xoá đơn'); m.remove(); route();
-    };
-  }
-  function exportCsv() {
-    const rows = [['Mã đơn', 'Thời gian', 'Khách hàng', 'SĐT', 'Lịch hẹn', 'Sản phẩm', 'Số tiền (cọc)', 'Thanh toán', 'TT thanh toán', 'Trạng thái']];
-    D().orders.forEach(o => rows.push([o.id, dt(o.createdAt), o.customer.name, o.customer.phone, o.delivery === 'ship' ? [o.customer.address, o.customer.district, o.customer.province].join(', ') : apptText(o).replace(/^\S+\s/, ''),
-      o.items.map(i => `${i.name} x${i.qty}`).join('; '), o.total, PAYN[o.payment], o.paymentStatus === 'paid' ? 'Đã TT' : 'Chưa TT', STATUS[o.status][0]]));
-    const csv = '﻿' + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
-    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = `don-hang-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
   }
 
   /* ---------------- Banners & Ads ---------------- */
@@ -824,9 +647,8 @@
 
   /* ---------------- Promotions ---------------- */
   function viewPromos() {
-    const f = D().promos.flash, cs = D().promos.coupons;
+    const f = D().promos.flash;
     const expired = new Date(f.endsAt) < new Date();
-    const typeLabel = c => c.type === 'percent' ? `Giảm ${c.value}%${c.max ? ` (tối đa ${fmt(c.max)})` : ''}` : c.type === 'fixed' ? `Giảm ${fmt(c.value)}` : 'Miễn phí ship';
     $('#view').innerHTML = `
       <div class="card-a">
         <h3>⚡ Flash Sale ${f.active ? (expired ? pill(['Đã hết hạn', 'red']) : pill(['Đang chạy', 'green'])) : pill(['Tắt', 'gray'])}<span class="sp"></span><label class="switch"><input type="checkbox" id="fOn" ${f.active ? 'checked' : ''}><span></span></label></h3>
@@ -839,23 +661,6 @@
           <select id="fAddSel" style="flex:1;min-width:200px;border:1.5px solid var(--line);border-radius:8px;padding:9px"><option value="">+ Chọn sản phẩm đưa vào Flash Sale…</option>${D().products.filter(p => !f.items.some(i => i.productId === p.id)).map(p => `<option value="${p.id}">${esc(p.name)} — ${fmt(p.price)}</option>`).join('')}</select>
           <button class="btn btn-brand" id="fSave">Lưu Flash Sale</button>
         </div>
-      </div>
-      <div class="card-a">
-        <h3>🏷 Mã giảm giá<span class="sp"></span><button class="btn btn-brand" id="cAdd">+ Tạo mã</button></h3>
-        <div class="tbl-wrap"><table class="tbl">
-          <thead><tr><th>Mã</th><th>Ưu đãi</th><th class="num">Đơn tối thiểu</th><th>Hết hạn</th><th>Mô tả</th><th>Bật</th><th></th></tr></thead>
-          <tbody>${cs.map((c, i) => {
-            const exp = c.expires && new Date(c.expires + 'T23:59:59') < new Date();
-            return `<tr>
-            <td><b style="font-family:monospace;font-size:14px">${esc(c.code)}</b></td>
-            <td>${typeLabel(c)}</td>
-            <td class="num">${c.min ? fmt(c.min) : '—'}</td>
-            <td>${c.expires ? new Date(c.expires).toLocaleDateString('vi-VN') : 'Không giới hạn'} ${exp ? pill(['Hết hạn', 'red']) : ''}</td>
-            <td class="muted">${esc(c.desc)}</td>
-            <td><label class="switch"><input type="checkbox" data-con="${i}" ${c.active ? 'checked' : ''}><span></span></label></td>
-            <td class="acts"><button class="ib" data-cedit="${i}">Sửa</button> <button class="ib danger" data-cdel="${i}">🗑</button></td>
-          </tr>`; }).join('') || '<tr><td colspan="7" class="empty">Chưa có mã</td></tr>'}</tbody>
-        </table></div>
       </div>`;
 
     const drawItems = () => {
@@ -880,49 +685,11 @@
       if (bad) return toast(`Giá flash của <b>${esc(DB.product(bad.productId).name)}</b> phải thấp hơn giá bán`);
       f.title = $('#fTitle').value.trim() || 'Flash Sale'; f.endsAt = $('#fEnd').value; save('Đã lưu Flash Sale <b>✓</b>'); viewPromos();
     };
-    $$('[data-con]').forEach(c => c.onchange = () => { cs[+c.dataset.con].active = c.checked; save(); });
-    $$('[data-cdel]').forEach(b => b.onclick = () => { if (confirm('Xoá mã này?')) { cs.splice(+b.dataset.cdel, 1); save('Đã xoá mã'); viewPromos(); } });
-    $$('[data-cedit]').forEach(b => b.onclick = () => couponForm(+b.dataset.cedit));
-    $('#cAdd').onclick = () => couponForm(-1);
   }
-  function couponForm(idx) {
-    const cs = D().promos.coupons;
-    const c = idx >= 0 ? { ...cs[idx] } : { code: '', type: 'percent', value: 10, min: 0, max: 0, expires: '', active: true, desc: '' };
-    const m = modal(`
-      <div class="m-head">${idx >= 0 ? 'Sửa mã ' + esc(c.code) : 'Tạo mã giảm giá'}</div>
-      <div class="m-body form-grid">
-        <div class="field"><label>Mã *</label><input id="cCode" value="${esc(c.code)}" style="text-transform:uppercase;font-family:monospace" placeholder="VD: TET2027"></div>
-        <div class="field"><label>Loại ưu đãi</label><select id="cType"><option value="percent">Giảm theo %</option><option value="fixed">Giảm số tiền cố định</option><option value="ship">Miễn phí vận chuyển</option></select></div>
-        <div class="field" id="cValW"><label id="cValL">Giá trị</label><input id="cVal" inputmode="numeric" value="${c.value}"></div>
-        <div class="field" id="cMaxW"><label>Giảm tối đa (đ)</label><input id="cMax" inputmode="numeric" value="${c.max || ''}" placeholder="Không giới hạn"></div>
-        <div class="field"><label>Đơn tối thiểu (đ)</label><input id="cMin" inputmode="numeric" value="${c.min || ''}" placeholder="0"></div>
-        <div class="field"><label>Hết hạn</label><input id="cExp" type="date" value="${esc(c.expires)}"></div>
-        <div class="field full"><label>Mô tả hiển thị cho khách</label><input id="cDesc" value="${esc(c.desc)}" placeholder="Tự tạo nếu để trống"></div>
-      </div>
-      <div class="m-foot"><button class="btn btn-outline" data-close>Huỷ</button><button class="btn btn-brand" id="cSave">Lưu mã</button></div>`);
-    const t = $('#cType', m); t.value = c.type;
-    const sync = () => { $('#cValW', m).classList.toggle('hidden', t.value === 'ship'); $('#cMaxW', m).classList.toggle('hidden', t.value !== 'percent'); $('#cValL', m).textContent = t.value === 'percent' ? 'Phần trăm giảm (%)' : 'Số tiền giảm (đ)'; };
-    t.onchange = sync; sync();
-    $('#cSave', m).onclick = () => {
-      const code = $('#cCode', m).value.trim().toUpperCase().replace(/\s/g, '');
-      if (!code) return toast('Nhập <b>mã</b>');
-      if (cs.some((x, i) => x.code === code && i !== idx)) return toast('Mã này <b>đã tồn tại</b>');
-      const type = t.value, value = num($('#cVal', m).value);
-      if (type === 'percent' && (value < 1 || value > 100)) return toast('Phần trăm phải từ <b>1 – 100</b>');
-      if (type === 'fixed' && !value) return toast('Nhập <b>số tiền giảm</b>');
-      Object.assign(c, { code, type, value: type === 'ship' ? 0 : value, max: type === 'percent' ? num($('#cMax', m).value) : 0, min: num($('#cMin', m).value), expires: $('#cExp', m).value });
-      c.desc = $('#cDesc', m).value.trim() || (type === 'percent' ? `Giảm ${value}%` : type === 'fixed' ? `Giảm ${fmt(value)}` : 'Miễn phí vận chuyển') + (c.min ? ` cho đơn từ ${fmt(c.min)}` : '');
-      if (idx >= 0) cs[idx] = c; else cs.unshift(c);
-      if (DB.save()) { m.remove(); toast('Đã lưu mã <b>' + esc(code) + '</b>'); viewPromos(); }
-    };
-  }
-
   /* ---------------- Đồng bộ TikTok ----------------
-     Trình duyệt không đọc thẳng được TikTok (bị chặn CORS) → nhờ Apps Script (cùng URL với Google Sheets)
-     lấy ~12 video mới nhất từ trang nhúng của kênh. Video mới được thêm vào thư viện, video cũ cập nhật caption + lượt xem. */
+     Nhờ Apps Script lấy ~12 video mới nhất từ trang nhúng của kênh. Video mới được thêm vào thư viện, video cũ cập nhật caption + lượt xem. */
   async function syncTikTok() {
-    // Chỉ cần URL Apps Script — đồng bộ TikTok không đụng tới dữ liệu đơn nên không cần mã bí mật
-    if (!Sheet.cfg().url) { location.hash = '#/settings'; return toast('Đồng bộ TikTok chạy qua Google Apps Script — nhập <b>URL Web App</b> ở Cài đặt trước'); }
+    if (!Script.url()) { location.hash = '#/settings'; return toast('Đồng bộ TikTok chạy qua Google Apps Script — nhập <b>URL Web App</b> ở Cài đặt trước'); }
     const btn = $('#ttSync'); if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Đang đồng bộ…'; }
     try {
       const base = new Set((window.TIKTOK_MEDIA || []).map(m => m.id));
@@ -933,7 +700,7 @@
       for (const { user } of DB.channels()) {
         if (btn) btn.innerHTML = `⏳ Đang đồng bộ @${esc(user)}…`;
         let res;
-        try { res = await Sheet.call({ action: 'tiktok', user, known: MEDIA().map(m => m.id).join(',') }); } catch (e) { errs.push(`@${esc(user)}: ${esc(e.message)}`); continue; }
+        try { res = await Script.call({ action: 'tiktok', user, known: MEDIA().map(m => m.id).join(',') }); } catch (e) { errs.push(`@${esc(user)}: ${esc(e.message)}`); continue; }
         if (res.info) infos[user] = { ...infos[user], ...Object.fromEntries(Object.entries(res.info).filter(([, v]) => v)) };
         res.videos.filter(v => /^\d{8,25}$/.test(v.id)).forEach(v => {
           const x = sync.get(v.id);
@@ -1019,27 +786,15 @@
           ${F('address', 'Địa chỉ', 'full')}${F('hours', 'Giờ mở cửa')}${F('tiktok', 'Link TikTok (kênh chính)')}${F('tiktok2', 'Link TikTok kênh 2')}
         </div>
       </div>
-      <div class="card-a"><h3>Đặt chỗ &amp; tiền cọc</h3>
-        <p class="muted" style="margin-top:-6px">Trang khách hiển thị giá "Liên hệ" và không giao hàng. Khách đặt chỗ, hẹn lịch lắp và cọc số tiền này cho mỗi lượt đặt.</p>
-        <div class="form-grid">
-          <div class="field"><label>Tiền cọc mỗi lượt đặt chỗ (đ)</label><input data-sn="deposit" inputmode="numeric" value="${(Number(s.deposit) || 0).toLocaleString('vi-VN')}"></div>
-        </div>
-      </div>
-      <div class="card-a"><h3>Tài khoản nhận chuyển khoản (VietQR)</h3>
-        <p class="muted" style="margin-top:-6px">Điền để trang đặt chỗ tự tạo mã QR đúng số tiền cọc. Mã ngân hàng theo chuẩn VietQR: MB, VCB, TCB, ACB, BIDV, VPB, TPB…</p>
-        <div class="form-grid g3">${F('bankName', 'Mã ngân hàng')}${F('bankAccount', 'Số tài khoản')}${F('bankOwner', 'Tên chủ tài khoản')}</div>
-      </div>
       <div style="display:flex;gap:10px;margin:14px 0"><button class="btn btn-brand btn-lg" id="sSave">Lưu cài đặt</button></div>
-      <div class="card-a" id="sheetCard"><h3>Google Sheets — nhận đơn từ trang web</h3>
-        <p class="muted" style="margin-top:-6px">Khách đặt chỗ trên web → đơn ghi vào Google Sheets và gửi mail báo cho bạn. Nhập thông tin dưới đây để trang admin này tải đơn về. Mã bí mật chỉ lưu trên máy này. Hướng dẫn cài: file <b>HUONG-DAN-GOOGLE-SHEETS.md</b>.</p>
+      <div class="card-a" id="scriptCard"><h3>Google Apps Script — đồng bộ TikTok</h3>
+        <p class="muted" style="margin-top:-6px">Nút <b>🔄 Đồng bộ TikTok</b> nhờ Apps Script đọc video mới trên TikTok. Dán URL Web App (kết thúc bằng /exec) — chỉ lưu trên máy này. Hướng dẫn cài: file <b>HUONG-DAN-APPS-SCRIPT.md</b>.</p>
         <div class="form-grid">
-          <div class="field full"><label>URL Web App (kết thúc bằng /exec)</label><input id="shUrl" value="${esc(Sheet.cfg().url)}" placeholder="https://script.google.com/macros/s/…/exec"></div>
-          <div class="field full"><label>Mã bí mật (ADMIN_KEY trong Apps Script) — chỉ cần khi tải đơn; Đồng bộ TikTok chỉ cần URL</label><input id="shKey" type="password" value="${esc(Sheet.cfg().key)}" autocomplete="off"></div>
+          <div class="field full"><label>URL Web App</label><input id="scUrl" value="${esc(Script.url())}" placeholder="https://script.google.com/macros/s/…/exec"></div>
         </div>
-        ${window.SHOP_CONFIG?.orderEndpoint ? '' : '<p class="msg err" style="margin-top:10px">⚠ File <b>assets/js/config.js</b> chưa có URL — trang web chưa gửi đơn về Google Sheets.</p>'}
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-          <button class="btn btn-brand" id="shSave">Lưu &amp; kiểm tra kết nối</button>
-          <span id="shMsg" class="msg" style="align-self:center;margin:0"></span>
+          <button class="btn btn-brand" id="scSave">Lưu &amp; kiểm tra kết nối</button>
+          <span id="scMsg" class="msg" style="align-self:center;margin:0"></span>
         </div>
       </div>
       <div class="card-a" id="ghCard"><h3>Xuất bản lên web (GitHub Pages)</h3>
@@ -1067,8 +822,6 @@
       </div>`;
     $('#sSave').onclick = () => {
       $$('[data-s]').forEach(i => s[i.dataset.s] = i.value.trim());
-      $$('[data-sn]').forEach(i => s[i.dataset.sn] = num(i.value));
-      s.bankName = s.bankName.toUpperCase();
       save('Đã lưu cài đặt <b>✓</b>');
     };
     $('#ghSave').onclick = async () => {
@@ -1085,22 +838,13 @@
       drawPublish();
     };
     $('#ghPull').onclick = pullLive;
-    $('#shSave').onclick = async () => {
-      Sheet.setCfg({ url: $('#shUrl').value.trim(), key: $('#shKey').value.trim() });
-      const msg = $('#shMsg');
-      if (!Sheet.cfg().url) { msg.className = 'msg err'; msg.textContent = 'Nhập URL Web App'; return; }
+    $('#scSave').onclick = async () => {
+      Script.setUrl($('#scUrl').value.trim());
+      const msg = $('#scMsg');
+      if (!Script.url()) { msg.className = 'msg err'; msg.textContent = 'Nhập URL Web App'; return; }
       msg.className = 'msg'; msg.textContent = 'Đang kiểm tra…';
-      if (!Sheet.ready()) {
-        try {
-          await Sheet.call({ action: 'ping' });
-          msg.className = 'msg ok'; msg.textContent = '✓ Đã lưu URL — dùng được Đồng bộ TikTok. Nhập thêm mã bí mật nếu cần tải đơn.';
-        } catch (e) { msg.className = 'msg err'; msg.textContent = '✕ ' + e.message; }
-        return;
-      }
-      try {
-        const r = await Sheet.pull();
-        msg.className = 'msg ok'; msg.textContent = `✓ Kết nối thành công — có ${r.total} đơn trên Sheets (${r.added} đơn mới đã tải về).`;
-      } catch (e) { msg.className = 'msg err'; msg.textContent = '✕ ' + e.message; }
+      try { await Script.call({ action: 'ping' }); msg.className = 'msg ok'; msg.textContent = '✓ Kết nối thành công — dùng được Đồng bộ TikTok'; }
+      catch (e) { msg.className = 'msg err'; msg.textContent = '✕ ' + e.message; }
     };
     $('#bkExport').onclick = () => {
       const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(D(), null, 2)], { type: 'application/json' }));
@@ -1110,11 +854,11 @@
       try { const data = JSON.parse(await e.target.files[0].text()); if (!data.products) throw 0; DB.data = data; save('Đã nhập dữ liệu <b>✓</b>'); route(); }
       catch (err) { toast('File không hợp lệ'); }
     };
-    $('#bkReset').onclick = () => { if (confirm('Xoá toàn bộ thay đổi và đơn hàng, khôi phục dữ liệu mẫu?')) { DB.reset(); toast('Đã khôi phục dữ liệu mẫu'); route(); } };
+    $('#bkReset').onclick = () => { if (confirm('Xoá toàn bộ thay đổi, khôi phục dữ liệu mẫu?')) { DB.reset(); toast('Đã khôi phục dữ liệu mẫu'); route(); } };
   }
 
   /* ---------------- Router ---------------- */
-  const VIEWS = { dashboard: viewDashboard, products: viewProducts, categories: viewCategories, orders: viewOrders, banners: viewBanners, promos: viewPromos, media: viewMedia, settings: viewSettings };
+  const VIEWS = { dashboard: viewDashboard, products: viewProducts, categories: viewCategories, banners: viewBanners, promos: viewPromos, media: viewMedia, settings: viewSettings };
   function route() {
     if (!isAuthed()) return renderLogin();
     if (!$('.adm')) renderShell();

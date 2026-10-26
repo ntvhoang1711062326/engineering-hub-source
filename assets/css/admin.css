@@ -10,7 +10,6 @@ body.admin { background: #f1f3f6; }
 .adm-menu a i { font-style: normal; width: 22px; text-align: center; }
 .adm-menu a:hover { background: var(--dark-3); color: #fff; }
 .adm-menu a.on { background: linear-gradient(90deg, rgba(255,184,0,.18), rgba(255,184,0,.04)); color: var(--brand); box-shadow: inset 3px 0 0 var(--brand); }
-.adm-menu .cnt { margin-left: auto; background: var(--sale); color: #fff; font-size: 11px; border-radius: 10px; padding: 0 7px; }
 .adm-side .foot { margin-top: auto; padding: 14px 18px; border-top: 1px solid rgba(255,255,255,.07); display: grid; gap: 8px; font-size: 13px; }
 .adm-side .foot a:hover { color: var(--brand); }
 .adm-main { min-width: 0; }
@@ -25,7 +24,6 @@ body.admin { background: #f1f3f6; }
 .kpi small { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; }
 .kpi b { display: block; font-size: 26px; margin-top: 4px; font-variant-numeric: tabular-nums; }
 .kpi span { font-size: 12.5px; color: var(--muted); }
-.two { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; margin-top: 14px; }
 
 .card-a { background: #fff; border-radius: 12px; box-shadow: var(--shadow); padding: 18px; }
 .card-a + .card-a { margin-top: 14px; }
@@ -114,15 +112,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 .login-box .logo b { color: var(--ink); }
 .login-box .field + .field { margin-top: 12px; }
 .login-box .note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 12px; }
-.bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; align-items: end; height: 170px; padding-top: 10px; }
-.bars .b { display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
-.bars .b i { width: 100%; max-width: 42px; background: linear-gradient(var(--brand), var(--brand-2)); border-radius: 6px 6px 2px 2px; min-height: 2px; }
-.bars .b small { font-size: 11px; color: var(--muted); }
-.bars .b em { font-style: normal; font-size: 11px; font-weight: 700; }
-.top-list .r { display: flex; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
-.top-list .r:last-child { border-bottom: 0; }
-.top-list img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
-.top-list .r div { flex: 1; min-width: 0; font-weight: 600; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 @media (max-width: 960px) {
   .adm { grid-template-columns: 1fr; }
@@ -130,7 +119,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   .adm-side.open { transform: none; box-shadow: 0 0 0 100vmax rgba(0,0,0,.5); }
   .adm-top .burger { display: block; }
   .kpis { grid-template-columns: repeat(2, 1fr); }
-  .two { grid-template-columns: 1fr; }
   .form-grid.g3 { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 640px) {
@@ -146,10 +134,6 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   .bar-tools input { min-width: 0; max-width: none; }
 }
 
-/* Ghi chú kết nối Google Sheets ở trang Đơn hàng */
-.sheet-note { background: #fff7e6; border: 1px solid #ffd591; color: #874d00; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 13.5px; }
-.sheet-note.ok { background: #effaf3; border-color: #b7ebc6; color: #135c2c; }
-.sheet-note a { text-decoration: underline; font-weight: 600; }
 #admTopActions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 /* Nút xuất bản lên web ở thanh bên */

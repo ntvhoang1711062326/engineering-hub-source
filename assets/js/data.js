@@ -9,7 +9,6 @@
   const KEY = 'tsl_db_v1';                     // bản nháp của Admin
   const CATALOG_URL = 'assets/data/catalog.json';
   const CATALOG_CACHE = 'tsl_catalog_cache';   // bản catalog khách tải gần nhất (hiện ngay khi mở lại)
-  const MY_ORDERS = 'tsl_my_orders';           // đơn khách đã đặt trên máy này (trang "Đặt chỗ thành công")
   const CATALOG_KEYS = ['version', 'categories', 'vehicles', 'products', 'banners', 'sideAds', 'promos', 'settings', 'tiktok', 'tiktokChannels'];
   const IS_ADMIN = !!window.IS_ADMIN;
   const IS_LOCAL = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
@@ -166,11 +165,6 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
 
   const in7days = () => new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 16);
   const PROMOS = {
-    coupons: [
-      { code: 'SUPERLIGHT10', type: 'percent', value: 10, min: 1000000, max: 500000, expires: '2026-12-31', active: true, desc: 'Giảm 10% đơn từ 1 triệu (tối đa 500K)' },
-      { code: 'LENDEN200', type: 'fixed', value: 200000, min: 3000000, max: 0, expires: '2026-12-31', active: true, desc: 'Giảm 200K cho đơn từ 3 triệu' },
-      { code: 'FREESHIP', type: 'ship', value: 0, min: 0, max: 0, expires: '2026-12-31', active: true, desc: 'Miễn phí vận chuyển' },
-    ],
     flash: {
       active: true,
       title: 'Flash Sale cuối tuần',
@@ -190,14 +184,10 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
     hours: '8:00 – 20:00 (Cả T7 & CN)',
     tiktok: 'https://www.tiktok.com/@ts.superlight',
     tiktok2: 'https://www.tiktok.com/@_superlightshop_',
-    deposit: 200000, // tiền cọc giữ chỗ cho mỗi lượt đặt
-    bankName: '',
-    bankAccount: '',
-    bankOwner: '',
   };
 
   const seed = () => ({
-    version: 9,
+    version: 10,
     categories: [...KENZO_CATEGORIES, ...TITAN_CATEGORIES],
     vehicles: VEHICLES,
     products: [...KENZO_PRODUCTS, ...TITAN_PRODUCTS],
@@ -205,7 +195,6 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
     sideAds: SIDE_ADS,
     promos: PROMOS,
     settings: SETTINGS,
-    orders: [],
   });
 
   const DB = {
@@ -216,7 +205,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       else {
         // Khách: catalog đã xuất bản (bản cache gần nhất, refresh() sẽ tải bản mới) — trên máy shop thì xem trước bản nháp
         const cat = (IS_LOCAL && draft) || readJSON(CATALOG_CACHE) || {};
-        this.data = { ...seed(), ...pick(cat, CATALOG_KEYS), orders: readJSON(MY_ORDERS) || [] };
+        this.data = { ...seed(), ...pick(cat, CATALOG_KEYS) };
         this.previewDraft = !!(IS_LOCAL && draft);
       }
       this.migrate();
@@ -227,6 +216,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       this.migrate7();
       this.migrate8();
       this.migrate9();
+      this.migrate10();
       if (this.data.settings.tiktok2 == null) this.data.settings.tiktok2 = SETTINGS.tiktok2;
       return this.data;
     },
@@ -235,7 +225,6 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       const d = this.data;
       if ((d.version || 1) >= 2) return;
       const s = d.settings, pr = d.promos;
-      if (s.deposit == null) s.deposit = SETTINGS.deposit;
       delete s.shipFee; delete s.freeShipFrom;
       if (pr.topbar && /ship/i.test(pr.topbar.text)) pr.topbar.text = PROMOS.topbar.text;
       if (pr.popup && /SUPERLIGHT10/.test(pr.popup.text)) Object.assign(pr.popup, { title: PROMOS.popup.title, text: PROMOS.popup.text });
@@ -290,7 +279,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       swap(d.sideAds, SIDE_ADS, OLD_DEFAULTS.sideAds);
       if (d.promos.popup?.image === OLD_DEFAULTS.popupImage) d.promos.popup.image = PROMOS.popup.image;
       if (d.settings.slogan === OLD_DEFAULTS.slogan) d.settings.slogan = SETTINGS.slogan;
-      d.promos.coupons.forEach(c => { if (c.desc === OLD_DEFAULTS.lenden200) c.desc = 'Giảm 200K cho đơn từ 3 triệu'; });
+      (d.promos.coupons || []).forEach(c => { if (c.desc === OLD_DEFAULTS.lenden200) c.desc = 'Giảm 200K cho đơn từ 3 triệu'; });
       d.version = 6;
       try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
     },
@@ -321,10 +310,19 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       d.version = 9;
       try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
     },
+    /* v10: bỏ nhận đơn qua web → xoá đơn hàng, mã giảm giá, tiền cọc, tài khoản ngân hàng */
+    migrate10() {
+      const d = this.data;
+      if ((d.version || 1) >= 10) return;
+      delete d.orders;
+      delete d.promos.coupons;
+      ['deposit', 'bankName', 'bankAccount', 'bankOwner'].forEach(k => delete d.settings[k]);
+      d.version = 10;
+      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+    },
     save() {
       try {
         if (IS_ADMIN) localStorage.setItem(KEY, JSON.stringify(this.data));
-        else localStorage.setItem(MY_ORDERS, JSON.stringify(this.data.orders.slice(0, 20)));
         return true;
       } catch (e) { alert('Không lưu được dữ liệu (bộ nhớ trình duyệt đầy?). Hãy dùng ảnh nhỏ hơn.'); return false; }
     },
@@ -364,18 +362,6 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       const price = fi ? fi.salePrice : p.price;
       const compare = fi ? Math.max(p.price, p.oldPrice || 0) : (p.oldPrice || 0);
       return { price, compare: compare > price ? compare : 0, flash: !!fi };
-    },
-    /* Áp mã giảm giá: trả về {ok, discount, freeShip, msg} */
-    applyCoupon(code, subtotal) {
-      const c = this.data.promos.coupons.find(x => x.code.toUpperCase() === String(code).trim().toUpperCase());
-      if (!c || !c.active) return { ok: false, msg: 'Mã không tồn tại hoặc đã tắt' };
-      if (c.expires && new Date(c.expires + 'T23:59:59') < new Date()) return { ok: false, msg: 'Mã đã hết hạn' };
-      if (subtotal < (c.min || 0)) return { ok: false, msg: `Đơn tối thiểu ${fmt(c.min)}` };
-      let discount = 0, freeShip = false;
-      if (c.type === 'percent') { discount = Math.round(subtotal * c.value / 100); if (c.max) discount = Math.min(discount, c.max); }
-      else if (c.type === 'fixed') discount = Math.min(c.value, subtotal);
-      else if (c.type === 'ship') freeShip = true;
-      return { ok: true, code: c.code, discount, freeShip, msg: c.desc };
     },
     /* Video TikTok theo dòng xe: tự phân loại từ caption (dùng chung cho trang khách + Admin) */
     // media.js là danh sách gốc; data.tiktok = video mới / số liệu mới từ nút "Đồng bộ TikTok" ở Admin

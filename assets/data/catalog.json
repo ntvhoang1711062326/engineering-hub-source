@@ -579,38 +579,6 @@
   }
  ],
  "promos": {
-  "coupons": [
-   {
-    "code": "SUPERLIGHT10",
-    "type": "percent",
-    "value": 10,
-    "min": 1000000,
-    "max": 500000,
-    "expires": "2026-12-31",
-    "active": true,
-    "desc": "Giảm 10% đơn từ 1 triệu (tối đa 500K)"
-   },
-   {
-    "code": "LENDEN200",
-    "type": "fixed",
-    "value": 200000,
-    "min": 3000000,
-    "max": 0,
-    "expires": "2026-12-31",
-    "active": true,
-    "desc": "Giảm 200K cho đơn từ 3 triệu"
-   },
-   {
-    "code": "FREESHIP",
-    "type": "ship",
-    "value": 0,
-    "min": 0,
-    "max": 0,
-    "expires": "2026-12-31",
-    "active": true,
-    "desc": "Miễn phí vận chuyển"
-   }
-  ],
   "flash": {
    "active": true,
    "title": "Flash Sale cuối tuần",
@@ -636,11 +604,7 @@
   "hotline": "0769678981",
   "address": "38/8 Đường Đinh Bộ Lĩnh, Bình Thạnh, Hồ Chí Minh",
   "hours": "8:00 – 20:00 (Cả T7 & CN)",
-  "tiktok": "https://www.tiktok.com/@ts.superlight",
-  "deposit": 200000,
-  "bankName": "",
-  "bankAccount": "",
-  "bankOwner": ""
+  "tiktok": "https://www.tiktok.com/@ts.superlight"
  },
  "publishedAt": "2026-10-26T08:51:20.516Z"
 }

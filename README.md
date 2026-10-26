@@ -14,19 +14,18 @@ python -m http.server 8000
 ## Cấu trúc
 | File | Nội dung |
 |---|---|
-| `index.html`, `assets/js/app.js` | Trang khách: sản phẩm Kenzo, video lắp đèn theo dòng xe, chi tiết SP, đặt chỗ & cọc (giá hiển thị "Liên hệ") |
-| `admin.html`, `assets/js/admin.js` | Admin: sản phẩm, đơn hàng (tải từ Google Sheets), banner, khuyến mãi, thư viện TikTok, cài đặt, **🚀 Xuất bản lên web** |
+| `index.html`, `assets/js/app.js` | Trang khách: sản phẩm Kenzo / Titan Moto, video lắp đèn theo dòng xe, chi tiết SP — khách Gọi / Zalo để tư vấn (giá 0 hiển thị "Liên hệ") |
+| `admin.html`, `assets/js/admin.js` | Admin: sản phẩm, danh mục, banner, Flash Sale, thư viện TikTok (+ đồng bộ), cài đặt, **🚀 Xuất bản lên web** |
 | `assets/data/catalog.json` | Dữ liệu web khách đang dùng — Admin ghi file này lên GitHub khi xuất bản |
 | `assets/js/data.js` | Dữ liệu mặc định + lớp dữ liệu (Admin: nháp trong localStorage; khách: đọc `catalog.json`) |
-| `assets/js/config.js` | URL Google Apps Script nhận đơn |
-| `google-apps-script/Code.gs` | Script dán vào Google Sheets: ghi đơn, mail báo đơn mới, cho Admin tải đơn, đồng bộ video TikTok |
+| `google-apps-script/Code.gs` | Google Apps Script đọc hộ TikTok cho nút **🔄 Đồng bộ TikTok** |
 | `assets/js/media.js` | Danh sách video TikTok gốc (108 video @ts.superlight + 10 video @_superlightshop_) và thông tin 2 kênh; video mới từ nút **🔄 Đồng bộ TikTok** nằm trong `catalog.json` (`tiktok`) |
 | `assets/img/`, `assets/video/` | Ảnh/video TikTok, ảnh sản phẩm Kenzo (`kenzo/`), ảnh tải lên từ Admin (`uploads/`) |
 
 ## Đưa lên web & vận hành
 - **HUONG-DAN-DUA-LEN-WEB.md** — GitHub Pages, tên miền riêng, token để Admin xuất bản.
-- **HUONG-DAN-GOOGLE-SHEETS.md** — nhận đơn vào Google Sheets + mail báo đơn mới.
+- **HUONG-DAN-APPS-SCRIPT.md** — cài Apps Script cho nút Đồng bộ TikTok.
 
 ## Lưu ý
-- Đăng nhập admin chỉ là lớp che phía trình duyệt, **không bảo mật**; dữ liệu thật được bảo vệ bằng GitHub token và mã bí mật Sheets (chỉ lưu trên máy admin).
-- MoMo / VNPay / ZaloPay đang là **cổng mô phỏng** (hàm `openGateway` trong `app.js`). Chuyển khoản VietQR hoạt động thật khi điền ngân hàng ở Admin → Cài đặt rồi xuất bản.
+- Đăng nhập admin chỉ là lớp che phía trình duyệt, **không bảo mật**; xuất bản lên web được bảo vệ bằng GitHub token (chỉ lưu trên máy admin).
+- Web không nhận đơn / thanh toán online — khách liên hệ qua Hotline / Zalo.
