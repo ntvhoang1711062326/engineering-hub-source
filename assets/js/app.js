@@ -36,6 +36,8 @@
     </div>`;
   }
   const zaloLink = () => `https://zalo.me/${S().zalo}`;
+  // Nút TikTok (góc dưới, chân trang) mở kênh đứng đầu — kênh nhiều người theo dõi nhất
+  const ttTop = () => DB.channels()[0]?.url || S().tiktok;
   const phoneFmt = p => String(p).replace(/(\d{4})(\d{3})(\d+)/, '$1.$2.$3');
 
   function card(p, opts = {}) {
@@ -121,7 +123,7 @@
         <a href="#/" class="logo" style="margin-bottom:12px"><img class="logo-img" src="assets/img/logo2.png" alt="TS SUPERLIGHT"></a>
         <p>${esc(s.slogan)}. Lắp đặt, test sáng miễn phí tại shop — bảo hành rõ ràng, liên hệ để được báo giá.</p>
         <div class="social">
-          <a href="${esc(s.tiktok)}" target="_blank" rel="noopener">TikTok</a>
+          <a href="${esc(ttTop())}" target="_blank" rel="noopener">TikTok</a>
           <a href="${zaloLink()}" target="_blank" rel="noopener">Zalo</a>
         </div>
       </div>
@@ -140,7 +142,7 @@
     $('#footerBottom').textContent = `© ${new Date().getFullYear()} ${s.shopName}. Chuyên độ đèn xe máy tại TP.HCM.`;
     $('#floatContact').innerHTML = `
       <a class="z" href="${zaloLink()}" target="_blank" rel="noopener" title="Chat Zalo">Zalo</a>
-      <a class="t" href="${esc(s.tiktok)}" target="_blank" rel="noopener" title="TikTok" aria-label="TikTok">${TIKTOK_ICON}</a>`;
+      <a class="t" href="${esc(ttTop())}" target="_blank" rel="noopener" title="TikTok" aria-label="TikTok">${TIKTOK_ICON}</a>`;
   }
   function setNav(key) {
     $$('#navMenu a').forEach(a => a.classList.toggle('on', !!key && a.dataset.nav === key));
