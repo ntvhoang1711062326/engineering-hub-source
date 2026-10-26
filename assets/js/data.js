@@ -1,10 +1,19 @@
 /* ============================================================
    TS SUPERLIGHT — Lớp dữ liệu dùng chung (trang khách + trang admin)
-   Lưu trong localStorage để admin sửa là trang khách thấy ngay.
-   Khi có backend thật: thay DB.load/DB.save bằng gọi API.
+   - Admin (máy chủ shop): sửa bản nháp trong localStorage, bấm "Xuất bản lên web"
+     để ghi assets/data/catalog.json lên GitHub (xem admin.js → GH).
+   - Trang khách: đọc assets/data/catalog.json mới nhất; chỉ lưu đơn của chính khách.
+     Mở trên máy (file:// / localhost) thì hiển thị bản nháp của Admin để xem trước.
    ============================================================ */
 (function () {
-  const KEY = 'tsl_db_v1';
+  const KEY = 'tsl_db_v1';                     // bản nháp của Admin
+  const CATALOG_URL = 'assets/data/catalog.json';
+  const CATALOG_CACHE = 'tsl_catalog_cache';   // bản catalog khách tải gần nhất (hiện ngay khi mở lại)
+  const MY_ORDERS = 'tsl_my_orders';           // đơn khách đã đặt trên máy này (trang "Đặt chỗ thành công")
+  const CATALOG_KEYS = ['version', 'categories', 'vehicles', 'products', 'banners', 'sideAds', 'promos', 'settings'];
+  const IS_ADMIN = !!window.IS_ADMIN;
+  const IS_LOCAL = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  const readJSON = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
   const img = id => `assets/img/${id}.jpg`;
   const vid = id => `assets/video/${id}.mp4`;
 
@@ -147,10 +156,14 @@
   const DB = {
     data: null,
     load() {
-      try {
-        const raw = localStorage.getItem(KEY);
-        this.data = raw ? JSON.parse(raw) : seed();
-      } catch (e) { this.data = seed(); }
+      const draft = readJSON(KEY);
+      if (IS_ADMIN) this.data = draft || seed();
+      else {
+        // Khách: catalog đã xuất bản (bản cache gần nhất, refresh() sẽ tải bản mới) — trên máy shop thì xem trước bản nháp
+        const cat = (IS_LOCAL && draft) || readJSON(CATALOG_CACHE) || {};
+        this.data = { ...seed(), ...pick(cat, CATALOG_KEYS), orders: readJSON(MY_ORDERS) || [] };
+        this.previewDraft = !!(IS_LOCAL && draft);
+      }
       this.migrate();
       this.migrate3();
       this.migrate4();
@@ -223,10 +236,29 @@
       try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
     },
     save() {
-      try { localStorage.setItem(KEY, JSON.stringify(this.data)); return true; }
-      catch (e) { alert('Không lưu được dữ liệu (bộ nhớ trình duyệt đầy?). Hãy dùng ảnh nhỏ hơn.'); return false; }
+      try {
+        if (IS_ADMIN) localStorage.setItem(KEY, JSON.stringify(this.data));
+        else localStorage.setItem(MY_ORDERS, JSON.stringify(this.data.orders.slice(0, 20)));
+        return true;
+      } catch (e) { alert('Không lưu được dữ liệu (bộ nhớ trình duyệt đầy?). Hãy dùng ảnh nhỏ hơn.'); return false; }
     },
     reset() { this.data = seed(); this.save(); },
+    /* Phần dữ liệu đưa lên web (không gồm đơn hàng) */
+    catalog() { return pick(this.data, CATALOG_KEYS); },
+    /* Trang khách: tải catalog mới nhất từ web; khác bản đang hiện thì báo 'db-changed' để vẽ lại */
+    async refresh() {
+      if (IS_ADMIN || this.previewDraft) return;
+      try {
+        const res = await fetch(`${CATALOG_URL}?t=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const cat = pick(await res.json(), CATALOG_KEYS);
+        if (!cat.products) return;
+        try { localStorage.setItem(CATALOG_CACHE, JSON.stringify(cat)); } catch (e) {}
+        if (JSON.stringify(cat) === JSON.stringify(this.catalog())) return;
+        Object.assign(this.data, cat);
+        window.dispatchEvent(new Event('db-changed'));
+      } catch (e) { /* mất mạng / mở file:// → giữ bản đang có */ }
+    },
     product(id) { return this.data.products.find(p => p.id === id); },
     category(id) { return this.data.categories.find(c => c.id === id); },
     /* Ảnh sản phẩm theo dòng xe đã chọn (không có thì dùng ảnh đại diện) */
@@ -273,11 +305,13 @@
   };
 
   function fmt(n) { return (Number(n) || 0).toLocaleString('vi-VN') + 'đ'; }
+  function pick(o, keys) { return Object.fromEntries(keys.filter(k => o && o[k] !== undefined).map(k => [k, o[k]])); }
 
   window.DB = DB;
   window.fmt = fmt;
   window.esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   DB.load();
-  // Đồng bộ giữa tab admin và tab khách
-  window.addEventListener('storage', e => { if (e.key === KEY) { DB.load(); window.dispatchEvent(new Event('db-changed')); } });
+  DB.refresh();
+  // Trên máy shop: tab Admin sửa nháp → tab xem trước cập nhật ngay
+  window.addEventListener('storage', e => { if (e.key === KEY && (IS_ADMIN || IS_LOCAL)) { DB.load(); window.dispatchEvent(new Event('db-changed')); } });
 })();

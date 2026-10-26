@@ -14,15 +14,19 @@ python -m http.server 8000
 ## Cấu trúc
 | File | Nội dung |
 |---|---|
-| `index.html`, `assets/js/app.js` | Trang khách: trang chủ, danh mục, lọc theo dòng xe, chi tiết SP, đặt chỗ, hẹn lịch lắp & đặt cọc (giá hiển thị "Liên hệ", không giao hàng) |
-| `admin.html`, `assets/js/admin.js` | Admin: tổng quan, sản phẩm, đơn hàng, banner/quảng cáo/popup, khuyến mãi (flash sale + mã giảm giá), thư viện TikTok, cài đặt |
-| `assets/js/data.js` | Dữ liệu mẫu + lớp lưu trữ dùng chung (localStorage) |
-| `assets/js/media.js` | Danh sách 108 ảnh bìa video TikTok (caption, lượt xem) |
-| `assets/img/`, `assets/video/` | Ảnh bìa và 4 video tải từ TikTok của shop |
+| `index.html`, `assets/js/app.js` | Trang khách: sản phẩm Kenzo, video lắp đèn theo dòng xe, chi tiết SP, đặt chỗ & cọc (giá hiển thị "Liên hệ") |
+| `admin.html`, `assets/js/admin.js` | Admin: sản phẩm, đơn hàng (tải từ Google Sheets), banner, khuyến mãi, thư viện TikTok, cài đặt, **🚀 Xuất bản lên web** |
+| `assets/data/catalog.json` | Dữ liệu web khách đang dùng — Admin ghi file này lên GitHub khi xuất bản |
+| `assets/js/data.js` | Dữ liệu mặc định + lớp dữ liệu (Admin: nháp trong localStorage; khách: đọc `catalog.json`) |
+| `assets/js/config.js` | URL Google Apps Script nhận đơn |
+| `google-apps-script/Code.gs` | Script dán vào Google Sheets: ghi đơn, mail báo đơn mới, cho Admin tải đơn |
+| `assets/js/media.js` | Danh sách 108 ảnh bìa video TikTok |
+| `assets/img/`, `assets/video/` | Ảnh/video TikTok, ảnh sản phẩm Kenzo (`kenzo/`), ảnh tải lên từ Admin (`uploads/`) |
 
-## Lưu ý trước khi chạy thật
-- Trang khách hiển thị mọi giá là **Liên hệ** và không còn giao hàng. Khách đặt chỗ và cọc một khoản cố định cho mỗi lượt đặt (mặc định 200.000đ, sửa ở Admin → Cài đặt). Giá trong Admin → Sản phẩm chỉ còn dùng nội bộ.
-- Dữ liệu đang lưu trong trình duyệt (localStorage): admin và khách phải dùng cùng trình duyệt/máy mới thấy nhau. Muốn chạy thật cần backend + database (thay `DB.load/DB.save` trong `data.js` bằng gọi API).
-- Đăng nhập admin chỉ là demo phía trình duyệt, **không bảo mật** — cần xác thực phía server.
-- MoMo / VNPay / ZaloPay đang là **cổng mô phỏng**. Tích hợp thật cần đăng ký merchant và backend tạo link thanh toán (hàm `openGateway` trong `app.js`).
-- Chuyển khoản VietQR hoạt động thật khi điền ngân hàng + số tài khoản ở Admin → Cài đặt.
+## Đưa lên web & vận hành
+- **HUONG-DAN-DUA-LEN-WEB.md** — GitHub Pages, tên miền riêng, token để Admin xuất bản.
+- **HUONG-DAN-GOOGLE-SHEETS.md** — nhận đơn vào Google Sheets + mail báo đơn mới.
+
+## Lưu ý
+- Đăng nhập admin chỉ là lớp che phía trình duyệt, **không bảo mật**; dữ liệu thật được bảo vệ bằng GitHub token và mã bí mật Sheets (chỉ lưu trên máy admin).
+- MoMo / VNPay / ZaloPay đang là **cổng mô phỏng** (hàm `openGateway` trong `app.js`). Chuyển khoản VietQR hoạt động thật khi điền ngân hàng ở Admin → Cài đặt rồi xuất bản.

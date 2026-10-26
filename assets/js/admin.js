@@ -23,6 +23,9 @@
     clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200);
   }
   const save = msg => { if (DB.save()) toast(msg || 'Đã lưu <b>✓</b>'); };
+  // Mỗi lần lưu nháp → cập nhật trạng thái "Có thay đổi chưa xuất bản"
+  const dbSave = DB.save.bind(DB);
+  DB.save = () => { const ok = dbSave(); drawPublish(); return ok; };
   const pill = ([t, c]) => `<span class="pill ${c}">${t}</span>`;
 
   /* ---------------- Google Sheets: tải đơn khách đặt trên web về máy này ----------------
@@ -65,6 +68,104 @@
     push(o) { return this.call(null, { action: 'update', id: o.id, status: o.status, paymentStatus: o.paymentStatus }); },
     remove(id) { return this.call(null, { action: 'delete', id }); },
   };
+  /* ---------------- Xuất bản lên web: ghi assets/data/catalog.json (+ ảnh tải lên) vào GitHub ----------------
+     GitHub Pages tự đưa bản mới lên web sau ~1 phút. Token chỉ lưu trên máy admin. */
+  const GH_CFG = 'tsl_github', PUBLISHED = 'tsl_published';
+  const GH = {
+    cfg() {
+      let c = {}; try { c = JSON.parse(localStorage.getItem(GH_CFG)) || {}; } catch (e) {}
+      return { owner: c.owner || 'ntvhoang1711062326', repo: c.repo || 'engineering-hub-source', branch: c.branch || 'main', token: c.token || '' };
+    },
+    setCfg(c) { try { localStorage.setItem(GH_CFG, JSON.stringify(c)); } catch (e) {} },
+    ready() { return !!this.cfg().token; },
+    siteUrl() { const { owner, repo } = this.cfg(); return `https://${owner}.github.io/${repo}/`; },
+    async api(path, { method = 'GET', body, raw } = {}) {
+      const { owner, repo, token } = this.cfg();
+      const res = await fetch(`https://api.github.com/repos/${owner}/${repo}${path}`, {
+        method, body: body && JSON.stringify(body), cache: 'no-store',
+        headers: { Authorization: `Bearer ${token}`, Accept: raw ? 'application/vnd.github.raw+json' : 'application/vnd.github+json', ...(body ? { 'Content-Type': 'application/json' } : {}) },
+      });
+      if (!res.ok) {
+        const msg = (await res.json().catch(() => ({}))).message || res.statusText;
+        throw new Error(res.status === 401 ? 'Token sai hoặc đã hết hạn' : res.status === 404 ? 'Không tìm thấy repo/nhánh — hoặc token chưa được cấp quyền repo này' : res.status === 403 ? 'Token chưa có quyền ghi (Contents: Read and write)' : `${res.status} ${msg}`);
+      }
+      return raw ? res.text() : res.json();
+    },
+    // Ghi nhiều file trong 1 commit (Git Data API)
+    async commit(files, message) {
+      const { branch } = this.cfg();
+      const ref = await this.api(`/git/ref/heads/${branch}`);
+      const base = await this.api(`/git/commits/${ref.object.sha}`);
+      const tree = [];
+      for (const [path, content] of files) {
+        const blob = await this.api('/git/blobs', { method: 'POST', body: { content, encoding: 'base64' } });
+        tree.push({ path, mode: '100644', type: 'blob', sha: blob.sha });
+      }
+      const t = await this.api('/git/trees', { method: 'POST', body: { base_tree: base.tree.sha, tree } });
+      if (t.sha === base.tree.sha) return null; // không có gì thay đổi
+      const c = await this.api('/git/commits', { method: 'POST', body: { message, tree: t.sha, parents: [ref.object.sha] } });
+      await this.api(`/git/refs/heads/${branch}`, { method: 'PATCH', body: { sha: c.sha } });
+      return c.sha;
+    },
+    async fetchCatalog() {
+      return JSON.parse(await this.api(`/contents/assets/data/catalog.json?ref=${encodeURIComponent(this.cfg().branch)}`, { raw: true }));
+    },
+  };
+  const b64utf8 = s => { const b = new TextEncoder().encode(s); let r = ''; for (let i = 0; i < b.length; i += 0x8000) r += String.fromCharCode(...b.subarray(i, i + 0x8000)); return btoa(r); };
+  const hashStr = s => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(16).padStart(8, '0') + s.length.toString(36); };
+  const isDirty = () => { try { return localStorage.getItem(PUBLISHED) !== JSON.stringify(DB.catalog()); } catch (e) { return true; } };
+  const markPublished = () => { try { localStorage.setItem(PUBLISHED, JSON.stringify(DB.catalog())); } catch (e) {} };
+
+  // Ảnh tải lên trong Admin đang ở dạng data:… → tách thành file assets/img/uploads/*.jpg khi xuất bản
+  function catalogForWeb() {
+    const cat = JSON.parse(JSON.stringify(DB.catalog())), files = new Map();
+    const conv = url => {
+      const m = /^data:image\/(\w+);base64,(.+)$/.exec(url || '');
+      if (!m) return url;
+      const path = `assets/img/uploads/${hashStr(m[2])}.${m[1] === 'png' ? 'png' : 'jpg'}`;
+      files.set(path, m[2]);
+      return path;
+    };
+    cat.products.forEach(p => {
+      p.image = conv(p.image); p.gallery = (p.gallery || []).map(conv);
+      Object.keys(p.vehicleImages || {}).forEach(v => { p.vehicleImages[v] = conv(p.vehicleImages[v]); });
+    });
+    [...(cat.banners || []), ...(cat.sideAds || []), cat.promos.popup].forEach(x => { if (x) x.image = conv(x.image); });
+    files.set('assets/data/catalog.json', b64utf8(JSON.stringify({ ...cat, publishedAt: new Date().toISOString() }, null, 1)));
+    return files;
+  }
+
+  async function publish() {
+    if (!GH.ready()) { location.hash = '#/settings'; return toast('Nhập <b>GitHub token</b> ở Cài đặt → Xuất bản lên web trước'); }
+    const btn = $('#pubBtn'); if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Đang xuất bản…'; }
+    try {
+      const sha = await GH.commit(catalogForWeb(), `Cập nhật dữ liệu web từ Admin (${new Date().toLocaleString('vi-VN')})`);
+      markPublished();
+      toast(sha ? `Đã xuất bản <b>✓</b> — web khách cập nhật sau khoảng 1 phút` : 'Web đã là bản mới nhất <b>✓</b>');
+    } catch (e) { toast('Xuất bản lỗi: ' + esc(e.message)); }
+    drawPublish();
+  }
+  async function pullLive() {
+    if (!GH.ready()) { location.hash = '#/settings'; return toast('Nhập <b>GitHub token</b> ở Cài đặt trước'); }
+    if (isDirty() && !confirm('Bản nháp đang có thay đổi CHƯA xuất bản. Lấy bản trên web về sẽ ghi đè các thay đổi đó. Tiếp tục?')) return;
+    try {
+      const cat = await GH.fetchCatalog();
+      if (!cat.products) throw new Error('File catalog.json trên web không hợp lệ');
+      DB.data = { ...DB.data, ...cat, orders: D().orders };
+      delete DB.data.publishedAt;
+      DB.save(); markPublished(); toast('Đã lấy bản đang chạy trên web về <b>✓</b>'); route();
+    } catch (e) { toast('Không lấy được: ' + esc(e.message)); }
+  }
+  // Nút + trạng thái ở thanh bên: "Có thay đổi chưa xuất bản"
+  function drawPublish() {
+    const box = $('#pubBox'); if (!box) return;
+    const dirty = isDirty();
+    box.innerHTML = `
+      <button class="btn ${dirty ? 'btn-brand' : 'btn-outline'} btn-block" id="pubBtn">🚀 Xuất bản lên web</button>
+      <small class="${dirty ? 'dirty' : ''}">${!GH.ready() ? 'Chưa kết nối GitHub' : dirty ? '● Có thay đổi chưa xuất bản' : '✓ Web đang là bản mới nhất'}</small>`;
+    $('#pubBtn').onclick = publish;
+  }
+
   async function syncOrders(silent) {
     if (!Sheet.ready()) { if (!silent) toast('Chưa kết nối Google Sheets — vào <b>Cài đặt</b> để nhập URL &amp; mã bí mật'); return; }
     const btn = $('#syncSheet'); if (btn) { btn.disabled = true; btn.textContent = '⟳ Đang tải…'; }
@@ -188,8 +289,10 @@
         <aside class="adm-side" id="side">
           <a href="#/dashboard" class="logo"><span class="logo-mark"></span><span class="logo-text"><b>TS <span>SUPERLIGHT</span></b><small class="role">Admin</small></span></a>
           <ul class="adm-menu" id="admMenu"></ul>
+          <div class="pub-box" id="pubBox"></div>
           <div class="foot">
-            <a href="index.html" target="_blank">↗ Xem trang bán hàng</a>
+            <a href="index.html" target="_blank">↗ Xem trước (bản nháp)</a>
+            <a href="${esc(GH.siteUrl())}" target="_blank">🌐 Mở web khách đang dùng</a>
             <a href="#" id="logout">⎋ Đăng xuất</a>
           </div>
         </aside>
@@ -207,6 +310,7 @@
     $('#admMenu').innerHTML = MENU.map(([k, i, t]) => `<li><a href="#/${k}" class="${k === cur ? 'on' : ''}"><i>${i}</i>${t}${k === 'orders' && newOrders ? `<span class="cnt">${newOrders}</span>` : ''}</a></li>`).join('');
     $('#admTitle').textContent = MENU.find(m => m[0] === cur)?.[2] || '';
     $('#admTopActions').innerHTML = '';
+    drawPublish();
   }
 
   /* ---------------- Dashboard ---------------- */
@@ -799,6 +903,21 @@
           <span id="shMsg" class="msg" style="align-self:center;margin:0"></span>
         </div>
       </div>
+      <div class="card-a" id="ghCard"><h3>Xuất bản lên web (GitHub Pages)</h3>
+        <p class="muted" style="margin-top:-6px">Sửa sản phẩm, banner, khuyến mãi, cài đặt… ở Admin chỉ lưu nháp trên máy này. Bấm <b>🚀 Xuất bản lên web</b> (thanh bên trái) để đưa lên web khách — khoảng 1 phút sau khách thấy. Token chỉ lưu trên máy này. Hướng dẫn tạo token: file <b>HUONG-DAN-DUA-LEN-WEB.md</b>.</p>
+        <div class="form-grid g3">
+          <div class="field"><label>Tài khoản GitHub</label><input id="ghOwner" value="${esc(GH.cfg().owner)}"></div>
+          <div class="field"><label>Repo</label><input id="ghRepo" value="${esc(GH.cfg().repo)}"></div>
+          <div class="field"><label>Nhánh</label><input id="ghBranch" value="${esc(GH.cfg().branch)}"></div>
+          <div class="field full" style="grid-column:1/-1"><label>GitHub token (Fine-grained, quyền Contents: Read and write)</label><input id="ghToken" type="password" value="${esc(GH.cfg().token)}" autocomplete="off" placeholder="github_pat_…"></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+          <button class="btn btn-brand" id="ghSave">Lưu &amp; kiểm tra kết nối</button>
+          <button class="btn btn-outline" id="ghPull">⤓ Lấy bản đang chạy trên web về</button>
+          <span id="ghMsg" class="msg" style="align-self:center;margin:0"></span>
+        </div>
+        <p class="muted" style="margin:10px 0 0;font-size:12.5px">Web khách: <a href="${esc(GH.siteUrl())}" target="_blank">${esc(GH.siteUrl())}</a></p>
+      </div>
       <div class="card-a"><h3>Sao lưu dữ liệu</h3>
         <p class="muted" style="margin-top:-6px">Dữ liệu đang lưu trong trình duyệt này. Xuất file để sao lưu hoặc chuyển sang máy khác.</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -813,6 +932,20 @@
       s.bankName = s.bankName.toUpperCase();
       save('Đã lưu cài đặt <b>✓</b>');
     };
+    $('#ghSave').onclick = async () => {
+      GH.setCfg({ owner: $('#ghOwner').value.trim(), repo: $('#ghRepo').value.trim(), branch: $('#ghBranch').value.trim() || 'main', token: $('#ghToken').value.trim() });
+      const msg = $('#ghMsg');
+      if (!GH.ready()) { msg.className = 'msg err'; msg.textContent = 'Nhập GitHub token'; return; }
+      msg.className = 'msg'; msg.textContent = 'Đang kiểm tra…';
+      try {
+        const r = await GH.api('');
+        if (!r.permissions?.push) throw new Error('Token chưa có quyền ghi (Contents: Read and write)');
+        await GH.api(`/git/ref/heads/${GH.cfg().branch}`);
+        msg.className = 'msg ok'; msg.textContent = '✓ Kết nối GitHub thành công — có thể xuất bản';
+      } catch (e) { msg.className = 'msg err'; msg.textContent = '✕ ' + e.message; }
+      drawPublish();
+    };
+    $('#ghPull').onclick = pullLive;
     $('#shSave').onclick = async () => {
       Sheet.setCfg({ url: $('#shUrl').value.trim(), key: $('#shKey').value.trim() });
       const msg = $('#shMsg');

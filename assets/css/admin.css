@@ -150,3 +150,8 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 .sheet-note.ok { background: #effaf3; border-color: #b7ebc6; color: #135c2c; }
 .sheet-note a { text-decoration: underline; font-weight: 600; }
 #admTopActions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Nút xuất bản lên web ở thanh bên */
+.pub-box { padding: 12px 14px; display: grid; gap: 6px; }
+.pub-box small { color: #9aa3b2; font-size: 11.5px; text-align: center; }
+.pub-box small.dirty { color: var(--brand); font-weight: 600; }

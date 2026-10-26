@@ -20,7 +20,7 @@
   --wrap: 1240px;
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--ink);
   font-family: 'Be Vietnam Pro', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
@@ -30,7 +30,7 @@ a { color: inherit; text-decoration: none; }
 img, video { display: block; max-width: 100%; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
-.wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 16px; }
+.wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 clamp(12px, 3vw, 16px); }
 .muted { color: var(--muted); }
 .hidden { display: none !important; }
 
@@ -129,7 +129,7 @@ button { cursor: pointer; }
 .slide.on { opacity: 1; pointer-events: auto; }
 .slide-text { padding: 44px 40px 44px 64px; color: #fff; display: flex; flex-direction: column; justify-content: center; gap: 14px; position: relative; z-index: 2; }
 .slide-text .tag { align-self: flex-start; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 5px 10px; border-radius: 6px; background: rgba(255,184,0,.15); color: var(--brand); border: 1px solid rgba(255,184,0,.35); }
-.slide-text h2 { font-size: 38px; line-height: 1.1; margin: 0; font-weight: 800; letter-spacing: -.5px; }
+.slide-text h2 { font-size: clamp(24px, 2.4vw + 12px, 38px); line-height: 1.1; margin: 0; font-weight: 800; letter-spacing: -.5px; }
 .slide-text p { color: #b9c1cd; margin: 0; font-size: 15px; max-width: 380px; }
 .slide-media { position: relative; overflow: hidden; }
 .slide-media img, .slide-media video { width: 100%; height: 100%; object-fit: cover; }
@@ -165,7 +165,7 @@ button { cursor: pointer; }
 .section { margin-top: 40px; }
 /* Tiêu đề mục căn giữa + đường kẻ hình thoi (title-separator kiểu cuongden) */
 .section-head { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; margin-bottom: 22px; color: var(--on-bg); }
-.section-head h3 { margin: 0; font-size: 26px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
+.section-head h3 { margin: 0; font-size: clamp(18px, 1.4vw + 12px, 26px); font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
 .section-head h3::after {
   content: ''; display: block; width: 154px; height: 12px; margin: 10px auto 0;
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 154 12'%3E%3Cg fill='none' stroke='%23ff8a00'%3E%3Cpath d='M0 6h60M94 6h60'/%3E%3Cpath d='M71 1.5l4.5 4.5-4.5 4.5-4.5-4.5z'/%3E%3Cpath d='M83 1.5l4.5 4.5-4.5 4.5-4.5-4.5z'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
@@ -266,7 +266,9 @@ select.sort { border: 1.5px solid var(--line); border-radius: 8px; padding: 8px 
 .listing .grid { grid-template-columns: repeat(4, 1fr); }
 
 /* ---------- Product detail ---------- */
-.pd { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.pd { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(16px, 3vw, 28px); }
+/* Không để phần tử con (nút, chữ dài) kéo giãn lưới làm tràn ngang trên điện thoại */
+.pd > *, .hero > *, .listing > *, .cart-layout > *, .footer-grid > * { min-width: 0; }
 .pd-gallery .main { position: relative; aspect-ratio: 1 / 1; border-radius: var(--radius); overflow: hidden; background: var(--dark); }
 .pd-gallery .main img, .pd-gallery .main video { width: 100%; height: 100%; object-fit: cover; }
 .pd-gallery .main video { object-fit: contain; }
@@ -275,10 +277,10 @@ select.sort { border: 1.5px solid var(--line); border-radius: 8px; padding: 8px 
 .thumbs button.on { border-color: var(--brand-2); }
 .thumbs img { width: 100%; height: 100%; object-fit: cover; }
 .thumbs .is-video::after { content: '▶'; position: absolute; inset: 0; display: grid; place-items: center; color: #fff; background: rgba(0,0,0,.4); font-size: 18px; }
-.pd-info h1 { font-size: 24px; line-height: 1.3; margin: 0 0 8px; }
+.pd-info h1 { font-size: clamp(19px, 1vw + 14px, 24px); line-height: 1.3; margin: 0 0 8px; }
 .pd-meta { display: flex; gap: 16px; color: var(--muted); font-size: 13px; flex-wrap: wrap; align-items: center; }
 .pd-price { background: #fafafa; border-radius: 10px; padding: 14px 16px; margin: 16px 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border: 1px dashed var(--line); }
-.pd-price b { color: var(--sale); font-size: 30px; font-weight: 800; }
+.pd-price b { color: var(--sale); font-size: clamp(24px, 1.5vw + 18px, 30px); font-weight: 800; }
 .pd-price s { color: var(--muted); font-size: 16px; }
 .pd-price .off { background: var(--sale); color: #fff; font-weight: 700; font-size: 12px; padding: 3px 8px; border-radius: 5px; }
 .pd-flash { display: flex; align-items: center; gap: 12px; background: linear-gradient(90deg, var(--brand-2), var(--sale)); color: #fff; padding: 10px 16px; border-radius: 10px 10px 0 0; margin-bottom: -16px; margin-top: 16px; font-weight: 700; flex-wrap: wrap; }
@@ -442,13 +444,15 @@ table.specs td:first-child { color: var(--muted); width: 38%; background: #fafaf
   .nav-sub-child { display: none; }
   .has-child:has(.nav-sub-child) > a::after { content: none; }
   .nav-backdrop { position: fixed; inset: 0; z-index: 1001; background: rgba(0,0,0,.55); }
+  /* Menu đang mở: đưa header (chứa menu + lớp phủ) lên trên nút nổi Zalo/TikTok, khoá cuộn trang phía sau */
+  body.nav-open { overflow: hidden; }
+  body.nav-open .header { z-index: 1001; }
   .nav-backdrop.show { display: block; }
 }
 @media (max-width: 1100px) {
   .grid { grid-template-columns: repeat(4, 1fr); }
   .listing .grid { grid-template-columns: repeat(3, 1fr); }
   .videos { grid-template-columns: repeat(4, 1fr); }
-  .cats { grid-template-columns: repeat(3, 1fr); }
 }
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; }
@@ -467,30 +471,62 @@ table.specs td:first-child { color: var(--muted); width: 38%; background: #fafaf
   .logo-text small { display: none; }
   .logo-text b { font-size: 17px; }
   .logo-mark { width: 36px; height: 36px; }
-  .slider { min-height: 440px; }
+  .slider { min-height: clamp(340px, 105vw, 440px); }
   .slide { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
   .slide-media { position: absolute; inset: 0; }
   .slide-media::before { background: linear-gradient(0deg, var(--dark) 20%, rgba(13,16,21,.3) 70%); }
   .slide-text { grid-row: 2; padding: 24px 20px 50px; }
-  .slide-text h2 { font-size: 28px; }
   .dots { left: 20px; bottom: 18px; }
   .slider-arrow { display: none; }
   .side-ad { min-height: 130px; }
   .grid, .grid.cols-4, .listing .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .videos { grid-template-columns: repeat(2, 1fr); }
-  .cats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .cats { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; }
   .cat { padding: 12px 6px; }
   .cat .ic { width: 50px; height: 50px; }
   .cat small { display: none; }
-  .policy { padding: 10px; }
-  .policy i { width: 34px; height: 34px; }
+  .policies { gap: 8px; }
+  .policy { padding: 10px; gap: 8px; align-items: flex-start; }
+  .policy i { width: 30px; height: 30px; font-size: 15px; border-radius: 8px; }
+  .policy b { font-size: 12.5px; line-height: 1.3; }
+  .policy small { font-size: 11px; line-height: 1.35; display: block; margin-top: 2px; }
+  .topbar { font-size: 12px; padding: 4px 12px; line-height: 1.35; }
+  .side-ad b { font-size: 15px; }
+  .side-ad span { font-size: 12px; }
+  .chip { padding: 7px 11px; font-size: 12.5px; }
+  .pd-actions { grid-template-columns: 1fr; }
+  .pd-actions .btn, .btn-lg { white-space: normal; text-align: center; }
+  .pd-row > label { width: 72px; }
+  .pd-price { padding: 12px; gap: 6px 10px; }
+  .float-contact { right: 10px; bottom: 12px; gap: 8px; }
+  .float-contact a { width: 42px; height: 42px; font-size: 10.5px; }
+  .toolbar h2 { font-size: 17px; }
+  .steps span { font-size: 12.5px; }
+  .tiktok-head { padding: 12px; gap: 10px; }
+  .tiktok-head .avatar { width: 42px; height: 42px; }
+  .tiktok-head .btn { margin-left: 0; width: 100%; }
+  .videos { padding: 8px; gap: 8px; }
+  .panel { padding: 14px; }
   .form-grid { grid-template-columns: 1fr; }
-  .pd-info h1 { font-size: 20px; }
-  .pd-price b { font-size: 26px; }
   .footer-grid { grid-template-columns: 1fr; }
   .cart-item { grid-template-columns: 64px 1fr; }
   .cart-item img { width: 64px; height: 64px; }
   .cart-item .right { grid-column: 1 / -1; flex-direction: row; justify-content: space-between; align-items: center; }
-  .section-head h3 { font-size: 17px; }
   .steps .ln { flex-basis: 16px; }
+}
+/* Màn hình rất nhỏ (iPhone SE, Android 360px…) */
+@media (max-width: 380px) {
+  .header-main { gap: 10px; padding-left: 12px; padding-right: 12px; }
+  .header-actions { gap: 12px; }
+  .logo { gap: 7px; }
+  .logo-text b { font-size: 15px; }
+  .logo-mark { width: 30px; height: 30px; }
+  .grid, .grid.cols-4, .listing .grid { gap: 8px; }
+  .card-body { padding: 8px 8px 10px; gap: 4px; }
+  .card-name { font-size: 13px; min-height: 34px; }
+  .card-meta { font-size: 11px; }
+  .card-add { font-size: 12px; padding: 6px; }
+  .policies { grid-template-columns: 1fr; }
+  .cats { grid-template-columns: repeat(2, 1fr); }
+  .side-ads { grid-template-columns: 1fr; }
 }

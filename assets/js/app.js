@@ -791,7 +791,7 @@
   $('#searchForm').onsubmit = e => { e.preventDefault(); const q = $('#searchInput').value.trim(); if (q) { closeSearch(); location.hash = '#/search/' + encodeURIComponent(q); } };
 
   /* ---------------- Header: menu mobile & ô tìm kiếm ---------------- */
-  const openNav = on => { $('#nav').classList.toggle('open', on); $('#navBackdrop').classList.toggle('show', on); };
+  const openNav = on => { $('#nav').classList.toggle('open', on); $('#navBackdrop').classList.toggle('show', on); document.body.classList.toggle('nav-open', on); };
   function openSearch() { $('#searchOverlay').classList.add('show'); setTimeout(() => $('#searchInput').focus(), 50); }
   function closeSearch() { $('#searchOverlay').classList.remove('show'); }
   $('#menuBtn').onclick = () => openNav(true);
@@ -819,7 +819,12 @@
     window.scrollTo(0, 0);
   }
   window.addEventListener('hashchange', route);
-  window.addEventListener('db-changed', () => { renderChrome(); if (!/checkout/.test(location.hash)) route(); });
+  // Dữ liệu mới (catalog vừa tải từ web / Admin sửa nháp): vẽ lại, giữ nguyên vị trí cuộn
+  window.addEventListener('db-changed', () => {
+    renderChrome(); Cart.clean(); updateCartCount();
+    if (/checkout/.test(location.hash) || $('#modal')) return;
+    const y = window.scrollY; route(); window.scrollTo(0, y);
+  });
 
   Cart.load();
   renderChrome();

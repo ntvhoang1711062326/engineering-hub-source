@@ -1,0 +1,646 @@
+{
+ "version": 6,
+ "categories": [
+  {
+   "id": "kenzo-bi-led",
+   "name": "Bi LED & Laser Kenzo",
+   "icon": "◎",
+   "desc": "Kenzo M18 Mini 1.8″ & S-Series chính hãng"
+  },
+  {
+   "id": "kenzo-tro-sang",
+   "name": "Trợ sáng Kenzo",
+   "icon": "✧",
+   "desc": "Trợ sáng, bi mini, bóng LED Kenzo"
+  }
+ ],
+ "vehicles": [
+  "Vario",
+  "Air Blade",
+  "Vision",
+  "SH",
+  "SH Mode",
+  "Lead",
+  "Scoopy",
+  "Future",
+  "NVX",
+  "Click",
+  "Vespa",
+  "Tất cả dòng xe"
+ ],
+ "products": [
+  {
+   "id": "kz-m18",
+   "name": "Bi LED Kenzo M18",
+   "cat": "kenzo-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 5000000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-m18.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Nhỏ gọn – dành cho moto.",
+   "desc": "Bi LED Kenzo M18 — Nhỏ gọn – dành cho moto.\n\nBi LED Mini 1.8″ thuộc dòng Kenzo M-Series, chip LED thế hệ mới từ CHLB Đức, tiêu thụ điện ít nhưng cường độ sáng cao.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo",
+    "Kích thước": "1.8″"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-m18-matrix",
+   "name": "Bi LED Kenzo M18 Matrix",
+   "cat": "kenzo-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 6500000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-m18-matrix.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Nhỏ gọn – siêu việt.",
+   "desc": "Bi LED Kenzo M18 Matrix — Nhỏ gọn – siêu việt.\n\nNhỏ gọn nhưng sở hữu hiệu suất siêu việt, Bi LED 1.8″ Kenzo M18 Matrix thế hệ mới là lựa chọn tăng sáng lý tưởng.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo",
+    "Kích thước": "1.8″"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-m18-laser",
+   "name": "Bi LED Kenzo M18 Laser Matrix",
+   "cat": "kenzo-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 9000000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-m18-laser.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Nhỏ gọn – laser siêu việt.",
+   "desc": "Bi LED Kenzo M18 Laser Matrix — Nhỏ gọn – laser siêu việt.\n\nTrang bị 9 chip LED OSRAM và 10W Laser Nichia. Kenzo M18 Laser Matrix là lựa chọn tăng sáng hoàn hảo cho các dòng xe chóa nhỏ.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo",
+    "Kích thước": "1.8″",
+    "Chip": "9 LED OSRAM + Laser Nichia 10W"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-s500-mini",
+   "name": "Bi LED Kenzo S500 Mini",
+   "cat": "kenzo-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 4000000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-s500-mini.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Kích thước nhỏ, hiệu suất cao.",
+   "desc": "Bi LED Kenzo S500 Mini — Kích thước nhỏ, hiệu suất cao.\n\nPhiên bản nhỏ gọn của dòng Kenzo S-Series, phù hợp nhiều dòng xe máy.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-s500-pro-v2",
+   "name": "Bi LED Kenzo S500 Pro V2",
+   "cat": "kenzo-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 5000000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-s500-pro-v2.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": false,
+   "isNew": true,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Nâng cấp mạnh mẽ, giá không đổi.",
+   "desc": "Bi LED Kenzo S500 Pro V2 — Nâng cấp mạnh mẽ, giá không đổi.\n\nRa mắt 20/12/2025, Bi LED Kenzo S500 Pro V2 là phiên bản nâng cấp dựa trên thành công của S500 Pro V1.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-s600-25",
+   "name": "Bi LED Kenzo S600 2.5",
+   "cat": "kenzo-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 5200000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-s600-25.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Thoát sáng đỉnh cao, chấp bụi chấp bão.",
+   "desc": "Bi LED Kenzo S600 2.5 — Thoát sáng đỉnh cao, chấp bụi chấp bão.\n\nThiết kế nhỏ gọn chỉ 2.5″ cùng công nghệ thoát sáng đỉnh cao mang lại hiệu suất chiếu sáng vượt trội.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo",
+    "Kích thước": "2.5″"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-s600-pro-v3",
+   "name": "Bi LED Kenzo S600 Pro V3",
+   "cat": "kenzo-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 6000000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-s600-pro-v3.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": true,
+   "isNew": true,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Sáng như mong đợi.",
+   "desc": "Bi LED Kenzo S600 Pro V3 — Sáng như mong đợi.\n\nPhiên bản mới nhất S600 Pro V3 nâng cấp toàn diện: chip LED 12 nhân hiệu năng cao, tăng sáng 25%, tối ưu vận hành đô thị với City Mode.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-s700-pro",
+   "name": "Bi LED Kenzo S700 Pro V2",
+   "cat": "kenzo-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 7500000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-s700-pro.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": true,
+   "isNew": false,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Kỷ nguyên mới của Bi LED.",
+   "desc": "Bi LED Kenzo S700 Pro V2 — Kỷ nguyên mới của Bi LED.\n\nHội tụ các công nghệ đột phá lần đầu tiên xuất hiện trên Bi LED Kenzo S700 Pro.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-s800",
+   "name": "Bi LED Kenzo S800",
+   "cat": "kenzo-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 8000000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-s800.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Hiệu suất vượt trội.",
+   "desc": "Bi LED Kenzo S800 — Hiệu suất vượt trội.\n\nChip LED OSRAM từ CHLB Đức, công suất Cos 65W – Pha 75W, Bi LED Kenzo S800 hiệu suất cao cho độ sáng vượt trội.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo",
+    "Công suất": "Cos 65W – Pha 75W"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-s900-pro",
+   "name": "Bi LED Laser Kenzo S900 Pro",
+   "cat": "kenzo-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 13500000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-s900-pro.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": true,
+   "isNew": false,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Không chỉ là tầm nhìn.",
+   "desc": "Bi LED Laser Kenzo S900 Pro — Không chỉ là tầm nhìn.\n\nDòng Bi LED Laser cao cấp nhất của Kenzo S-Series.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-x3-pro",
+   "name": "Đèn trợ sáng dạng rời Kenzo X3 Pro",
+   "cat": "kenzo-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 5000000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-x3-pro.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": false,
+   "isNew": true,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Trợ sáng dạng rời toàn diện nhất phân khúc.",
+   "desc": "Đèn trợ sáng dạng rời Kenzo X3 Pro — Trợ sáng dạng rời toàn diện nhất phân khúc.\n\nKenzo X3 Pro được phát triển để trở thành lựa chọn đèn trợ sáng dạng rời toàn diện nhất trong phân khúc.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-v9s",
+   "name": "Đèn LED Kenzo V9S",
+   "cat": "kenzo-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 2400000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-v9s.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Đỉnh cao công nghệ đèn LED cho ô tô và xe máy.",
+   "desc": "Đèn LED Kenzo V9S — Đỉnh cao công nghệ đèn LED cho ô tô và xe máy.\n\nNối tiếp thành công của dòng Kenzo V8S, Kenzo ra mắt mẫu đèn mới V9S kế thừa người tiền nhiệm.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-v16",
+   "name": "Đèn LED Kenzo V16",
+   "cat": "kenzo-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 2500000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-v16.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": false,
+   "isNew": true,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Mẫu bóng đèn LED thế hệ mới.",
+   "desc": "Đèn LED Kenzo V16 — Mẫu bóng đèn LED thế hệ mới.\n\nKenzo V16 – mẫu bóng đèn LED cao cấp mới nhất, nâng tầm hiệu suất chiếu sáng cho mọi dòng xe, kể cả ô tô và xe máy.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-z20",
+   "name": "Bi LED Mini Kenzo Z20 V2",
+   "cat": "kenzo-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 1400000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-z20.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Thiết kế nhỏ gọn – dễ lắp đặt.",
+   "desc": "Bi LED Mini Kenzo Z20 V2 — Thiết kế nhỏ gọn – dễ lắp đặt.\n\nSuper Bi LED Mini Kenzo Z20 là đèn trợ sáng hiệu quả cho đèn chính, tích hợp 2 chế độ pha/cos trong 1 và driver tích hợp trên thân đèn.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-x100",
+   "name": "Đèn trợ sáng Mini Kenzo X100 V4",
+   "cat": "kenzo-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 1500000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-x100.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Trợ sáng mini thế hệ mới.",
+   "desc": "Đèn trợ sáng Mini Kenzo X100 V4 — Trợ sáng mini thế hệ mới.\n\nThiết kế nhỏ gọn – linh hoạt – dễ lắp đặt, Kenzo X100 là lựa chọn tối ưu cho những ai cần bổ sung ánh sáng an toàn.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-x200",
+   "name": "Đèn trợ sáng Kenzo X200",
+   "cat": "kenzo-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 2500000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-x200.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Trợ sáng thế hệ mới, mạnh mẽ trong từng chi tiết.",
+   "desc": "Đèn trợ sáng Kenzo X200 — Trợ sáng thế hệ mới, mạnh mẽ trong từng chi tiết.\n\nThiết kế nhỏ gọn – dễ lắp đặt, đèn trợ sáng mini Kenzo X200 mang đến hiệu suất vượt trội cho mọi hành trình.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo",
+    "Công suất": "45W",
+    "Nhiệt màu": "5500K",
+    "Chống nước": "IP68"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-kz40-v5",
+   "name": "Đèn trợ sáng pha thế hệ mới Kenzo KZ40 V5.0",
+   "cat": "kenzo-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 2500000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-kz40-v5.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Trợ sáng pha thế hệ mới.",
+   "desc": "Đèn trợ sáng pha thế hệ mới Kenzo KZ40 V5.0 — Trợ sáng pha thế hệ mới.\n\nĐèn trợ sáng pha Kenzo KZ40 phiên bản V5.0.\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "kz-cx80-v2",
+   "name": "Đèn trợ sáng bi cầu Kenzo CX80 V2 2026",
+   "cat": "kenzo-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 4200000,
+   "oldPrice": 0,
+   "image": "assets/img/kenzo/kz-cx80-v2.jpg",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "stock": 20,
+   "sold": 0,
+   "rating": 5,
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Kenzo",
+   "short": "Đèn trợ sáng văn minh, an toàn.",
+   "desc": "Đèn trợ sáng bi cầu Kenzo CX80 V2 2026 — Đèn trợ sáng văn minh, an toàn.\n\nKenzo CX80 V2 – đèn LED trợ sáng dạng bi cầu (projector) văn minh, sáng mạnh, an toàn cho anh em đi phố, offroad…\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Kenzo"
+   },
+   "vehicleImages": {},
+   "active": true
+  }
+ ],
+ "banners": [
+  {
+   "id": "b1",
+   "title": "Bi LED Kenzo S600 Pro V3",
+   "subtitle": "Chip LED 12 nhân, tăng sáng 25%, City Mode — lắp đặt & test sáng tại shop",
+   "image": "assets/img/kenzo/kz-s600-pro-v3.jpg",
+   "video": "",
+   "cta": "Xem chi tiết",
+   "link": "#/product/kz-s600-pro-v3",
+   "active": true,
+   "theme": "amber"
+  },
+  {
+   "id": "b2",
+   "title": "Kenzo S500 Pro V2",
+   "subtitle": "Nâng cấp mạnh mẽ, giá không đổi — Bi LED chính hãng Kenzo",
+   "image": "assets/img/kenzo/kz-s500-pro-v2.jpg",
+   "video": "",
+   "cta": "Khám phá",
+   "link": "#/product/kz-s500-pro-v2",
+   "active": true,
+   "theme": "cyan"
+  },
+  {
+   "id": "b3",
+   "title": "Trợ sáng Kenzo",
+   "subtitle": "X3 Pro · X100 · X200 · CX80 — sáng mạnh, an toàn khi đi đêm",
+   "image": "assets/img/kenzo/kz-x3-pro.jpg",
+   "video": "",
+   "cta": "Chọn trợ sáng",
+   "link": "#/category/kenzo-tro-sang",
+   "active": true,
+   "theme": "red"
+  }
+ ],
+ "sideAds": [
+  {
+   "id": "a1",
+   "title": "Laser Kenzo S900 Pro",
+   "subtitle": "Liên hệ báo giá",
+   "image": "assets/img/kenzo/kz-s900-pro.jpg",
+   "link": "#/product/kz-s900-pro",
+   "active": true
+  },
+  {
+   "id": "a2",
+   "title": "Kenzo M18 Laser Matrix",
+   "subtitle": "Nhỏ gọn – laser siêu việt",
+   "image": "assets/img/kenzo/kz-m18-laser.jpg",
+   "link": "#/product/kz-m18-laser",
+   "active": true
+  }
+ ],
+ "promos": {
+  "coupons": [
+   {
+    "code": "SUPERLIGHT10",
+    "type": "percent",
+    "value": 10,
+    "min": 1000000,
+    "max": 500000,
+    "expires": "2026-12-31",
+    "active": true,
+    "desc": "Giảm 10% đơn từ 1 triệu (tối đa 500K)"
+   },
+   {
+    "code": "LENDEN200",
+    "type": "fixed",
+    "value": 200000,
+    "min": 3000000,
+    "max": 0,
+    "expires": "2026-12-31",
+    "active": true,
+    "desc": "Giảm 200K cho đơn từ 3 triệu"
+   },
+   {
+    "code": "FREESHIP",
+    "type": "ship",
+    "value": 0,
+    "min": 0,
+    "max": 0,
+    "expires": "2026-12-31",
+    "active": true,
+    "desc": "Miễn phí vận chuyển"
+   }
+  ],
+  "flash": {
+   "active": true,
+   "title": "Flash Sale cuối tuần",
+   "endsAt": "2026-11-02T08:51",
+   "items": []
+  },
+  "popup": {
+   "active": true,
+   "title": "Đặt chỗ lắp đèn online",
+   "text": "Chọn mẫu đèn, hẹn giờ lắp và cọc trước để giữ hàng. Lắp đặt miễn phí tại shop Bình Thạnh!",
+   "image": "assets/img/kenzo/kz-s700-pro.jpg",
+   "link": "#/category/all"
+  },
+  "topbar": {
+   "active": true,
+   "text": "🔥 Lắp đặt miễn phí tại shop · Đặt chỗ online, cọc giữ lịch · Bảo hành đến 24 tháng"
+  }
+ },
+ "settings": {
+  "shopName": "TS SUPERLIGHT",
+  "slogan": "Chuyên lắp Bi LED · Laser · Trợ sáng Kenzo chính hãng",
+  "zalo": "0769678981",
+  "hotline": "0769678981",
+  "address": "Bình Thạnh, TP. Hồ Chí Minh",
+  "hours": "8:00 – 20:00 (Cả T7 & CN)",
+  "tiktok": "https://www.tiktok.com/@ts.superlight",
+  "deposit": 200000,
+  "bankName": "",
+  "bankAccount": "",
+  "bankOwner": ""
+ },
+ "publishedAt": "2026-10-26T08:51:20.516Z"
+}
