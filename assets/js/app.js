@@ -378,24 +378,34 @@
     $('#searchInput').value = q;
     pageListing({ title: `Kết quả cho “${q}”`, list, crumbs: ['Tìm kiếm'], key: '' });
   }
+  // Trang Video theo xe: hiện 20 video, bấm "Xem thêm" tải tiếp 20 video
+  const VIDEOS_PER_LOAD = 20;
   function pageVideos(v = '') {
     setNav('videos');
-    const media = v ? videosFor(v) : allVideos();
+    const all = v ? videosFor(v) : allVideos();
+    let shown = Math.min(VIDEOS_PER_LOAD, all.length);
+    const moreLabel = () => `Xem thêm ${Math.min(VIDEOS_PER_LOAD, all.length - shown)} video <small>(còn ${all.length - shown})</small>`;
     const products = v ? activeProducts().filter(p => p.vehicles.includes(v) || p.vehicles.includes('Tất cả dòng xe')).sort((a, b) => b.featured - a.featured) : [];
     app.innerHTML = `
       <nav class="crumbs"><a href="#/">Trang chủ</a>${v ? `<span><a href="#/videos">Video theo xe</a></span><span>${esc(v)}</span>` : '<span>Video theo xe</span>'}</nav>
       <section class="section" style="margin-top:8px">
-        <div class="section-head"><h3>${v ? `Video lắp đèn ${esc(v)}` : 'Video lắp đèn theo dòng xe'}</h3><span class="muted">${media.length} video${v ? '' : ' · chọn dòng xe để lọc'}</span></div>
+        <div class="section-head"><h3>${v ? `Video lắp đèn ${esc(v)}` : 'Video lắp đèn theo dòng xe'}</h3><span class="muted">${all.length} video${v ? '' : ' · chọn dòng xe để lọc'}</span></div>
         ${vehicleChips(v)}
       </section>
       <section class="section" style="margin-top:16px">
-        ${media.length ? tiktokBlock(media) : `<div class="empty panel"><div class="big">🎬</div><p>Chưa có video cho dòng xe ${esc(v)}.</p><a class="btn btn-outline" href="#/videos">Xem tất cả video</a></div>`}
+        ${all.length ? tiktokBlock(all.slice(0, shown)) + (shown < all.length ? `<div class="load-more"><button class="btn btn-dark btn-lg" id="vidMore">${moreLabel()}</button></div>` : '') : `<div class="empty panel"><div class="big">🎬</div><p>Chưa có video cho dòng xe ${esc(v)}.</p><a class="btn btn-outline" href="#/videos">Xem tất cả video</a></div>`}
       </section>
       ${products.length ? `
       <section class="section">
         <div class="section-head"><h3>Đèn lắp được cho ${esc(v)}</h3><a href="#/category/all">Xem tất cả →</a></div>
         ${grid(products.slice(0, 10))}
       </section>` : ''}`;
+    const more = $('#vidMore');
+    if (more) more.onclick = () => {
+      $('#app .videos').insertAdjacentHTML('beforeend', all.slice(shown, shown + VIDEOS_PER_LOAD).map(vidCard).join(''));
+      shown = Math.min(shown + VIDEOS_PER_LOAD, all.length);
+      if (shown >= all.length) more.parentElement.remove(); else more.innerHTML = moreLabel();
+    };
   }
 
   function pageProduct(id) {

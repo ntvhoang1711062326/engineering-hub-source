@@ -232,8 +232,11 @@ button { cursor: pointer; }
 .tiktok-head b { font-size: 17px; display: block; }
 .tiktok-head small { color: #9aa3b2; }
 .tiktok-head .btn { margin-left: auto; background: #fe2c55; color: #fff; }
-.videos { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; background: var(--dark-2); padding: 12px; border-radius: 0 0 var(--radius) var(--radius); }
+.videos { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; background: var(--dark-2); padding: 12px; border-radius: 0 0 var(--radius) var(--radius); }
 .tiktok-head .avatars { display: flex; }
+/* Nút "Xem thêm" trang Video theo xe (mỗi lần 20 video = 5 cột × 4 hàng) */
+.load-more { text-align: center; margin-top: 16px; }
+.load-more .btn small { font-weight: 500; opacity: .7; margin-left: 4px; }
 .tiktok-head .avatars .avatar + .avatar { margin-left: -14px; }
 .tiktok-head .tt-follow { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
 .tiktok-head .tt-follow .btn { margin-left: 0; }
