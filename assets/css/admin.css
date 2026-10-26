@@ -48,6 +48,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 .ib { border: 1.5px solid var(--line); background: #fff; border-radius: 7px; padding: 5px 9px; font-size: 12.5px; font-weight: 600; }
 .ib:hover { border-color: var(--ink); }
 .ib.danger:hover { border-color: var(--sale); color: var(--sale); }
+.ib:disabled { opacity: .35; cursor: default; border-color: var(--line); }
 .pill { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
 .pill.gray { background: #eef0f3; color: #4b5563; }
 .pill.green { background: #dcfce7; color: #15803d; }

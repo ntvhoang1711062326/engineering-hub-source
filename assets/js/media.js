@@ -1,4 +1,5 @@
-/* Media lấy từ TikTok @ts.superlight (ảnh bìa video + video tải về) */
+/* Media lấy từ TikTok @ts.superlight và @_superlightshop_ (ảnh bìa video + video tải về).
+   Video không có "ch" thuộc kênh ts.superlight. */
 window.TIKTOK_MEDIA = [
 {
 "id": "7688304356801662226",
@@ -755,5 +756,103 @@ window.TIKTOK_MEDIA = [
 "views": 519,
 "likes": 18,
 "video": false
+},
+{
+"id": "7700952365851053332",
+"cap": "Ab 2026 lên đèn thì nhìn ngầu luôn 🔥",
+"views": 661,
+"likes": 0,
+"video": false,
+"ch": "_superlightshop_"
+},
+{
+"id": "7700567066268634389",
+"cap": "Audi trước sau lead 🔥",
+"views": 1182,
+"likes": 0,
+"video": false,
+"ch": "_superlightshop_"
+},
+{
+"id": "7700456596832406805",
+"cap": "Audi scoopy 2017 🔥",
+"views": 1070,
+"likes": 0,
+"video": false,
+"ch": "_superlightshop_"
+},
+{
+"id": "7700219851813489941",
+"cap": "Ab2026 lên đèn nhìn ngầu ae nhỉ 🔥",
+"views": 7421,
+"likes": 0,
+"video": false,
+"ch": "_superlightshop_"
+},
+{
+"id": "7700083453294923029",
+"cap": "Scoopy lên đèn này thì khỏi đụng hàng luôn 🔥",
+"views": 1250,
+"likes": 0,
+"video": false,
+"ch": "_superlightshop_"
+},
+{
+"id": "7699829779364646164",
+"cap": "Combo đèn ab 2026 🔥",
+"views": 3112,
+"likes": 0,
+"video": false,
+"ch": "_superlightshop_"
+},
+{
+"id": "7699085583418854677",
+"cap": "Ab2026 1 cặp S700prov2 + TCĐ 🔥",
+"views": 2225,
+"likes": 0,
+"video": false,
+"ch": "_superlightshop_"
+},
+{
+"id": "7698690937119067413",
+"cap": "Audi A7pro V3 lên xe Ab 2026🥰",
+"views": 7782,
+"likes": 0,
+"video": false,
+"ch": "_superlightshop_"
+},
+{
+"id": "7697983451286326548",
+"cap": "Ab 2026 lên đèn có đẹp không ae 🔥",
+"views": 9417,
+"likes": 0,
+"video": false,
+"ch": "_superlightshop_"
+},
+{
+"id": "7697219310841859349",
+"cap": "Ab 2026 của bạn đã lên đèn chưa 🔥",
+"views": 8301,
+"likes": 0,
+"video": false,
+"ch": "_superlightshop_"
 }
+];
+
+/* Thông tin kênh (nút "Đồng bộ TikTok" ở Admin cập nhật số liệu mới vào catalog: tiktokChannels) */
+window.TIKTOK_CHANNELS = [
+ {
+  "user": "ts.superlight",
+  "name": "TS SUPERLIGHT 🇻🇳",
+  "followers": 820,
+  "likes": 15500,
+  "avatar": "assets/img/avatar-ts.superlight.jpg"
+ },
+ {
+  "user": "_superlightshop_",
+  "name": "Nguyễn Thanh Sang",
+  "followers": 186200,
+  "likes": 4200000,
+  "avatar": "assets/img/avatar-_superlightshop_.jpg"
+ }
 ];

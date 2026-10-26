@@ -619,14 +619,14 @@
   },
   "popup": {
    "active": true,
-   "title": "Đặt chỗ lắp đèn online",
-   "text": "Chọn mẫu đèn, hẹn giờ lắp và cọc trước để giữ hàng. Lắp đặt miễn phí tại shop Bình Thạnh!",
+   "title": "Tư vấn lắp đèn miễn phí",
+   "text": "Chọn mẫu đèn ưng ý rồi gọi hoặc nhắn Zalo để được tư vấn, báo giá theo dòng xe. Lắp đặt miễn phí tại shop Bình Thạnh!",
    "image": "assets/img/kenzo/kz-s700-pro.jpg",
    "link": "#/category/all"
   },
   "topbar": {
    "active": true,
-   "text": "🔥 Lắp đặt miễn phí tại shop · Đặt chỗ online, cọc giữ lịch · Bảo hành đến 24 tháng"
+   "text": "🔥 Lắp đặt miễn phí tại shop · Test sáng trước khi lắp · Bảo hành đến 24 tháng"
   }
  },
  "settings": {
@@ -634,7 +634,7 @@
   "slogan": "Chuyên lắp Bi LED · Laser · Trợ sáng Kenzo chính hãng",
   "zalo": "0769678981",
   "hotline": "0769678981",
-  "address": "Bình Thạnh, TP. Hồ Chí Minh",
+  "address": "38/8 Đường Đinh Bộ Lĩnh, Bình Thạnh, Hồ Chí Minh",
   "hours": "8:00 – 20:00 (Cả T7 & CN)",
   "tiktok": "https://www.tiktok.com/@ts.superlight",
   "deposit": 200000,

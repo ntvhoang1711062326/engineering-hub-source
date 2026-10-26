@@ -6,34 +6,21 @@
   const D = () => DB.data;
   const S = () => D().settings;
 
-  /* ---------------- Danh sách đặt chỗ (localStorage) ---------------- */
-  const CART_KEY = 'tsl_cart';
-  const Cart = {
-    items: [],
-    load() { try { this.items = JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch (e) { this.items = []; } this.clean(); },
-    save() { try { localStorage.setItem(CART_KEY, JSON.stringify(this.items)); } catch (e) {} updateCartCount(); },
-    clean() { this.items = this.items.filter(i => { const p = DB.product(i.pid); return p && p.active; }); },
-    add(pid, qty = 1, vehicle = '') {
-      const ex = this.items.find(i => i.pid === pid && i.vehicle === vehicle);
-      if (ex) ex.qty += qty; else this.items.push({ pid, qty, vehicle });
-      this.save();
-    },
-    set(idx, qty) { this.items[idx].qty = Math.max(1, Math.min(99, qty)); this.save(); },
-    remove(idx) { this.items.splice(idx, 1); this.save(); },
-    clear() { this.items = []; this.save(); },
-    count() { return this.items.reduce((s, i) => s + i.qty, 0); },
-    lines() { return this.items.map(i => { const p = DB.product(i.pid); return { ...i, p, img: DB.imageFor(p, i.vehicle) }; }); },
-  };
-  // Tiền cọc cố định cho mỗi lượt đặt chỗ (Admin → Cài đặt)
-  const deposit = () => Number(S().deposit) || 0;
   const PRICE_TEXT = 'Liên hệ';
+  // Logo TikTok: nốt nhạc trắng với viền xanh ngọc / hồng lệch nhau như logo gốc
+  const TT_PATH = 'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z';
+  const TIKTOK_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#25f4ee" transform="translate(-1 -1)" d="${TT_PATH}"/><path fill="#fe2c55" transform="translate(1 1)" d="${TT_PATH}"/><path fill="#fff" d="${TT_PATH}"/></svg>`;
+  // Giá bán = 0 → hiện "Liên hệ"; có giá thì hiện giá (kèm giá gạch / giá Flash Sale nếu có)
+  function priceHTML(p) {
+    const pr = DB.priceOf(p);
+    return pr.price > 0 ? `<b>${fmt(pr.price)}</b>${pr.compare ? `<s>${fmt(pr.compare)}</s>` : ''}` : `<b>${PRICE_TEXT}</b>`;
+  }
 
   /* ---------------- Helpers ---------------- */
   function toast(html) {
     const t = $('#toast'); t.innerHTML = html; t.classList.add('show');
     clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2400);
   }
-  function updateCartCount() { $('#cartCount').textContent = Cart.count(); }
   const stars = n => '★★★★★'.slice(0, Math.round(n)) + '☆☆☆☆☆'.slice(0, 5 - Math.round(n));
   const activeProducts = () => D().products.filter(p => p.active);
 
@@ -66,13 +53,13 @@
       </a>
       <div class="card-body">
         <a href="#/product/${p.id}" class="card-name">${esc(p.name)}</a>
-        <div class="price"><b>${PRICE_TEXT}</b></div>
+        <div class="price">${priceHTML(p)}</div>
         <div class="card-meta">
           ${opts.flash
             ? `<div class="bar"><i style="width:${soldPct}%"></i><span>Đã bán ${p.sold}</span></div>`
             : `<span class="stars">${stars(p.rating)}</span><span>Đã bán ${p.sold}</span>`}
         </div>
-        <button class="card-add" data-add="${p.id}">+ Đặt chỗ</button>
+        <a class="card-add" href="${zaloLink()}" target="_blank" rel="noopener">💬 Tư vấn Zalo</a>
       </div>
     </article>`;
   }
@@ -128,11 +115,10 @@
         </ul>
       </li>
       <li class="nav-item"><a href="#/policy" data-nav="policy">Bảo hành</a></li>
-      <li class="nav-item"><a href="#/cart" data-nav="cart">Đặt chỗ</a></li>
       <li class="nav-item"><a href="${zaloLink()}" target="_blank" rel="noopener">Liên hệ</a></li>`;
     $('#footer').innerHTML = `
       <div>
-        <a href="#/" class="logo" style="margin-bottom:12px"><span class="logo-mark"></span><span class="logo-text"><b style="color:#fff">TS <span>SUPERLIGHT</span></b></span></a>
+        <a href="#/" class="logo" style="margin-bottom:12px"><img class="logo-img" src="assets/img/logo2.png" alt="TS SUPERLIGHT"></a>
         <p>${esc(s.slogan)}. Lắp đặt, test sáng miễn phí tại shop — bảo hành rõ ràng, liên hệ để được báo giá.</p>
         <div class="social">
           <a href="${esc(s.tiktok)}" target="_blank" rel="noopener">TikTok</a>
@@ -141,21 +127,20 @@
       </div>
       <div><h5>Danh mục</h5><ul>${D().categories.map(c => `<li><a href="#/category/${c.id}">${esc(c.name)}</a></li>`).join('')}</ul></div>
       <div><h5>Hỗ trợ</h5><ul>
-        <li><a href="#/cart">Đặt chỗ của bạn</a></li>
         <li><a href="#/policy">Chính sách bảo hành</a></li>
-        <li><a href="#/policy">Đặt chỗ &amp; tiền cọc</a></li>
+        <li><a href="#/videos">Video lắp đèn theo xe</a></li>
+        <li><a href="tel:${esc(s.hotline)}">Gọi tư vấn ${phoneFmt(s.hotline)}</a></li>
       </ul></div>
       <div class="contact"><h5>Liên hệ</h5><ul>
         <li>📍 ${esc(s.address)}</li>
         <li>☎ Hotline/Zalo: <b>${phoneFmt(s.hotline)}</b></li>
         <li>🕘 ${esc(s.hours)}</li>
-        <li>🎵 TikTok: <a href="${esc(s.tiktok)}" target="_blank" rel="noopener">@ts.superlight</a></li>
+        ${DB.channels().map(c => `<li>🎵 TikTok: <a href="${esc(c.url)}" target="_blank" rel="noopener">@${esc(c.user)}</a></li>`).join('')}
       </ul></div>`;
     $('#footerBottom').textContent = `© ${new Date().getFullYear()} ${s.shopName}. Chuyên độ đèn xe máy tại TP.HCM.`;
     $('#floatContact').innerHTML = `
       <a class="z" href="${zaloLink()}" target="_blank" rel="noopener" title="Chat Zalo">Zalo</a>
-      <a class="t" href="${esc(s.tiktok)}" target="_blank" rel="noopener" title="TikTok">TT</a>`;
-    updateCartCount();
+      <a class="t" href="${esc(s.tiktok)}" target="_blank" rel="noopener" title="TikTok" aria-label="TikTok">${TIKTOK_ICON}</a>`;
   }
   function setNav(key) {
     $$('#navMenu a').forEach(a => a.classList.toggle('on', !!key && a.dataset.nav === key));
@@ -173,7 +158,6 @@
     const flashList = flashOn ? f.items.map(i => DB.product(i.productId)).filter(p => p && p.active) : [];
     const featured = activeProducts().filter(p => p.featured);
     const catImg = cid => (activeProducts().find(p => p.cat === cid) || {}).image || '';
-    const media = [...(window.TIKTOK_MEDIA || [])].sort((a, b) => (b.video - a.video) || (b.views - a.views)).slice(0, 12);
 
     app.innerHTML = `
       <section class="hero">
@@ -205,7 +189,7 @@
         <div class="policy"><i>🔧</i><div><b>Lắp đặt miễn phí</b><small>Tại shop Bình Thạnh</small></div></div>
         <div class="policy"><i>💡</i><div><b>Test sáng trước khi lắp</b><small>Hài lòng mới thanh toán</small></div></div>
         <div class="policy"><i>🛡</i><div><b>Bảo hành đến 24 tháng</b><small>1 đổi 1 trong 7 ngày</small></div></div>
-        <div class="policy"><i>📅</i><div><b>Đặt chỗ online</b><small>Cọc ${fmt(deposit())} giữ hàng &amp; lịch lắp</small></div></div>
+        <div class="policy"><i>💬</i><div><b>Tư vấn miễn phí</b><small>Gọi / Zalo ${phoneFmt(S().hotline)}</small></div></div>
       </section>
 
       ${flashOn && flashList.length ? `
@@ -243,31 +227,56 @@
         </section>` : '';
       }).join('')}
 
-      <section class="section">
-        ${tiktokBlock(media)}
-      </section>`;
+      ${DB.channels().map(c => tiktokRail(c)).join('')}`;
 
     initSlider(banners.length);
     if (flashOn) startCountdowns();
     maybePopup();
   }
 
-  function tiktokBlock(media, full) {
+  // 1.2K / 186.2K / 4.2M
+  const kfmt = n => n >= 1e6 ? (n / 1e6).toFixed(1).replace('.0', '') + 'M' : n >= 1000 ? (n / 1000).toFixed(1).replace('.0', '') + 'K' : String(n || 0);
+  function vidCard(m) {
+    return `
+          <div class="vid" data-video="${m.video ? m.id : ''}" data-tt="${m.id}" data-u="${esc(DB.chOf(m))}">
+            <img src="${esc(DB.cover(m))}" alt="" loading="lazy">
+            <span class="play">▶</span>
+            <div class="cap"><b>▶ ${kfmt(m.views)} lượt xem</b><span>${esc(m.cap || 'TS Superlight')}</span></div>
+          </div>`;
+  }
+  function channelHead(c) {
     return `
       <div class="tiktok-head">
-        <div class="avatar"><img src="assets/img/${media[0]?.id || ''}.jpg" alt=""></div>
-        <div><b>TS SUPERLIGHT 🇻🇳</b><small>@ts.superlight · 800+ followers · 14.7K lượt thích · 109 video</small></div>
-        <a class="btn" href="${esc(S().tiktok)}" target="_blank" rel="noopener">Theo dõi TikTok</a>
+        <div class="avatar">${c.avatar ? `<img src="${esc(c.avatar)}" alt="">` : ''}</div>
+        <div><b>${esc(c.name)}</b><small>@${esc(c.user)}${c.followers ? ` · ${kfmt(c.followers)} người theo dõi` : ''}${c.likes ? ` · ${kfmt(c.likes)} lượt thích` : ''}</small></div>
+        <a class="btn" href="${esc(c.url)}" target="_blank" rel="noopener">Theo dõi TikTok</a>
+      </div>`;
+  }
+  // Trang chủ: mỗi kênh TikTok một dải video kéo ngang (vuốt trên điện thoại, nút ‹ › trên máy tính)
+  function tiktokRail(c) {
+    const list = DB.channelVideos(c.user);
+    if (!list.length) return '';
+    return `
+      <section class="section">
+        ${channelHead(c)}
+        <div class="rail-wrap">
+          <button class="rail-nav prev" data-rail="-1" aria-label="Video trước">‹</button>
+          <div class="rail">${list.slice(0, 20).map(vidCard).join('')}
+            <a class="vid more" href="${esc(c.url)}" target="_blank" rel="noopener"><span>Xem thêm trên TikTok<br><b>@${esc(c.user)} →</b></span></a></div>
+          <button class="rail-nav next" data-rail="1" aria-label="Video tiếp">›</button>
+        </div>
+      </section>`;
+  }
+  // Trang Video theo xe: lưới video của tất cả kênh
+  function tiktokBlock(media) {
+    const chs = DB.channels();
+    return `
+      <div class="tiktok-head">
+        <div class="avatars">${chs.filter(c => c.avatar).map(c => `<div class="avatar"><img src="${esc(c.avatar)}" alt=""></div>`).join('')}</div>
+        <div><b>Video thi công từ TikTok</b><small>${chs.map(c => '@' + esc(c.user)).join(' · ')}</small></div>
+        <div class="tt-follow">${chs.map(c => `<a class="btn" href="${esc(c.url)}" target="_blank" rel="noopener">Theo dõi @${esc(c.user)}</a>`).join('')}</div>
       </div>
-      <div class="videos">
-        ${media.map(m => `
-          <div class="vid" data-video="${m.video ? m.id : ''}" data-tt="${m.id}">
-            <img src="assets/img/${m.id}.jpg" alt="" loading="lazy">
-            <span class="play">▶</span>
-            <div class="cap"><b>▶ ${m.views >= 1000 ? (m.views / 1000).toFixed(1).replace('.0', '') + 'K' : m.views} lượt xem</b><span>${esc(m.cap || 'TS Superlight')}</span></div>
-          </div>`).join('')}
-      </div>
-      ${full ? '' : `<div style="text-align:center;margin-top:12px"><a class="btn btn-outline" href="#/videos">Xem thêm video thi công →</a></div>`}`;
+      <div class="videos">${media.map(vidCard).join('')}</div>`;
   }
 
   function initSlider(n) {
@@ -364,7 +373,7 @@
     app.innerHTML = `
       <nav class="crumbs"><a href="#/">Trang chủ</a><span><a href="#/videos">Video theo xe</a></span><span>Dòng xe</span></nav>
       <div class="cats">${videoVehicleList().map(v => [v, videosFor(v)]).filter(([, l]) => l.length).map(([v, list]) =>
-        `<a class="cat" href="#/vehicle/${encodeURIComponent(v)}"><div class="ic"><img src="assets/img/${list[0].id}.jpg" alt="" loading="lazy"></div><b>${esc(v)}</b><small>${list.length} video</small></a>`).join('')}</div>`;
+        `<a class="cat" href="#/vehicle/${encodeURIComponent(v)}"><div class="ic"><img src="${esc(DB.cover(list[0]))}" alt="" loading="lazy"></div><b>${esc(v)}</b><small>${list.length} video</small></a>`).join('')}</div>`;
   }
   function pageSearch(q) {
     q = decodeURIComponent(q);
@@ -389,7 +398,7 @@
         ${vehicleChips(v)}
       </section>
       <section class="section" style="margin-top:16px">
-        ${media.length ? tiktokBlock(media, true) : `<div class="empty panel"><div class="big">🎬</div><p>Chưa có video cho dòng xe ${esc(v)}.</p><a class="btn btn-outline" href="#/videos">Xem tất cả video</a></div>`}
+        ${media.length ? tiktokBlock(media) : `<div class="empty panel"><div class="big">🎬</div><p>Chưa có video cho dòng xe ${esc(v)}.</p><a class="btn btn-outline" href="#/videos">Xem tất cả video</a></div>`}
       </section>
       ${products.length ? `
       <section class="section">
@@ -426,25 +435,22 @@
             <span>Mã: ${esc(p.id.toUpperCase())}</span>
           </div>
           ${pr.flash ? `<div class="pd-flash">⚡ FLASH SALE · Kết thúc sau ${countdownHTML('cdPd')}</div>` : ''}
-          <div class="pd-price"><b>${PRICE_TEXT}</b><span class="muted" style="font-size:14px">Gọi/Zalo <a href="tel:${esc(S().hotline)}">${phoneFmt(S().hotline)}</a> để được báo giá</span></div>
+          <div class="pd-price">${pr.price > 0
+            ? `<b>${fmt(pr.price)}</b>${pr.compare ? `<s>${fmt(pr.compare)}</s><span class="off">-${Math.round((1 - pr.price / pr.compare) * 100)}%</span>` : ''}<span class="muted" style="font-size:14px">Gọi/Zalo <a href="tel:${esc(S().hotline)}">${phoneFmt(S().hotline)}</a> để được tư vấn</span>`
+            : `<b>${PRICE_TEXT}</b><span class="muted" style="font-size:14px">Gọi/Zalo <a href="tel:${esc(S().hotline)}">${phoneFmt(S().hotline)}</a> để được báo giá</span>`}</div>
           <p>${esc(p.short)}</p>
           <div class="pd-row"><label>Dòng xe</label>
             <div class="opt" id="vehOpt">${vehicles.map(v => `<button class="${v === selVeh ? 'on' : ''}" data-veh="${esc(v)}">${p.vehicleImages?.[v] ? `<img src="${esc(p.vehicleImages[v])}" alt="">` : ''}${esc(v)}</button>`).join('')}</div>
           </div>
-          <div class="pd-row"><label>Số lượng</label>
-            <div class="qty"><button data-q="-1">−</button><input id="pdQty" type="number" value="1" min="1" max="99"><button data-q="1">+</button></div>
-          </div>
           <div class="pd-row"><label>Bảo hành</label><b>${esc(p.warranty)}</b></div>
           <div class="pd-actions">
-            <button class="btn btn-outline btn-lg" id="pdAdd" ${p.stock > 0 ? '' : 'disabled'}>📋 Thêm vào đặt chỗ</button>
-            <button class="btn btn-brand btn-lg" id="pdBuy" ${p.stock > 0 ? '' : 'disabled'}>📅 Đặt chỗ &amp; cọc ngay</button>
-            <a class="btn btn-zalo btn-lg" href="${zaloLink()}" target="_blank" rel="noopener">💬 Tư vấn qua Zalo ${phoneFmt(S().zalo)}</a>
+            <a class="btn btn-brand btn-lg" href="tel:${esc(S().hotline)}">📞 Gọi ${phoneFmt(S().hotline)}</a>
+            <a class="btn btn-zalo btn-lg" href="${zaloLink()}" target="_blank" rel="noopener">💬 Tư vấn qua Zalo</a>
           </div>
           <div class="pd-perks">
             <div>Lắp đặt miễn phí tại shop — test sáng trước khi lắp</div>
             <div>1 đổi 1 trong 7 ngày nếu lỗi nhà sản xuất</div>
-            <div>Đặt cọc ${fmt(deposit())} để giữ hàng &amp; lịch lắp — trừ vào tiền đèn khi lắp</div>
-            <div>Cọc qua chuyển khoản, MoMo, VNPay, ZaloPay · Phần còn lại thanh toán tại shop</div>
+            <div>Thanh toán tại shop sau khi lắp và test sáng</div>
           </div>
         </div>
       </section>
@@ -484,258 +490,10 @@
       const src = DB.imageFor(p, selVeh);
       showMedia(media.findIndex(m => m.type === 'img' && m.src === src));
     });
-    const qty = $('#pdQty');
-    $$('[data-q]').forEach(b => b.onclick = () => { qty.value = Math.max(1, Math.min(99, (+qty.value || 1) + +b.dataset.q)); });
-    const add = () => {
-      if (vehicles.length > 1 && !selVeh) { toast('Vui lòng chọn <b>dòng xe</b> của bạn'); $('#vehOpt').scrollIntoView({ block: 'center', behavior: 'smooth' }); return false; }
-      Cart.add(p.id, Math.max(1, +qty.value || 1), selVeh);
-      return true;
-    };
-    $('#pdAdd').onclick = () => { if (add()) toast(`Đã thêm <b>${esc(p.name)}</b> vào danh sách đặt chỗ`); };
-    $('#pdBuy').onclick = () => { if (add()) location.hash = '#/cart'; };
     $$('#pdTabs button').forEach(b => b.onclick = () => {
       $$('#pdTabs button').forEach(x => x.classList.remove('on')); b.classList.add('on');
       $$('[data-pane]').forEach(x => x.classList.toggle('hidden', x.dataset.pane !== b.dataset.tab));
     });
-  }
-
-  function steps(n) {
-    const s = ['Chọn sản phẩm', 'Hẹn lịch & đặt cọc', 'Hoàn tất'];
-    return `<div class="steps">${s.map((t, i) => `${i ? '<div class="ln"></div>' : ''}<span class="${i < n ? 'on' : ''}"><i>${i + 1}</i>${t}</span>`).join('')}</div>`;
-  }
-
-  function summaryHTML() {
-    return `
-      <aside class="panel summary">
-        <h3 style="margin:0 0 10px">Tóm tắt đặt chỗ</h3>
-        <div class="row"><span>Sản phẩm</span><span>${Cart.count()}</span></div>
-        <div class="row"><span>Giá sản phẩm</span><span>${PRICE_TEXT}</span></div>
-        <div class="row total"><span>Tiền cọc giữ chỗ</span><span>${fmt(deposit())}</span></div>
-        <p class="muted" style="font-size:12px;margin:6px 0 0">Tiền cọc được trừ vào tổng tiền khi lắp. Shop sẽ gọi/Zalo báo giá chi tiết trước khi lắp.</p>
-        <div id="summaryAction"></div>
-      </aside>`;
-  }
-
-  function pageCart() {
-    setNav('cart');
-    Cart.clean();
-    const lines = Cart.lines();
-    if (!lines.length) {
-      app.innerHTML = `${steps(1)}<div class="empty panel"><div class="big">📋</div><h3>Chưa có sản phẩm đặt chỗ</h3><p>Chọn mẫu đèn ưng ý rồi đặt chỗ, cọc trước để giữ hàng và lịch lắp nhé!</p><a class="btn btn-brand btn-lg" href="#/">Xem sản phẩm</a></div>`;
-      return;
-    }
-    app.innerHTML = `
-      ${steps(1)}
-      <div class="cart-layout">
-        <section class="panel">
-          <h3 style="margin:0 0 14px">Sản phẩm đặt chỗ (${Cart.count()})</h3>
-          ${lines.map((l, i) => `
-            <div class="cart-item">
-              <a href="#/product/${l.p.id}"><img src="${esc(l.img)}" alt=""></a>
-              <div>
-                <a class="nm" href="#/product/${l.p.id}">${esc(l.p.name)}</a>
-                ${l.vehicle ? `<div class="vh">Dòng xe: ${esc(l.vehicle)}</div>` : ''}
-                <div class="price" style="margin-top:4px"><b style="font-size:14px">${PRICE_TEXT}</b></div>
-              </div>
-              <div class="right">
-                <div class="qty"><button data-cq="${i}" data-d="-1">−</button><input value="${l.qty}" data-ci="${i}" type="number" min="1"><button data-cq="${i}" data-d="1">+</button></div>
-                <button class="rm" data-rm="${i}">Xoá</button>
-              </div>
-            </div>`).join('')}
-          <div style="margin-top:14px"><a href="#/" class="muted">← Xem thêm sản phẩm</a></div>
-        </section>
-        ${summaryHTML()}
-      </div>`;
-    $('#summaryAction').innerHTML = `<a class="btn btn-brand btn-block btn-lg" href="#/checkout" style="margin-top:12px">Hẹn lịch &amp; đặt cọc →</a>`;
-    $$('[data-cq]').forEach(b => b.onclick = () => { const i = +b.dataset.cq; Cart.set(i, Cart.items[i].qty + +b.dataset.d); pageCart(); });
-    $$('[data-ci]').forEach(inp => inp.onchange = () => { Cart.set(+inp.dataset.ci, +inp.value || 1); pageCart(); });
-    $$('[data-rm]').forEach(b => b.onclick = () => { Cart.remove(+b.dataset.rm); pageCart(); });
-  }
-
-  const PAY = {
-    bank: { name: 'Chuyển khoản ngân hàng (VietQR)', sub: 'Quét mã QR bằng app ngân hàng', color: '#0f766e', short: 'QR' },
-    momo: { name: 'Ví MoMo', sub: 'Thanh toán qua ứng dụng MoMo', color: '#a50064', short: 'MoMo' },
-    vnpay: { name: 'VNPay (ATM / Visa / Master)', sub: 'Thẻ nội địa & quốc tế', color: '#005baa', short: 'VNPAY' },
-    zalopay: { name: 'ZaloPay', sub: 'Thanh toán qua ví ZaloPay', color: '#0068ff', short: 'Zalo' },
-  };
-  const SLOTS = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
-  const localDate = (d = new Date()) => new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
-
-  function pageCheckout() {
-    setNav('');
-    Cart.clean();
-    if (!Cart.items.length) { location.hash = '#/cart'; return; }
-    let draft = {}; try { draft = JSON.parse(localStorage.getItem('tsl_customer')) || {}; } catch (e) {}
-    const s = S();
-    const render = () => {
-      const pay = $('input[name=pay]:checked').value;
-      const amount = deposit();
-      const bankOk = s.bankName && s.bankAccount;
-      const detail = {
-        bank: bankOk
-          ? `<div class="qr-box"><img src="https://img.vietqr.io/image/${encodeURIComponent(s.bankName)}-${encodeURIComponent(s.bankAccount)}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent('TSL COC ' + ($('#fPhone')?.value || ''))}&accountName=${encodeURIComponent(s.bankOwner)}" alt="QR chuyển khoản"><div>Ngân hàng: <b>${esc(s.bankName)}</b><br>STK: <b>${esc(s.bankAccount)}</b><br>Chủ TK: <b>${esc(s.bankOwner)}</b><br>Tiền cọc: <b style="color:var(--sale)">${fmt(amount)}</b><br><small class="muted">Nội dung: TSL COC + số điện thoại</small></div></div>`
-          : `Mã QR chuyển khoản sẽ hiển thị khi shop cấu hình tài khoản ngân hàng. Bạn vẫn có thể đặt chỗ — shop sẽ gửi thông tin chuyển khoản cọc qua Zalo.`,
-        momo: 'Sau khi bấm Đặt chỗ, bạn sẽ được chuyển đến cổng thanh toán MoMo để cọc.',
-        vnpay: 'Sau khi bấm Đặt chỗ, bạn sẽ được chuyển đến cổng VNPay để cọc bằng thẻ ATM/Visa/Master.',
-        zalopay: 'Sau khi bấm Đặt chỗ, bạn sẽ được chuyển đến cổng ZaloPay để cọc.',
-      }[pay];
-      $('#payDetail').innerHTML = detail;
-    };
-
-    app.innerHTML = `
-      ${steps(2)}
-      <form class="cart-layout" id="checkoutForm" novalidate>
-        <div style="display:grid;gap:16px">
-          <section class="panel">
-            <h3 style="margin:0 0 14px">1. Thông tin khách hàng</h3>
-            <div class="form-grid">
-              <div class="field"><label>Họ và tên *</label><input id="fName" required value="${esc(draft.name || '')}" placeholder="Nguyễn Văn A"></div>
-              <div class="field"><label>Số điện thoại *</label><input id="fPhone" required inputmode="tel" value="${esc(draft.phone || '')}" placeholder="09xx xxx xxx"></div>
-              <div class="field full"><label>Email (không bắt buộc)</label><input id="fEmail" type="email" value="${esc(draft.email || '')}" placeholder="email@example.com"></div>
-            </div>
-          </section>
-          <section class="panel">
-            <h3 style="margin:0 0 6px">2. Hẹn lịch lắp tại shop</h3>
-            <p class="muted" style="margin:0 0 12px">🔧 ${esc(s.address)} · ${esc(s.hours)}</p>
-            <div class="form-grid">
-              <div class="field"><label>Ngày hẹn *</label><input id="fDate" type="date" min="${localDate()}" value="${localDate(new Date(Date.now() + 864e5))}"></div>
-              <div class="field"><label>Giờ hẹn *</label><select id="fTime">${SLOTS.map(t => `<option>${t}</option>`).join('')}</select></div>
-            </div>
-            <div class="field" style="margin-top:12px"><label>Ghi chú (đời xe, yêu cầu thêm…)</label><textarea id="fNote" rows="2" placeholder="VD: Vario 2022, muốn xem thêm mẫu hậu"></textarea></div>
-          </section>
-          <section class="panel">
-            <h3 style="margin:0 0 14px">3. Thanh toán tiền cọc ${fmt(deposit())}</h3>
-            <div class="pay-methods">
-              ${Object.entries(PAY).map(([k, v], i) => `<label class="pay"><input type="radio" name="pay" value="${k}" ${i === 0 ? 'checked' : ''}><span class="logo-pay" style="background:${v.color}">${v.short}</span><div><b>${v.name}</b><small>${v.sub}</small></div></label>`).join('')}
-            </div>
-            <div class="pay-detail" id="payDetail"></div>
-          </section>
-        </div>
-        <div>
-          ${summaryHTML()}
-        </div>
-      </form>`;
-
-    $('#summaryAction').innerHTML = `
-      <div class="mini-items" style="margin:12px 0;border-top:1px solid var(--line);padding-top:8px">
-        ${Cart.lines().map(l => `<div class="it"><img src="${esc(l.img)}" alt=""><div>${esc(l.p.name)}<br><small class="muted">x${l.qty}${l.vehicle ? ' · ' + esc(l.vehicle) : ''}</small></div></div>`).join('')}
-      </div>
-      <button class="btn btn-brand btn-block btn-lg" type="submit">Đặt chỗ &amp; cọc ${fmt(deposit())}</button>
-      <p class="muted" style="font-size:12px;text-align:center;margin:8px 0 0">Bằng việc đặt chỗ, bạn đồng ý với chính sách đặt cọc của ${esc(s.shopName)}</p>
-      <a href="#/cart" class="muted" style="display:block;text-align:center;font-size:13px;margin-top:6px">← Quay lại danh sách đặt chỗ</a>`;
-
-    $$('#checkoutForm input[name=pay]').forEach(r => r.onchange = render);
-    $('#fPhone').addEventListener('change', render);
-    render();
-
-    $('#checkoutForm').onsubmit = e => {
-      e.preventDefault();
-      const pay = $('input[name=pay]:checked').value;
-      const f = { name: $('#fName').value.trim(), phone: $('#fPhone').value.replace(/\s|\./g, ''), email: $('#fEmail').value.trim(), note: $('#fNote').value.trim() };
-      const appt = { date: $('#fDate').value, time: $('#fTime').value };
-      const need = [['fName', f.name], ['fPhone', /^0\d{9}$/.test(f.phone)], ['fDate', appt.date && appt.date >= localDate()]];
-      let bad = null;
-      need.forEach(([id, ok]) => { const fld = $('#' + id).closest('.field'); fld.classList.toggle('invalid', !ok); if (!ok && !bad) bad = $('#' + id); });
-      if (bad) { bad.focus(); toast(bad.id === 'fPhone' ? 'Số điện thoại chưa đúng (10 số, bắt đầu bằng 0)' : bad.id === 'fDate' ? 'Vui lòng chọn ngày hẹn từ hôm nay trở đi' : 'Vui lòng điền đủ thông tin bắt buộc'); return; }
-      try { localStorage.setItem('tsl_customer', JSON.stringify(f)); } catch (e) {}
-      const order = {
-        id: 'TSL' + new Date().toISOString().slice(2, 10).replace(/-/g, '') + Math.random().toString(36).slice(2, 6).toUpperCase(),
-        type: 'booking',
-        createdAt: new Date().toISOString(),
-        customer: f, appointment: appt, payment: pay,
-        items: Cart.lines().map(l => ({ pid: l.p.id, name: l.p.name, image: l.img, qty: l.qty, vehicle: l.vehicle })),
-        deposit: deposit(), total: deposit(),
-        paymentStatus: 'unpaid', status: 'new',
-      };
-      if (['momo', 'vnpay', 'zalopay'].includes(pay)) openGateway(order);
-      else placeOrder(order);
-    };
-  }
-
-  /* Gửi đơn về Google Sheets (URL trong assets/js/config.js). Chưa cấu hình → chỉ lưu trên trình duyệt (chế độ thử) */
-  async function sendOrder(order) {
-    const url = window.SHOP_CONFIG?.orderEndpoint;
-    if (!url) return;
-    // text/plain để không bị chặn CORS preflight của Google Apps Script
-    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'create', order }) });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error || 'Lỗi không xác định');
-  }
-
-  async function placeOrder(order) {
-    const btn = $('#checkoutForm button[type=submit]');
-    const label = btn?.innerHTML;
-    if (btn) { btn.disabled = true; btn.innerHTML = 'Đang gửi đơn…'; }
-    try {
-      await sendOrder(order);
-    } catch (e) {
-      if (btn) { btn.disabled = false; btn.innerHTML = label; }
-      openModal(`
-        <div class="popup-ad"><div class="body">
-          <h3>Chưa gửi được đơn 😥</h3>
-          <p class="muted">Kết nối bị gián đoạn nên shop chưa nhận được đơn của bạn. Vui lòng thử lại, hoặc nhắn Zalo để shop giữ lịch giúp bạn.</p>
-          <div style="display:grid;gap:8px;margin-top:12px">
-            <button class="btn btn-brand btn-lg" data-close>Thử lại</button>
-            <a class="btn btn-zalo" href="${zaloLink()}" target="_blank" rel="noopener">Nhắn Zalo ${phoneFmt(S().zalo)}</a>
-          </div>
-        </div></div>`);
-      return;
-    }
-    DB.load(); // tránh ghi đè thay đổi từ tab admin
-    order.items.forEach(i => { const p = DB.product(i.pid); if (p) { p.stock = Math.max(0, p.stock - i.qty); p.sold += i.qty; } });
-    DB.data.orders.unshift(order);
-    DB.save();
-    Cart.clear();
-    closeModal();
-    location.hash = '#/success/' + order.id;
-  }
-
-  /* Cổng thanh toán mô phỏng — thay bằng redirect tới URL thanh toán do backend tạo (MoMo/VNPay/ZaloPay SDK) */
-  function openGateway(order) {
-    const g = PAY[order.payment];
-    openModal(`
-      <div class="gateway">
-        <div class="gw-head" style="background:${g.color}"><span class="logo-pay" style="background:rgba(255,255,255,.2)">${g.short}</span><div><b>${g.name}</b><br><small>Cổng thanh toán (mô phỏng)</small></div></div>
-        <div class="gw-body" id="gwBody">
-          <div class="muted">Tiền cọc đặt chỗ ${esc(order.id)} · ${esc(S().shopName)}</div>
-          <div class="amount">${fmt(order.deposit)}</div>
-          <div class="fake-qr"></div>
-          <p class="muted" style="font-size:13px">Quét mã bằng ứng dụng ${g.short} để thanh toán.<br>Đây là bản demo — chưa trừ tiền thật.</p>
-          <button class="btn btn-brand btn-block btn-lg" id="gwPay">Xác nhận đã thanh toán</button>
-          <button class="btn btn-outline btn-block" data-close style="margin-top:8px">Huỷ giao dịch</button>
-        </div>
-      </div>`);
-    $('#gwPay').onclick = () => {
-      $('#gwBody').innerHTML = '<div class="spinner"></div><p>Đang xác thực giao dịch…</p>';
-      setTimeout(() => { order.paymentStatus = 'paid'; order.paidAt = new Date().toISOString(); placeOrder(order); }, 1600);
-    };
-  }
-
-  function pageSuccess(id) {
-    setNav('');
-    const o = D().orders.find(x => x.id === id);
-    if (!o) return pageNotFound();
-    const a = o.appointment || {};
-    const apptText = a.date ? `${a.time || ''} · ${new Date(a.date + 'T00:00').toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}` : '—';
-    app.innerHTML = `
-      ${steps(3)}
-      <section class="panel success">
-        <div class="tick">✓</div>
-        <h2>Đặt chỗ thành công!</h2>
-        <p class="muted">Cảm ơn ${esc(o.customer.name)}. Shop sẽ gọi/Zalo xác nhận lịch hẹn và báo giá trong ít phút.</p>
-        <div class="code">${esc(o.id)}</div>
-        <div style="text-align:left;margin:16px 0" class="summary">
-          <div class="row"><span>Lịch hẹn lắp</span><b>${esc(apptText)}</b></div>
-          <div class="row"><span>Địa điểm</span><b>${esc(S().address)}</b></div>
-          <div class="row"><span>Hình thức cọc</span><b>${PAY[o.payment]?.name || esc(o.payment)}</b></div>
-          <div class="row"><span>Trạng thái cọc</span><b style="color:${o.paymentStatus === 'paid' ? 'var(--ok)' : 'var(--brand-2)'}">${o.paymentStatus === 'paid' ? 'Đã cọc' : 'Chờ xác nhận chuyển khoản'}</b></div>
-          <div class="row total"><span>Tiền cọc</span><span>${fmt(o.deposit ?? o.total)}</span></div>
-        </div>
-        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-          <a class="btn btn-zalo btn-lg" href="${zaloLink()}" target="_blank" rel="noopener">Nhắn Zalo shop</a>
-          <a class="btn btn-dark btn-lg" href="#/">Xem thêm sản phẩm</a>
-        </div>
-      </section>`;
   }
 
   function pagePolicy() {
@@ -747,13 +505,9 @@
 • 1 đổi 1 trong 7 ngày nếu lỗi nhà sản xuất.
 • Không bảo hành khi sản phẩm bị va chạm, cháy nổ do tự ý đấu nối sai.
 
-<h2>Đặt chỗ &amp; tiền cọc</h2>• Giá sản phẩm tuỳ đời xe — vui lòng liên hệ Hotline/Zalo ${phoneFmt(S().hotline)} để được báo giá.
+<h2>Mua hàng &amp; lắp đặt</h2>• Giá sản phẩm tuỳ đời xe — vui lòng liên hệ Hotline/Zalo ${phoneFmt(S().hotline)} để được tư vấn, báo giá.
 • Shop không giao hàng — sản phẩm được lắp đặt trực tiếp tại shop: ${esc(S().address)}.
-• Đặt chỗ online và cọc ${fmt(deposit())} để giữ hàng và lịch lắp. Tiền cọc được trừ vào tổng tiền khi lắp.
-• Cần đổi lịch hẹn, vui lòng báo trước qua Zalo/Hotline.
-
-<h2>Thanh toán</h2>• Tiền cọc: chuyển khoản VietQR, ví MoMo, VNPay, ZaloPay.
-• Phần còn lại: thanh toán tại shop sau khi lắp và test sáng.
+• Thanh toán tại shop sau khi lắp và test sáng.
       </section>`;
   }
 
@@ -775,16 +529,14 @@
 
   /* ---------------- Global events ---------------- */
   document.addEventListener('click', e => {
-    const add = e.target.closest('[data-add]');
-    if (add) {
-      const p = DB.product(add.dataset.add);
-      if (p.vehicles.length > 1) { location.hash = '#/product/' + p.id; toast('Chọn <b>dòng xe</b> trước khi đặt chỗ'); return; }
-      Cart.add(p.id, 1, p.vehicles[0] || ''); toast(`Đã thêm <b>${esc(p.name)}</b> vào danh sách đặt chỗ`); return;
-    }
+    const nav = e.target.closest('[data-rail]');
+    if (nav) { const r = nav.parentElement.querySelector('.rail'); r.scrollBy({ left: nav.dataset.rail * r.clientWidth * 0.9, behavior: 'smooth' }); return; }
     const v = e.target.closest('.vid');
     if (v) {
       if (v.dataset.video) openModal(`<video src="assets/video/${v.dataset.video}.mp4" controls autoplay playsinline></video>`, 'video-modal');
-      else window.open(`https://www.tiktok.com/@ts.superlight/video/${v.dataset.tt}`, '_blank', 'noopener');
+      // Video chưa tải về máy → phát bằng trình phát nhúng của TikTok, khách không phải rời web
+      else if (/^\d+$/.test(v.dataset.tt)) openModal(`<iframe src="https://www.tiktok.com/player/v1/${v.dataset.tt}?autoplay=1&description=1&rel=0" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen title="Video TikTok"></iframe>
+        <a class="tt-link" href="https://www.tiktok.com/@${encodeURIComponent(v.dataset.u || 'ts.superlight')}/video/${v.dataset.tt}" target="_blank" rel="noopener">Xem trên TikTok ↗</a>`, 'video-modal');
       return;
     }
   });
@@ -813,20 +565,18 @@
     const [, a, b] = path.split('/');
     ({
       '': pageHome, category: () => pageCategory(b || 'all'), vehicle: () => pageVehicle(b), vehicles: pageVehicles,
-      search: () => pageSearch(b), product: () => pageProduct(b), cart: pageCart, checkout: pageCheckout,
-      success: () => pageSuccess(b), videos: pageVideos, policy: pagePolicy,
+      search: () => pageSearch(b), product: () => pageProduct(b), videos: pageVideos, policy: pagePolicy,
     }[a || ''] || pageNotFound)();
     window.scrollTo(0, 0);
   }
   window.addEventListener('hashchange', route);
   // Dữ liệu mới (catalog vừa tải từ web / Admin sửa nháp): vẽ lại, giữ nguyên vị trí cuộn
   window.addEventListener('db-changed', () => {
-    renderChrome(); Cart.clean(); updateCartCount();
-    if (/checkout/.test(location.hash) || $('#modal')) return;
+    renderChrome();
+    if ($('#modal')) return;
     const y = window.scrollY; route(); window.scrollTo(0, y);
   });
 
-  Cart.load();
   renderChrome();
   route();
 })();

@@ -77,6 +77,16 @@ Vào web trên tên miền → chọn sản phẩm → **Đặt chỗ**. Kiểm 
 - **Không sửa / xoá** cột ẩn "Dữ liệu (không sửa)".
 - Cột Tình trạng cọc ghi *"khách báo đã TT — kiểm tra lại"* nghĩa là khách bấm thanh toán ví điện tử trên web — cổng MoMo/VNPay/ZaloPay trên web hiện là **bản mô phỏng**, hãy kiểm tra tài khoản trước khi xác nhận "Đã cọc".
 
+## Đồng bộ video TikTok
+
+Nút **🔄 Đồng bộ TikTok** (Admin → **Thư viện TikTok**) dùng chung Apps Script này để đọc các kênh TikTok ở **Cài đặt → Link TikTok (kênh chính)** và **Link TikTok kênh 2** (trình duyệt không tự đọc TikTok được). Mỗi kênh có một dải video kéo ngang ở trang chủ; số người theo dõi, lượt thích, ảnh đại diện cũng được cập nhật khi đồng bộ.
+
+- Mỗi lần bấm lấy được khoảng **10–12 video mới nhất** của mỗi kênh: video chưa có thì thêm vào thư viện (kèm ảnh bìa), video đã có thì cập nhật caption + lượt xem. Dòng xe tự nhận theo caption như cũ.
+- Sau khi đồng bộ, bấm **🚀 Xuất bản lên web** để khách thấy video mới.
+- Khách bấm vào video sẽ xem ngay trên web bằng trình phát của TikTok.
+- **Lần đầu dùng (khi cập nhật `Code.gs` có chức năng này):** dán lại `Code.gs` mới → chạy hàm `setup` một lần để cấp thêm quyền **"Kết nối với dịch vụ bên ngoài"** → triển khai **Phiên bản mới** (xem Lưu ý bên dưới).
+- Nếu báo *"TikTok không trả về danh sách video"*: TikTok tạm chặn, đợi vài phút rồi bấm lại.
+
 ## Lưu ý
 
 - **Sửa `Code.gs` sau này:** phải vào **Triển khai → Quản lý bản triển khai → ✏ Chỉnh sửa → Phiên bản: Phiên bản mới → Triển khai** thì thay đổi mới có hiệu lực (URL giữ nguyên, không cần sửa `config.js`).

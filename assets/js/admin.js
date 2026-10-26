@@ -8,7 +8,7 @@
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const root = $('#root');
   const D = () => DB.data;
-  const MEDIA = window.TIKTOK_MEDIA || [];
+  const MEDIA = () => DB.media();
   const DEMO_USER = 'admin', DEMO_PASS = 'superlight';
 
   const STATUS = {
@@ -131,6 +131,16 @@
       Object.keys(p.vehicleImages || {}).forEach(v => { p.vehicleImages[v] = conv(p.vehicleImages[v]); });
     });
     [...(cat.banners || []), ...(cat.sideAds || []), cat.promos.popup].forEach(x => { if (x) x.image = conv(x.image); });
+    // Ảnh bìa video mới đồng bộ từ TikTok → assets/img/<id>.jpg (cùng chỗ với ảnh bìa có sẵn)
+    (cat.tiktok || []).forEach(x => {
+      const m = /^data:image\/\w+;base64,(.+)$/.exec(x.cover || '');
+      if (m) files.set(`assets/img/${x.id}.jpg`, m[1]);
+      delete x.cover;
+    });
+    Object.entries(cat.tiktokChannels || {}).forEach(([user, c]) => {
+      const m = /^data:image\/\w+;base64,(.+)$/.exec(c.avatar || '');
+      if (m) { files.set(`assets/img/avatar-${user}.jpg`, m[1]); c.avatar = `assets/img/avatar-${user}.jpg`; }
+    });
     files.set('assets/data/catalog.json', b64utf8(JSON.stringify({ ...cat, publishedAt: new Date().toISOString() }, null, 1)));
     return files;
   }
@@ -140,6 +150,10 @@
     const btn = $('#pubBtn'); if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Đang xuất bản…'; }
     try {
       const sha = await GH.commit(catalogForWeb(), `Cập nhật dữ liệu web từ Admin (${new Date().toLocaleString('vi-VN')})`);
+      // Ảnh bìa đã thành file trên web → bỏ bản data:… khỏi nháp cho nhẹ bộ nhớ trình duyệt
+      (D().tiktok || []).forEach(x => { delete x.cover; });
+      Object.entries(D().tiktokChannels || {}).forEach(([user, c]) => { if (/^data:/.test(c.avatar || '')) c.avatar = `assets/img/avatar-${user}.jpg`; });
+      DB.save();
       markPublished();
       toast(sha ? `Đã xuất bản <b>✓</b> — web khách cập nhật sau khoảng 1 phút` : 'Web đã là bản mới nhất <b>✓</b>');
     } catch (e) { toast('Xuất bản lỗi: ' + esc(e.message)); }
@@ -203,17 +217,20 @@
   function readImage(file, max = 800) {
     return new Promise((res, rej) => {
       const fr = new FileReader();
-      fr.onload = () => {
-        const im = new Image();
-        im.onload = () => {
-          const k = Math.min(1, max / Math.max(im.width, im.height));
-          const c = document.createElement('canvas'); c.width = im.width * k; c.height = im.height * k;
-          c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
-          res(c.toDataURL('image/jpeg', .82));
-        };
-        im.onerror = rej; im.src = fr.result;
-      };
+      fr.onload = () => shrinkImage(fr.result, max).then(res, rej);
       fr.onerror = rej; fr.readAsDataURL(file);
+    });
+  }
+  function shrinkImage(src, max = 800) {
+    return new Promise((res, rej) => {
+      const im = new Image();
+      im.onload = () => {
+        const k = Math.min(1, max / Math.max(im.width, im.height));
+        const c = document.createElement('canvas'); c.width = im.width * k; c.height = im.height * k;
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        res(c.toDataURL('image/jpeg', .82));
+      };
+      im.onerror = rej; im.src = src;
     });
   }
 
@@ -221,7 +238,7 @@
   function pickImage(cb, { multi = false } = {}) {
     const sel = new Set();
     const m = modal(`
-      <div class="m-head">Thư viện ảnh TikTok @ts.superlight (${MEDIA.length})</div>
+      <div class="m-head">Thư viện ảnh TikTok @ts.superlight (${MEDIA().length})</div>
       <div class="m-body">
         <div class="bar-tools">
           <input id="libQ" placeholder="Lọc theo caption: vario, ab, audi, hậu…">
@@ -232,9 +249,9 @@
       ${multi ? '<div class="m-foot"><button class="btn btn-outline" data-close>Huỷ</button><button class="btn btn-brand" id="libOk">Chọn ảnh</button></div>' : ''}`, { id: 'modal2', wide: true });
     const draw = q => {
       q = (q || '').toLowerCase();
-      $('#libGrid', m).innerHTML = MEDIA.filter(x => !q || x.cap.toLowerCase().includes(q)).map(x => `
+      $('#libGrid', m).innerHTML = MEDIA().filter(x => !q || x.cap.toLowerCase().includes(q)).map(x => `
         <div class="it ${sel.has(x.id) ? 'on' : ''}" data-id="${x.id}">
-          <img src="assets/img/${x.id}.jpg" loading="lazy" alt="">
+          <img src="${esc(DB.cover(x))}" loading="lazy" alt="">
           ${x.video ? '<span class="v">VIDEO</span>' : ''}
           <div class="cap">${esc(x.cap || '—')}</div>
         </div>`).join('');
@@ -244,7 +261,7 @@
     $('#libGrid', m).onclick = e => {
       const it = e.target.closest('.it'); if (!it) return;
       const id = it.dataset.id;
-      if (!multi) { cb(`assets/img/${id}.jpg`, MEDIA.find(x => x.id === id)); m.remove(); return; }
+      if (!multi) { cb(`assets/img/${id}.jpg`, MEDIA().find(x => x.id === id)); m.remove(); return; }
       sel.has(id) ? sel.delete(id) : sel.add(id); it.classList.toggle('on');
     };
     if (multi) $('#libOk', m).onclick = () => { cb([...sel].map(id => `assets/img/${id}.jpg`)); m.remove(); };
@@ -261,7 +278,7 @@
     root.innerHTML = `
       <div class="login">
         <form class="login-box" id="loginForm">
-          <div class="logo"><span class="logo-mark"></span><span class="logo-text"><b>TS <span style="color:var(--brand-2)">SUPERLIGHT</span></b><small style="color:var(--muted)">Trang quản trị</small></span></div>
+          <div class="logo"><img class="logo-img" src="assets/img/logo2.png" alt="TS SUPERLIGHT"><span class="logo-text"><small style="color:var(--muted)">Trang quản trị</small></span></div>
           <div class="field"><label>Tài khoản</label><input id="lu" autocomplete="username" value="admin"></div>
           <div class="field"><label>Mật khẩu</label><input id="lp" type="password" autocomplete="current-password" placeholder="••••••••"></div>
           <div class="msg err" id="lmsg" style="margin-top:8px"></div>
@@ -280,14 +297,14 @@
 
   /* ---------------- Shell ---------------- */
   const MENU = [
-    ['dashboard', '📊', 'Tổng quan'], ['products', '💡', 'Sản phẩm'], ['orders', '🧾', 'Đơn hàng'],
+    ['dashboard', '📊', 'Tổng quan'], ['products', '💡', 'Sản phẩm'], ['categories', '📂', 'Danh mục'], ['orders', '🧾', 'Đơn hàng'],
     ['banners', '🖼', 'Banner & Quảng cáo'], ['promos', '🏷', 'Khuyến mãi'], ['media', '🎬', 'Thư viện TikTok'], ['settings', '⚙', 'Cài đặt'],
   ];
   function renderShell() {
     root.innerHTML = `
       <div class="adm">
         <aside class="adm-side" id="side">
-          <a href="#/dashboard" class="logo"><span class="logo-mark"></span><span class="logo-text"><b>TS <span>SUPERLIGHT</span></b><small class="role">Admin</small></span></a>
+          <a href="#/dashboard" class="logo"><img class="logo-img" src="assets/img/logo2.png" alt="TS SUPERLIGHT"><span class="logo-text"><small class="role">Admin</small></span></a>
           <ul class="adm-menu" id="admMenu"></ul>
           <div class="pub-box" id="pubBox"></div>
           <div class="foot">
@@ -362,7 +379,7 @@
         <td class="nm">${esc(p.name)}<br><small class="muted">${esc(p.id.toUpperCase())} · ${esc(p.vehicles.join(', '))}</small>
           <div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap">${p.featured ? pill(['Nổi bật', 'amber']) : ''}${p.isNew ? pill(['Mới', 'green']) : ''}${fi ? pill([`⚡ ${fmt(fi.salePrice)}`, 'red']) : ''}${p.video ? pill(['Video', 'gray']) : ''}</div></td>
         <td>${esc(catName(p.cat))}</td>
-        <td class="num"><b>${fmt(p.price)}</b></td>
+        <td class="num"><b>${p.price ? fmt(p.price) : 'Liên hệ'}</b></td>
         <td class="num muted">${p.oldPrice ? fmt(p.oldPrice) : '—'}</td>
         <td class="num" style="${p.stock <= 5 ? 'color:var(--sale);font-weight:700' : ''}">${p.stock}</td>
         <td class="num">${p.sold}</td>
@@ -423,7 +440,7 @@
       ...preset,
     };
     if (!d.vehicleImages) d.vehicleImages = {};
-    const videos = MEDIA.filter(m => m.video);
+    const videos = MEDIA().filter(m => m.video);
     const m = modal(`
       <div class="m-head">${isNew ? 'Thêm sản phẩm mới' : 'Sửa: ' + esc(d.name)}</div>
       <form class="m-body" id="pForm">
@@ -433,7 +450,7 @@
           <div class="field"><label>Bảo hành</label><input name="warranty" value="${esc(d.warranty)}"></div>
         </div>
         <div class="form-grid g3" style="margin-top:12px">
-          <div class="field"><label>Giá bán (đ) *</label><input name="price" inputmode="numeric" value="${d.price ? d.price.toLocaleString('vi-VN') : ''}" required></div>
+          <div class="field"><label>Giá bán (đ)</label><input name="price" inputmode="numeric" value="${d.price ? d.price.toLocaleString('vi-VN') : ''}" placeholder="0"><div class="hint">Để trống hoặc 0 → web hiện “Liên hệ”</div></div>
           <div class="field"><label>Giá gốc / giá gạch (đ)</label><input name="oldPrice" inputmode="numeric" value="${d.oldPrice ? d.oldPrice.toLocaleString('vi-VN') : ''}"><div class="hint">Để trống nếu không giảm giá</div></div>
           <div class="field"><label>Tồn kho</label><input name="stock" type="number" min="0" value="${d.stock}"></div>
         </div>
@@ -504,7 +521,6 @@
     $('#pSave', m).onclick = () => {
       const f = $('#pForm', m);
       if (!f.name.value.trim()) { f.name.focus(); return toast('Nhập <b>tên sản phẩm</b>'); }
-      if (!num(f.price.value)) { f.price.focus(); return toast('Nhập <b>giá bán</b>'); }
       if (!d.image) return toast('Chọn <b>ảnh đại diện</b>');
       Object.assign(d, {
         name: f.name.value.trim(), cat: f.cat.value, warranty: f.warranty.value.trim(),
@@ -694,7 +710,7 @@
   function bannerForm(kind, idx) {
     const isBanner = kind === 'banners';
     const x = idx >= 0 ? { ...D()[kind][idx] } : { id: DB.uid('b'), title: '', subtitle: '', image: '', video: '', cta: 'Xem ngay', link: '#/', active: true, theme: 'amber' };
-    const videos = MEDIA.filter(v => v.video);
+    const videos = MEDIA().filter(v => v.video);
     const m = modal(`
       <div class="m-head">${idx >= 0 ? 'Sửa' : 'Thêm'} ${isBanner ? 'banner' : 'quảng cáo'}</div>
       <div class="m-body">
@@ -718,6 +734,91 @@
       if (isBanner) Object.assign(x, { cta: $('#bCta', m).value.trim(), video: $('#bVid', m).value, theme: $('#bTheme', m).value });
       if (idx >= 0) D()[kind][idx] = x; else D()[kind].push(x);
       if (DB.save()) { m.remove(); toast('Đã lưu <b>✓</b>'); viewBanners(); }
+    };
+  }
+
+  /* ---------------- Categories ----------------
+     Mã danh mục (id) nằm trong đường dẫn #/category/<id> nên giữ nguyên khi đổi tên; chỉ tạo khi thêm mới. */
+  const slugify = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'danh-muc';
+  const catCount = id => D().products.filter(p => p.cat === id).length;
+  function viewCategories() {
+    const cs = D().categories;
+    $('#admTopActions').innerHTML = `<button class="btn btn-brand" id="catAdd">+ Thêm danh mục</button>`;
+    $('#catAdd').onclick = () => categoryForm(-1);
+    $('#view').innerHTML = `
+      <div class="card-a">
+        <h3>📂 Danh mục sản phẩm<span class="sp"></span><span class="muted" style="font-size:13px;font-weight:500">${cs.length} danh mục</span></h3>
+        <p class="muted" style="margin-top:-6px">Thứ tự ở đây là thứ tự hiện trên menu, trang chủ và bộ lọc của web khách. Sửa xong bấm <b>🚀 Xuất bản lên web</b>.</p>
+        <div class="tbl-wrap"><table class="tbl">
+          <thead><tr><th>Thứ tự</th><th>Tên danh mục</th><th>Mô tả ngắn</th><th>Mã (đường dẫn)</th><th class="num">Sản phẩm</th><th></th></tr></thead>
+          <tbody>${cs.map((c, i) => `<tr>
+            <td style="white-space:nowrap"><button class="ib" data-cup="${i}" ${i ? '' : 'disabled'} title="Lên">↑</button> <button class="ib" data-cdown="${i}" ${i < cs.length - 1 ? '' : 'disabled'} title="Xuống">↓</button></td>
+            <td class="nm"><b>${esc(c.name)}</b></td>
+            <td class="muted">${esc(c.desc || '—')}</td>
+            <td><code>#/category/${esc(c.id)}</code></td>
+            <td class="num"><a href="#/products" data-cprod="${esc(c.id)}">${catCount(c.id)}</a></td>
+            <td class="acts"><button class="ib" data-catedit="${i}">Sửa</button> <button class="ib danger" data-catdel="${i}" title="Xoá">🗑</button></td>
+          </tr>`).join('')}</tbody></table></div>
+      </div>`;
+    const move = (i, d) => { [cs[i], cs[i + d]] = [cs[i + d], cs[i]]; save('Đã đổi thứ tự'); viewCategories(); };
+    $$('[data-cup]').forEach(b => b.onclick = () => move(+b.dataset.cup, -1));
+    $$('[data-cdown]').forEach(b => b.onclick = () => move(+b.dataset.cdown, 1));
+    $$('[data-catedit]').forEach(b => b.onclick = () => categoryForm(+b.dataset.catedit));
+    $$('[data-catdel]').forEach(b => b.onclick = () => deleteCategory(+b.dataset.catdel));
+    $$('[data-cprod]').forEach(a => a.onclick = () => { pFilter = { q: '', cat: a.dataset.cprod, status: '' }; });
+  }
+  function categoryForm(idx) {
+    const cs = D().categories;
+    const c = idx >= 0 ? { ...cs[idx] } : { id: '', name: '', icon: '◎', desc: '' };
+    const m = modal(`
+      <div class="m-head">${idx >= 0 ? 'Sửa danh mục: ' + esc(c.name) : 'Thêm danh mục'}</div>
+      <div class="m-body form-grid">
+        <div class="field full"><label>Tên danh mục *</label><input id="catName" value="${esc(c.name)}" placeholder="VD: Đèn hậu, Phụ kiện…"></div>
+        <div class="field full"><label>Mô tả ngắn (hiện dưới tên ở trang chủ)</label><input id="catDesc" value="${esc(c.desc)}" placeholder="VD: Đèn hậu Audi, đèn xi-nhan…"></div>
+        <div class="field full"><label>Mã (đường dẫn)</label><input id="catId" value="${esc(c.id)}" ${idx >= 0 ? 'readonly' : ''} placeholder="Tự tạo theo tên">
+          <small class="muted">${idx >= 0 ? 'Không đổi được để giữ các link đã chia sẻ.' : 'Chỉ gồm chữ không dấu, số, dấu gạch ngang.'}</small></div>
+      </div>
+      <div class="m-foot"><button class="btn btn-outline" data-close>Huỷ</button><button class="btn btn-brand" id="catSave">Lưu danh mục</button></div>`);
+    let idTouched = false;
+    if (idx < 0) {
+      $('#catId', m).oninput = () => { idTouched = true; };
+      $('#catName', m).oninput = e => { if (!idTouched) $('#catId', m).value = slugify(e.target.value); };
+    }
+    $('#catSave', m).onclick = () => {
+      const name = $('#catName', m).value.trim();
+      if (!name) return toast('Nhập <b>tên danh mục</b>');
+      if (cs.some((x, i) => i !== idx && x.name.toLowerCase() === name.toLowerCase())) return toast('Tên danh mục <b>đã tồn tại</b>');
+      if (idx < 0) {
+        const id = slugify($('#catId', m).value || name);
+        if (id === 'all' || cs.some(x => x.id === id)) return toast('Mã <b>' + esc(id) + '</b> đã được dùng — đổi mã khác');
+        c.id = id;
+      }
+      Object.assign(c, { name, desc: $('#catDesc', m).value.trim() });
+      if (idx >= 0) cs[idx] = c; else cs.push(c);
+      if (DB.save()) { m.remove(); toast('Đã lưu danh mục <b>' + esc(name) + '</b>'); viewCategories(); }
+    };
+  }
+  // Xoá danh mục: sản phẩm + banner/quảng cáo đang trỏ tới danh mục này được chuyển sang danh mục khác
+  function deleteCategory(idx) {
+    const cs = D().categories, c = cs[idx];
+    if (cs.length < 2) return toast('Phải còn ít nhất <b>1 danh mục</b>');
+    const n = catCount(c.id), others = cs.filter(x => x.id !== c.id);
+    const m = modal(`
+      <div class="m-head">Xoá danh mục: ${esc(c.name)}</div>
+      <div class="m-body">
+        ${n ? `<p>Danh mục này đang có <b>${n} sản phẩm</b>. Chuyển các sản phẩm đó sang:</p>
+        <div class="field"><select id="catTo">${others.map(x => `<option value="${esc(x.id)}">${esc(x.name)}</option>`).join('')}</select></div>` : '<p>Danh mục này không có sản phẩm nào.</p>'}
+        <p class="muted">Banner / quảng cáo đang dẫn tới danh mục này sẽ được chuyển link sang ${n ? 'danh mục trên' : '“Tất cả sản phẩm”'}.</p>
+      </div>
+      <div class="m-foot"><button class="btn btn-outline" data-close>Huỷ</button><button class="btn btn-brand" id="catDelOk" style="background:var(--sale);border-color:var(--sale)">Xoá danh mục</button></div>`);
+    $('#catDelOk', m).onclick = () => {
+      const to = n ? $('#catTo', m).value : '';
+      D().products.forEach(p => { if (p.cat === c.id) p.cat = to; });
+      const link = `#/category/${c.id}`;
+      [...(D().banners || []), ...(D().sideAds || []), D().promos.popup].forEach(x => { if (x && x.link === link) x.link = to ? `#/category/${to}` : '#/category/all'; });
+      if (pFilter.cat === c.id) pFilter.cat = '';
+      D().categories = cs.filter(x => x.id !== c.id);
+      if (DB.save()) { m.remove(); toast('Đã xoá danh mục <b>' + esc(c.name) + '</b>'); viewCategories(); }
     };
   }
 
@@ -816,36 +917,73 @@
     };
   }
 
+  /* ---------------- Đồng bộ TikTok ----------------
+     Trình duyệt không đọc thẳng được TikTok (bị chặn CORS) → nhờ Apps Script (cùng URL với Google Sheets)
+     lấy ~12 video mới nhất từ trang nhúng của kênh. Video mới được thêm vào thư viện, video cũ cập nhật caption + lượt xem. */
+  async function syncTikTok() {
+    if (!Sheet.ready()) { location.hash = '#/settings'; return toast('Đồng bộ TikTok chạy qua Google Apps Script — nhập <b>URL &amp; mã bí mật</b> ở Cài đặt trước'); }
+    const btn = $('#ttSync'); if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Đang đồng bộ…'; }
+    try {
+      const base = new Set((window.TIKTOK_MEDIA || []).map(m => m.id));
+      const sync = new Map((D().tiktok || []).map(x => [x.id, x]));
+      const infos = D().tiktokChannels || (D().tiktokChannels = {});
+      let added = 0, updated = 0;
+      const errs = [];
+      for (const { user } of DB.channels()) {
+        if (btn) btn.innerHTML = `⏳ Đang đồng bộ @${esc(user)}…`;
+        let res;
+        try { res = await Sheet.call({ action: 'tiktok', user, known: MEDIA().map(m => m.id).join(',') }); } catch (e) { errs.push(`@${esc(user)}: ${esc(e.message)}`); continue; }
+        if (res.info) infos[user] = { ...infos[user], ...Object.fromEntries(Object.entries(res.info).filter(([, v]) => v)) };
+        res.videos.filter(v => /^\d{8,25}$/.test(v.id)).forEach(v => {
+          const x = sync.get(v.id);
+          if (x || base.has(v.id)) { updated++; sync.set(v.id, { ...x, id: v.id, cap: v.cap, views: v.views }); }
+          else if (v.cover) { added++; sync.set(v.id, { id: v.id, cap: v.cap, views: v.views, likes: 0, video: false, ch: user, cover: v.cover }); }
+        });
+      }
+      if (errs.length && !added && !updated) throw new Error(errs.join(' · '));
+      // Ảnh bìa gốc ~250KB → thu về cỡ ảnh bìa có sẵn (~960px) cho nhẹ bản nháp
+      await Promise.all([...sync.values()].filter(x => x.cover?.length > 150000).map(async x => { x.cover = await shrinkImage(x.cover, 960).catch(() => x.cover); }));
+      D().tiktok = [...sync.values()];
+      D().settings.tiktokSyncedAt = new Date().toISOString();
+      if (!DB.save()) throw new Error('bộ nhớ trình duyệt đầy');
+      toast((added ? `Đã thêm <b>${added} video mới</b>, cập nhật ${updated} video — bấm 🚀 Xuất bản để đưa lên web` : `Không có video mới · đã cập nhật lượt xem ${updated} video`) + (errs.length ? `<br>Lỗi: ${errs.join(' · ')}` : ''));
+      drawPublish();
+      if (location.hash === '#/media') viewMedia();
+    } catch (e) { toast('Đồng bộ TikTok lỗi: ' + esc(e.message)); }
+    if (btn && btn.isConnected) { btn.disabled = false; btn.innerHTML = '🔄 Đồng bộ TikTok'; }
+  }
+
   /* ---------------- Media library ---------------- */
   function viewMedia() {
     const used = new Set(D().products.flatMap(p => [p.image, ...p.gallery]).map(u => (u.match(/(\d{15,})/) || [])[1]).filter(Boolean));
     $('#view').innerHTML = `
       <div class="card-a">
-        <h3>Ảnh & video từ TikTok @ts.superlight<span class="sp"></span><a class="ib" href="${esc(D().settings.tiktok)}" target="_blank">Mở TikTok ↗</a></h3>
-        <p class="muted" style="margin-top:-6px">${MEDIA.length} ảnh bìa video · ${MEDIA.filter(m => m.video).length} video đã tải về · <span class="pill green">Đang dùng</span> = ảnh đã gắn vào sản phẩm. Bấm vào ảnh để tạo nhanh sản phẩm.</p>
-        <div class="bar-tools"><input id="mq" placeholder="Lọc theo caption…"><select id="mv"><option value="">Mọi dòng xe (${MEDIA.length})</option>${DB.videoVehicleList().map(v => [v, DB.videosFor(v).length]).filter(([, n]) => n).map(([v, n]) => `<option value="${esc(v)}">${esc(v)} (${n})</option>`).join('')}<option value="-">Chưa rõ dòng xe (${MEDIA.filter(x => !DB.videoVehiclesOf(x).length).length})</option></select><select id="mf"><option value="">Tất cả</option><option value="unused">Chưa dùng</option><option value="video">Có video</option></select></div>
+        <h3>Ảnh & video từ TikTok ${DB.channels().map(c => '@' + esc(c.user)).join(' · ')}<span class="sp"></span><button class="btn btn-brand" id="ttSync">🔄 Đồng bộ TikTok</button>${DB.channels().map(c => `<a class="ib" href="${esc(c.url)}" target="_blank">@${esc(c.user)} ↗</a>`).join(' ')}</h3>
+        <p class="muted" style="margin-top:-6px">${MEDIA().length} ảnh bìa video · ${MEDIA().filter(m => m.video).length} video đã tải về · <span class="pill green">Đang dùng</span> = ảnh đã gắn vào sản phẩm. Bấm vào ảnh để tạo nhanh sản phẩm.${D().settings.tiktokSyncedAt ? ` · Đồng bộ lần cuối: ${new Date(D().settings.tiktokSyncedAt).toLocaleString('vi-VN')}` : ''}</p>
+        <div class="bar-tools"><input id="mq" placeholder="Lọc theo caption…"><select id="mc"><option value="">Mọi kênh</option>${[...new Set(MEDIA().map(x => DB.chOf(x)))].map(u => `<option value="${esc(u)}">@${esc(u)} (${MEDIA().filter(x => DB.chOf(x) === u).length})</option>`).join('')}</select><select id="mv"><option value="">Mọi dòng xe (${MEDIA().length})</option>${DB.videoVehicleList().map(v => [v, DB.videosFor(v).length]).filter(([, n]) => n).map(([v, n]) => `<option value="${esc(v)}">${esc(v)} (${n})</option>`).join('')}<option value="-">Chưa rõ dòng xe (${MEDIA().filter(x => !DB.videoVehiclesOf(x).length).length})</option></select><select id="mf"><option value="">Tất cả</option><option value="unused">Chưa dùng</option><option value="video">Có video</option></select></div>
         <p class="muted" style="margin:0 0 10px;font-size:12.5px">Dòng xe được tự nhận từ caption (vd: “Ab”, “Airbalde” → Air Blade; “Fuled” → Future) — giống mục <b>Video theo xe</b> trên trang bán hàng.</p>
         <div class="lib" id="mGrid"></div>
       </div>`;
     const draw = () => {
-      const q = $('#mq').value.toLowerCase(), fl = $('#mf').value, fv = $('#mv').value;
+      const q = $('#mq').value.toLowerCase(), fl = $('#mf').value, fv = $('#mv').value, fc = $('#mc').value;
       const vehOk = x => !fv || (fv === '-' ? !DB.videoVehiclesOf(x).length : DB.videoMatches(x, fv));
-      $('#mGrid').innerHTML = MEDIA.filter(x => (!q || x.cap.toLowerCase().includes(q)) && vehOk(x) && (fl !== 'unused' || !used.has(x.id)) && (fl !== 'video' || x.video)).map(x => `
+      $('#mGrid').innerHTML = MEDIA().filter(x => (!q || x.cap.toLowerCase().includes(q)) && (!fc || DB.chOf(x) === fc) && vehOk(x) && (fl !== 'unused' || !used.has(x.id)) && (fl !== 'video' || x.video)).map(x => `
         <div class="it" data-mid="${x.id}" title="${esc(x.cap)}">
-          <img src="assets/img/${x.id}.jpg" loading="lazy" alt="">
+          <img src="${esc(DB.cover(x))}" loading="lazy" alt="">
           ${used.has(x.id) ? '<span class="used">Đang dùng</span>' : ''}${x.video ? '<span class="v">VIDEO</span>' : ''}
           ${DB.videoVehiclesOf(x).length ? `<span class="veh">${esc(DB.videoVehiclesOf(x).join(' · '))}</span>` : ''}
           <div class="cap">👁 ${x.views.toLocaleString('vi-VN')} · ${esc(x.cap || '—')}</div>
         </div>`).join('');
     };
-    $('#mq').oninput = draw; $('#mf').onchange = draw; $('#mv').onchange = draw; draw();
+    $('#mq').oninput = draw; $('#mf').onchange = draw; $('#mv').onchange = draw; $('#mc').onchange = draw; draw();
+    $('#ttSync').onclick = syncTikTok;
     $('#mGrid').onclick = e => {
       const it = e.target.closest('[data-mid]'); if (!it) return;
-      const x = MEDIA.find(m => m.id === it.dataset.mid);
+      const x = MEDIA().find(m => m.id === it.dataset.mid);
       const m = modal(`
         <div class="m-head">Ảnh TikTok</div>
         <div class="m-body" style="display:flex;gap:16px;flex-wrap:wrap">
-          ${x.video ? `<video src="assets/video/${x.id}.mp4" poster="assets/img/${x.id}.jpg" controls style="width:240px;border-radius:10px;background:#000"></video>` : `<img src="assets/img/${x.id}.jpg" style="width:240px;border-radius:10px">`}
+          ${x.video ? `<video src="assets/video/${x.id}.mp4" poster="${esc(DB.cover(x))}" controls style="width:240px;border-radius:10px;background:#000"></video>` : `<img src="${esc(DB.cover(x))}" style="width:240px;border-radius:10px">`}
           <div style="flex:1;min-width:220px">
             <p><b>${esc(x.cap || '—')}</b></p>
             <p class="muted">👁 ${x.views.toLocaleString('vi-VN')} lượt xem · ❤ ${x.likes.toLocaleString('vi-VN')}</p>
@@ -853,7 +991,7 @@
             <div class="field"><label>Đường dẫn ảnh</label><input readonly value="assets/img/${x.id}.jpg" onclick="this.select()"></div>
             <div style="display:grid;gap:8px;margin-top:12px">
               <button class="btn btn-brand" id="mkP">+ Tạo sản phẩm từ ảnh này</button>
-              <a class="btn btn-outline" target="_blank" href="https://www.tiktok.com/@ts.superlight/video/${x.id}">Xem trên TikTok ↗</a>
+              <a class="btn btn-outline" target="_blank" href="https://www.tiktok.com/@${esc(DB.chOf(x))}/video/${x.id}">Xem trên TikTok ↗</a>
             </div>
           </div>
         </div>`);
@@ -862,7 +1000,7 @@
         productForm(null, {
           name: x.cap.replace(/[^\p{L}\p{N}\s+\-.,/]/gu, '').trim(),
           image: `assets/img/${x.id}.jpg`,
-          tiktok: `https://www.tiktok.com/@ts.superlight/video/${x.id}`,
+          tiktok: `https://www.tiktok.com/@${DB.chOf(x)}/video/${x.id}`,
           video: x.video ? `assets/video/${x.id}.mp4` : '',
         });
       };
@@ -877,7 +1015,7 @@
       <div class="card-a"><h3>Thông tin cửa hàng</h3>
         <div class="form-grid">
           ${F('shopName', 'Tên shop')}${F('slogan', 'Slogan')}${F('hotline', 'Hotline')}${F('zalo', 'Số Zalo')}
-          ${F('address', 'Địa chỉ', 'full')}${F('hours', 'Giờ mở cửa')}${F('tiktok', 'Link TikTok')}
+          ${F('address', 'Địa chỉ', 'full')}${F('hours', 'Giờ mở cửa')}${F('tiktok', 'Link TikTok (kênh chính)')}${F('tiktok2', 'Link TikTok kênh 2')}
         </div>
       </div>
       <div class="card-a"><h3>Đặt chỗ &amp; tiền cọc</h3>
@@ -968,7 +1106,7 @@
   }
 
   /* ---------------- Router ---------------- */
-  const VIEWS = { dashboard: viewDashboard, products: viewProducts, orders: viewOrders, banners: viewBanners, promos: viewPromos, media: viewMedia, settings: viewSettings };
+  const VIEWS = { dashboard: viewDashboard, products: viewProducts, categories: viewCategories, orders: viewOrders, banners: viewBanners, promos: viewPromos, media: viewMedia, settings: viewSettings };
   function route() {
     if (!isAuthed()) return renderLogin();
     if (!$('.adm')) renderShell();

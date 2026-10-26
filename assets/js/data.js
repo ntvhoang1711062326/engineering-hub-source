@@ -10,7 +10,7 @@
   const CATALOG_URL = 'assets/data/catalog.json';
   const CATALOG_CACHE = 'tsl_catalog_cache';   // bản catalog khách tải gần nhất (hiện ngay khi mở lại)
   const MY_ORDERS = 'tsl_my_orders';           // đơn khách đã đặt trên máy này (trang "Đặt chỗ thành công")
-  const CATALOG_KEYS = ['version', 'categories', 'vehicles', 'products', 'banners', 'sideAds', 'promos', 'settings'];
+  const CATALOG_KEYS = ['version', 'categories', 'vehicles', 'products', 'banners', 'sideAds', 'promos', 'settings', 'tiktok', 'tiktokChannels'];
   const IS_ADMIN = !!window.IS_ADMIN;
   const IS_LOCAL = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   const readJSON = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
@@ -82,6 +82,57 @@
     K('kz-cx80-v2', 'Đèn trợ sáng bi cầu Kenzo CX80 V2 2026', 'kenzo-tro-sang', 4200000, 'Đèn trợ sáng văn minh, an toàn.', 'Kenzo CX80 V2 – đèn LED trợ sáng dạng bi cầu (projector) văn minh, sáng mạnh, an toàn cho anh em đi phố, offroad…'),
   ];
 
+  /* Hàng Titan Moto (danh mục Đèn Bi LED / Đèn trợ sáng / Bóng LED trên titanmoto.vn). Giá 0 = web hiện "Liên hệ" */
+  const TITAN_CATEGORIES = [
+    { id: 'titan-bi-led', name: 'Đèn Bi LED Titan Moto', icon: '◎', desc: 'Bi LED Black Mini, CB150, CB100, F200 chính hãng' },
+    { id: 'titan-tro-sang', name: 'Đèn trợ sáng Titan Moto', icon: '✧', desc: 'Trợ sáng M10, M20, M60, F1, F2 Zero GT' },
+    { id: 'titan-bong-led', name: 'Bóng LED Titan Moto', icon: '✦', desc: 'Bóng LED, Bi LED mini Titan Moto' },
+  ];
+  const T = (id, name, cat, price, short, extra = {}) => ({
+    id, name, cat, vehicles: ['Tất cả dòng xe'], price, oldPrice: extra.oldPrice || 0, image: `assets/img/titan/${id}.jpg`,
+    gallery: [], video: '', tiktok: '', stock: 20, sold: 0, rating: 5, featured: false, isNew: false, warranty: extra.warranty,
+    short, desc: `${name} — ${short}
+
+Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.`,
+    specs: { 'Thương hiệu': 'Titan Moto', ...extra.specs }, vehicleImages: {}, active: true,
+  });
+  const TITAN_PRODUCTS = [
+    T("tt-black-mini-20-version-2", "Bi LED Titan Moto Black Mini 2.0 Version 2", "titan-bi-led", 3400000, "Cos 45W – Pha 50W · 5000K.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất Cos": "45W", "Công suất Pha": "50W", "Nhân LED": "6+1 chip Led (Osram)", "Nhiệt màu": "5000K", "Điện áp": "12V"}}),
+    T("tt-black-mini-20-version-2-square", "Bi LED Titan Moto Black Mini 2.0 Version 2 Square", "titan-bi-led", 3400000, "Cos 45W – Pha 50W · 5500K · Ánh sáng mịn đều.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất Cos": "45W", "Công suất Pha": "50W", "Nhân LED": "6+1 chip Led (Osram)", "Nhiệt màu": "5500K", "Điện áp": "12 - 16V", "Đặc điểm nổi bật": "Ánh sáng mịn đều"}}),
+    T("tt-cb150-pro-square", "Bi LED Titan Moto CB150 Pro Square", "titan-bi-led", 5000000, "Công suất 55W · 5500K · Công nghệ thoát sáng TWR.", {"warranty": "2 năm", "specs": {"Công suất Cos": "55W", "Nhân LED": "9+1+1 (Osram)", "Nhiệt màu": "5500K", "Tuổi thọ": "30000 giờ", "Kích thước lens": "3.0 inch", "Vật liệu tản nhiệt": "Quạt + Khối Nhôm", "Đặc điểm nổi bật": "Công nghệ thoát sáng TWR"}}),
+    T("tt-black-mini-20-square", "Titan Moto Black Mini 2.0 Square", "titan-bi-led", 3400000, "Cos 40W – Pha 45W · 5000K.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất Cos": "40W", "Công suất Pha": "45W", "Nhiệt màu": "5000K"}}),
+    T("tt-cb150-pro", "Bi LED Titan Moto CB150 Pro", "titan-bi-led", 5000000, "Cos 55W – Pha 65W · 5500K · Công nghệ thoát sáng TWR.", {"warranty": "2 năm", "specs": {"Công suất Cos": "55W", "Công suất Pha": "65W", "Nhân LED": "9+1+1 (Osram)", "Nhiệt màu": "5500K", "Tuổi thọ": "30000 giờ", "Kích thước lens": "3.0 inch", "Vật liệu tản nhiệt": "Quạt + Khối Nhôm", "Đặc điểm nổi bật": "Công nghệ thoát sáng TWR"}}),
+    T("tt-f200-storm", "Bi LED Titan Moto F200 Storm", "titan-bi-led", 6000000, "Cos 50W – Pha 80W · 5500K · Hai trợ pha - siêu nhỏ gọn.", {"warranty": "2 năm", "specs": {"Công suất Cos": "50W", "Công suất Pha": "80W", "Nhân LED": "9", "Nhiệt màu": "5500K", "Mắt trợ pha": "1+1", "Kích thước lens": "3.0 inch", "Đặc điểm nổi bật": "Hai trợ pha - siêu nhỏ gọn"}}),
+    T("tt-cb100-pro", "Bi LED Titan Moto CB100 Pro", "titan-bi-led", 4000000, "Cos 55W – Pha 65W · 5500K · Phiên bản tiết kiệm - Công nghệ đầy đủ.", {"warranty": "2 năm", "specs": {"Công suất Cos": "55W", "Công suất Pha": "65W", "Nhân LED": "6 (big) + 1", "Nhiệt màu": "5500K", "Đặc điểm nổi bật": "Phiên bản tiết kiệm - Công nghệ đầy đủ"}}),
+    T("tt-cb100-pro-square", "Bi LED Titan Moto CB100 Pro Square", "titan-bi-led", 4000000, "Cos 55W – Pha 65W · 5500K · Phiên bản tiết kiệm - công nghệ đầy đủ.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất Cos": "55W", "Công suất Pha": "65W", "Nhân LED": "6 (Big) + 1", "Nhiệt màu": "5500K", "Kích thước lens": "3.0 inch", "Đặc điểm nổi bật": "Phiên bản tiết kiệm - công nghệ đầy đủ"}}),
+    T("tt-mini-f15", "Bi LED Mini Titan Moto F15", "titan-bi-led", 2200000, "Cos 35W – Pha 50W · 5500K.", {"warranty": "1 năm", "specs": {"Công suất Cos": "35W", "Công suất Pha": "50W", "Số nhân LED": "6 (Big) + 6", "Nhiệt màu": "5500K", "Vật liệu tản nhiệt": "Aluminum"}}),
+    T("tt-black-mini-2", "Bi LED Titan Moto Black Mini 2.0 Inch", "titan-bi-led", 3400000, "Cos 40W – Pha 45W · 5000K.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất Cos": "40W", "Công suất Pha": "45W", "Nhân LED": "6+1 Osram", "Nhiệt màu": "5000K", "Điện áp": "12V"}}),
+    T("tt-cb750", "Bi LED Titan Moto CB750", "titan-bi-led", 3000000, "Cos 45W – Pha 55W · 5000K.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất Cos": "45W", "Công suất Pha": "55W", "Nhiệt màu": "5000K"}, "oldPrice": 3500000}),
+    T("tt-cb150", "Bi LED Titan Moto CB150", "titan-bi-led", 5000000, "Cos 55W – Pha 65W · 5000K.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất Cos": "55W", "Công suất Pha": "65W", "Nhiệt màu": "5000K"}}),
+    T("tt-black-mini-18-laser", "Titan Moto Black Mini 1.8 Laser", "titan-bi-led", 4000000, "Cos 50W – Pha 60W · 5000K.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất Cos": "50W", "Công suất Pha": "60W", "Nhiệt màu": "5000K"}}),
+    T("tt-black-mini-18", "Bi LED Titan Black Mini 1.8", "titan-bi-led", 4000000, "Cos 40W – Pha 45W · 5000K.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất Cos": "40W", "Công suất Pha": "45W", "Nhiệt màu": "5000K"}}),
+    T("tt-cb150-hp", "Bi LED Titan Moto CB150 HP", "titan-bi-led", 6500000, "Cos 45W – Pha 75W · 5800K.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất Cos": "45W", "Công suất Pha": "75W", "Nhiệt màu": "5800K"}}),
+    T("tt-black-mini-15-inch", "Bi LED Titan Black Mini 1.5 Inch", "titan-bi-led", 4000000, "Cos 40W – Pha 45W · 5000K.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất Cos": "40W", "Công suất Pha": "45W", "Nhiệt màu": "5000K"}}),
+    T("tt-m45-hyper", "Đèn trợ sáng Titan Moto M45 Hyper", "titan-tro-sang", 3500000, "Công suất 45W · 6000K - 3000K · Vùng sáng rộng, sắc nét.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất": "45W", "Nhân LED": "6+6 (Big) thế hệ mới", "Nhiệt màu": "6000K - 3000K", "Đặc điểm nổi bật": "Vùng sáng rộng, sắc nét"}}),
+    T("tt-m60-ultra-v2", "Đèn trợ sáng Titan Moto M60 Ultra V2", "titan-tro-sang", 2500000, "Công suất 65W · 6000K.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất": "65W", "Nhân LED": "Sft-40", "Nhiệt màu": "6000K"}}),
+    T("tt-m10-ultra-v2", "Đèn trợ sáng M10 Ultra V2", "titan-tro-sang", 1700000, "Công suất 28W · 6000K/3000K · Cường độ sáng mạnh, mặt cắt sắc nét.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất": "28W", "Nhân LED": "3 Vàng + 3 Trắng", "Nhiệt màu": "6000K/3000K", "Chống nước": "IP68", "Điện áp": "12 - 16V", "Đặc điểm nổi bật": "Cường độ sáng mạnh, mặt cắt sắc nét"}}),
+    T("tt-f1-turbo-s", "Đèn trợ sáng Titan Moto F1 Turbo S", "titan-tro-sang", 4200000, "Cos 42W – Pha 67W · 4300K/5500K · Trợ pha kép, giả lập laser.", {"warranty": "1 năm", "specs": {"Công suất Cos": "42W", "Công suất Pha": "67W", "Nhân LED": "6 (big) + 1 + 1 (osram)", "Nhiệt màu": "4300K/5500K", "Chống nước": "IP68", "Tuổi thọ": "30.000 GIỜ", "Vật liệu tản nhiệt": "Chủ động và thụ động", "Đặc điểm nổi bật": "Trợ pha kép, giả lập laser"}}),
+    T("tt-f1-gt", "Đèn trợ sáng Titan Moto F1 GT", "titan-tro-sang", 2500000, "Cos ~30W – Pha ~40W · 5500K/3000K & 5500K/5500K · Trợ sáng nhỏ gọn - chuẩn sáng Bi LED.", {"warranty": "1 năm", "specs": {"Công suất Cos": "~30W", "Công suất Pha": "~40W", "Nhân LED": "3+3", "Nhiệt màu": "5500K/3000K & 5500K/5500K", "Đặc điểm nổi bật": "Trợ sáng nhỏ gọn - chuẩn sáng Bi LED"}}),
+    T("tt-m10-plus", "Đèn trợ sáng Titan Moto M10 Plus", "titan-tro-sang", 1200000, "Công suất 20W · Nhỏ gọn, tối ưu hiệu ứng.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất Cos": "20W", "Công suất": "20W", "Nhân LED": "3 Trắng + 3 Vàng", "Điện áp": "12 - 16V", "Đặc điểm nổi bật": "Nhỏ gọn, tối ưu hiệu ứng"}}),
+    T("tt-f2-zero-gt", "Đèn trợ sáng Titan Moto F2 Zero GT", "titan-tro-sang", 3500000, "Cos ~45W – Pha ~65W · 4800K/3000K & 5500K/3000K · Hai nguồn sáng cos, ba nguồn sáng pha.", {"warranty": "2 năm", "specs": {"Công suất Cos": "~45W", "Công suất Pha": "~65W", "Nhân LED": "6+6+1+1+1", "Nhiệt màu": "4800K/3000K & 5500K/3000K", "Đặc điểm nổi bật": "Hai nguồn sáng cos, ba nguồn sáng pha"}}),
+    T("tt-m90-ultra", "Đèn trợ sáng Titan Moto M90 Ultra", "titan-tro-sang", 2999000, "5500K.", {"warranty": "12 tháng", "specs": {"Nhân LED": "Luminus SBT90.2", "Nhiệt màu": "5500K", "Điện áp": "12-16V", "Vật liệu tản nhiệt": "Thụ động"}}),
+    T("tt-m60-ultra-high", "Đèn trợ sáng Titan Moto M60 Ultra High", "titan-tro-sang", 2800000, "Cos 70W – Pha 70W.", {"warranty": "12 tháng", "specs": {"Công suất Cos": "70W", "Công suất Pha": "70W"}}),
+    T("tt-m10-ultra", "Đèn trợ sáng Titan Moto M10 Ultra", "titan-tro-sang", 1400000, "Công suất 25W.", {"warranty": "12 tháng", "specs": {"Công suất Pha": "25W", "Nhân LED": "Titan Custom", "Cường độ ánh sáng": "7.500 lux", "Điện áp": "12V"}}),
+    T("tt-m60-ultra", "Đèn trợ sáng Titan Moto M60 Ultra", "titan-tro-sang", 2500000, "Công suất 60W.", {"warranty": "12 tháng", "specs": {"Công suất Pha": "60W", "Cường độ ánh sáng": "7.500 lux"}}),
+    T("tt-m20-ultra", "Đèn trợ sáng Titan Moto M20 Ultra", "titan-tro-sang", 2800000, "Cos 50W – Pha 50W · 3000K, 6000K.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất Cos": "50W", "Công suất Pha": "50W", "Nhiệt màu": "3000K, 6000K"}}),
+    T("tt-z20", "Titan Moto Z20", "titan-tro-sang", 0, "Cos 35W – Pha 60W.", {"warranty": "Theo chính sách Titan Moto", "specs": {"Công suất Cos": "35W", "Công suất Pha": "60W", "Cường độ ánh sáng": "7.500 lux"}}),
+    T("tt-z40", "Titan Moto Z40", "titan-tro-sang", 0, "Cos 45-50W – Pha 90-100W.", {"warranty": "12 tháng", "specs": {"Công suất Cos": "45-50W", "Công suất Pha": "90-100W"}}),
+    T("tt-l60", "Titan Moto L60", "titan-tro-sang", 0, "Cos 30-35W – Pha 90-100W.", {"warranty": "12 tháng", "specs": {"Công suất Cos": "30-35W", "Công suất Pha": "90-100W"}}),
+    T("tt-f60", "Titan Moto F60", "titan-tro-sang", 0, "Cos 110w – Pha 150w.", {"warranty": "12 tháng", "specs": {"Công suất Cos": "110w", "Công suất Pha": "150w"}}),
+    T("tt-mini-f15-v2", "Bi LED Mini Titan Moto F-15 V2", "titan-bong-led", 2200000, "Cos ~40W/đèn – Pha ~65W/đèn · 5500K.", {"warranty": "12 tháng", "specs": {"Công suất Cos": "~40W/đèn", "Công suất Pha": "~65W/đèn", "Chân bóng": "H4", "Nhiệt màu": "5500K"}}),
+    T("tt-bong-led-a7-ultra", "Bóng LED Titan A7 Ultra", "titan-bong-led", 2200000, "Công suất ~70W · 6000K · Tăng sáng 300%.", {"warranty": "2 năm", "specs": {"Công suất": "~70W", "Chân bóng": "H4, H7, H11, 9005", "Nhiệt màu": "6000K", "Vật liệu tản nhiệt": "Quạt + 2 Ống đồng + Lá tản nhiệt", "Đặc điểm nổi bật": "Tăng sáng 300%"}}),
+  ];
+
   // Nhận cả cách viết tắt/sai chính tả hay gặp trong caption TikTok: Ab/Airbalde → Air Blade, Fuled → Future…
   const VIDEO_VEH_RE = {
     'Vario': /vario/, 'Air Blade': /\bab\b|air ?b(la|al)de/, 'Vision': /vision/, 'SH': /\bsh\b(?! ?mode)/, 'SH Mode': /\bsh ?mode/,
@@ -123,8 +174,8 @@
       endsAt: in7days(),
       items: [], // thêm sản phẩm Flash Sale trong Admin
     },
-    popup: { active: true, title: 'Đặt chỗ lắp đèn online', text: 'Chọn mẫu đèn, hẹn giờ lắp và cọc trước để giữ hàng. Lắp đặt miễn phí tại shop Bình Thạnh!', image: kimg('kz-s700-pro'), link: '#/category/all' },
-    topbar: { active: true, text: '🔥 Lắp đặt miễn phí tại shop · Đặt chỗ online, cọc giữ lịch · Bảo hành đến 24 tháng' },
+    popup: { active: true, title: 'Tư vấn lắp đèn miễn phí', text: 'Chọn mẫu đèn ưng ý rồi gọi hoặc nhắn Zalo để được tư vấn, báo giá theo dòng xe. Lắp đặt miễn phí tại shop Bình Thạnh!', image: kimg('kz-s700-pro'), link: '#/category/all' },
+    topbar: { active: true, text: '🔥 Lắp đặt miễn phí tại shop · Test sáng trước khi lắp · Bảo hành đến 24 tháng' },
   };
 
   const SETTINGS = {
@@ -132,9 +183,10 @@
     slogan: 'Chuyên lắp Bi LED · Laser · Trợ sáng Kenzo chính hãng',
     zalo: '0769678981',
     hotline: '0769678981',
-    address: 'Bình Thạnh, TP. Hồ Chí Minh',
+    address: '38/8 Đường Đinh Bộ Lĩnh, Bình Thạnh, Hồ Chí Minh',
     hours: '8:00 – 20:00 (Cả T7 & CN)',
     tiktok: 'https://www.tiktok.com/@ts.superlight',
+    tiktok2: 'https://www.tiktok.com/@_superlightshop_',
     deposit: 200000, // tiền cọc giữ chỗ cho mỗi lượt đặt
     bankName: '',
     bankAccount: '',
@@ -142,10 +194,10 @@
   };
 
   const seed = () => ({
-    version: 6,
-    categories: KENZO_CATEGORIES,
+    version: 9,
+    categories: [...KENZO_CATEGORIES, ...TITAN_CATEGORIES],
     vehicles: VEHICLES,
-    products: KENZO_PRODUCTS,
+    products: [...KENZO_PRODUCTS, ...TITAN_PRODUCTS],
     banners: BANNERS,
     sideAds: SIDE_ADS,
     promos: PROMOS,
@@ -169,6 +221,10 @@
       this.migrate4();
       this.migrate5();
       this.migrate6();
+      this.migrate7();
+      this.migrate8();
+      this.migrate9();
+      if (this.data.settings.tiktok2 == null) this.data.settings.tiktok2 = SETTINGS.tiktok2;
       return this.data;
     },
     /* v2: bỏ giao hàng, chuyển sang đặt chỗ + cọc */
@@ -235,6 +291,33 @@
       d.version = 6;
       try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
     },
+    /* v7: thêm danh mục + sản phẩm Titan Moto, giữ nguyên dữ liệu đã có */
+    migrate7() {
+      const d = this.data;
+      if ((d.version || 1) >= 7) return;
+      TITAN_CATEGORIES.forEach(c => { if (!d.categories.some(x => x.id === c.id)) d.categories.push({ ...c }); });
+      TITAN_PRODUCTS.forEach(p => { if (!d.products.some(x => x.id === p.id)) d.products.push(JSON.parse(JSON.stringify(p))); });
+      d.version = 7;
+      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+    },
+    /* v8: địa chỉ shop cụ thể (chỉ thay khi chủ shop chưa tự sửa địa chỉ mặc định cũ) */
+    migrate8() {
+      const d = this.data;
+      if ((d.version || 1) >= 8) return;
+      if (d.settings.address === 'Bình Thạnh, TP. Hồ Chí Minh') d.settings.address = SETTINGS.address;
+      d.version = 8;
+      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+    },
+    /* v9: bỏ đặt chỗ & tiền cọc trên trang khách → đổi chữ thanh thông báo / popup mặc định (giữ nguyên nếu chủ shop đã tự sửa) */
+    migrate9() {
+      const d = this.data, pr = d.promos;
+      if ((d.version || 1) >= 9) return;
+      if (pr.topbar?.text === '🔥 Lắp đặt miễn phí tại shop · Đặt chỗ online, cọc giữ lịch · Bảo hành đến 24 tháng') pr.topbar.text = PROMOS.topbar.text;
+      if (pr.popup?.title === 'Đặt chỗ lắp đèn online') pr.popup.title = PROMOS.popup.title;
+      if (pr.popup?.text === 'Chọn mẫu đèn, hẹn giờ lắp và cọc trước để giữ hàng. Lắp đặt miễn phí tại shop Bình Thạnh!') pr.popup.text = PROMOS.popup.text;
+      d.version = 9;
+      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+    },
     save() {
       try {
         if (IS_ADMIN) localStorage.setItem(KEY, JSON.stringify(this.data));
@@ -292,7 +375,28 @@
       return { ok: true, code: c.code, discount, freeShip, msg: c.desc };
     },
     /* Video TikTok theo dòng xe: tự phân loại từ caption (dùng chung cho trang khách + Admin) */
-    allVideos() { return [...(window.TIKTOK_MEDIA || [])].sort((a, b) => (b.video - a.video) || (b.views - a.views)); },
+    // media.js là danh sách gốc; data.tiktok = video mới / số liệu mới từ nút "Đồng bộ TikTok" ở Admin
+    media() {
+      const sync = new Map((this.data.tiktok || []).map(x => [x.id, x]));
+      const base = (window.TIKTOK_MEDIA || []).map(m => sync.has(m.id) ? { ...m, ...sync.get(m.id) } : m);
+      const known = new Set(base.map(m => m.id));
+      const added = [...sync.values()].filter(x => !known.has(x.id)).map(x => ({ cap: '', views: 0, likes: 0, video: false, ...x }));
+      return [...added.sort((a, b) => b.id.length - a.id.length || b.id.localeCompare(a.id)), ...base];
+    },
+    allVideos() { return this.media().sort((a, b) => (b.video - a.video) || (b.views - a.views)); },
+    // Video mới đồng bộ chưa xuất bản: ảnh bìa còn nằm trong bản nháp (data:…)
+    cover(m) { return m.cover || img(m.id); },
+    /* Kênh TikTok: link ở Cài đặt (tiktok, tiktok2) + thông tin kênh (media.js, số liệu mới từ Đồng bộ) */
+    chOf(m) { return m.ch || 'ts.superlight'; },
+    channels() {
+      const s = this.data.settings, users = [s.tiktok, s.tiktok2 ?? SETTINGS.tiktok2].map(u => (String(u || '').match(/@([\w.]+)/) || [])[1]).filter(Boolean);
+      return [...new Set(users)].map(user => ({
+        user, name: '@' + user, followers: 0, likes: 0, avatar: '',
+        ...(window.TIKTOK_CHANNELS || []).find(c => c.user === user), ...(this.data.tiktokChannels || {})[user],
+        url: 'https://www.tiktok.com/@' + user,
+      }));
+    },
+    channelVideos(user) { return this.media().filter(m => this.chOf(m) === user).sort((a, b) => b.id.length - a.id.length || b.id.localeCompare(a.id)); },
     // Dòng xe trong Admin + nhóm "Ô tô" (có video lắp cho Innova, CRV…)
     videoVehicleList() { return [...new Set([...this.data.vehicles.filter(v => v !== 'Tất cả dòng xe'), 'Ô tô'])]; },
     videoMatches(m, v) {

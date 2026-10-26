@@ -19,8 +19,8 @@ python -m http.server 8000
 | `assets/data/catalog.json` | Dữ liệu web khách đang dùng — Admin ghi file này lên GitHub khi xuất bản |
 | `assets/js/data.js` | Dữ liệu mặc định + lớp dữ liệu (Admin: nháp trong localStorage; khách: đọc `catalog.json`) |
 | `assets/js/config.js` | URL Google Apps Script nhận đơn |
-| `google-apps-script/Code.gs` | Script dán vào Google Sheets: ghi đơn, mail báo đơn mới, cho Admin tải đơn |
-| `assets/js/media.js` | Danh sách 108 ảnh bìa video TikTok |
+| `google-apps-script/Code.gs` | Script dán vào Google Sheets: ghi đơn, mail báo đơn mới, cho Admin tải đơn, đồng bộ video TikTok |
+| `assets/js/media.js` | Danh sách video TikTok gốc (108 video @ts.superlight + 10 video @_superlightshop_) và thông tin 2 kênh; video mới từ nút **🔄 Đồng bộ TikTok** nằm trong `catalog.json` (`tiktok`) |
 | `assets/img/`, `assets/video/` | Ảnh/video TikTok, ảnh sản phẩm Kenzo (`kenzo/`), ảnh tải lên từ Admin (`uploads/`) |
 
 ## Đưa lên web & vận hành
