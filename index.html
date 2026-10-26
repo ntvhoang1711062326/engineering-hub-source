@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TS SUPERLIGHT — Đèn xe máy Bi cầu · Audi · Trợ sáng</title>
-  <meta name="description" content="TS SUPERLIGHT chuyên độ đèn xe máy: bi cầu Kenzo, Aozoom, đèn Audi A7, đèn hậu, combo trước sau cho Vario, Air Blade, Vision, SH, Lead, Scoopy. Lắp đặt tại Bình Thạnh, TP.HCM.">
+  <title>TS SUPERLIGHT — Bi LED · Laser · Trợ sáng Kenzo</title>
+  <meta name="description" content="TS SUPERLIGHT chuyên lắp đèn Kenzo chính hãng: Bi LED M18, S-Series S500 – S800, Laser S900 Pro, trợ sáng X3 Pro, X100, X200, CX80. Lắp đặt tại Bình Thạnh, TP.HCM.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='15' fill='%230d1015' stroke='%23ffb800' stroke-width='2'/><circle cx='16' cy='16' r='8' fill='%23ffb800'/><circle cx='16' cy='16' r='4' fill='%23fff'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,24 +16,47 @@
 
   <header class="header">
     <div class="wrap header-main">
+      <button class="menu-btn" id="menuBtn" aria-label="Mở menu">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
       <a href="#/" class="logo">
         <span class="logo-mark"></span>
-        <span class="logo-text"><b>TS <span>SUPERLIGHT</span></b><small>Bi cầu · Audi · Trợ sáng · Bimini</small></span>
+        <span class="logo-text"><b>TS <span>SUPERLIGHT</span></b><small>Bi LED · Laser · Trợ sáng Kenzo</small></span>
       </a>
-      <form class="search" id="searchForm">
-        <input id="searchInput" type="search" placeholder="Tìm đèn theo tên, dòng xe: Vario, AB, bi cầu Kenzo…" autocomplete="off">
-        <button type="submit">Tìm</button>
-      </form>
+      <nav class="nav" id="nav">
+        <div class="nav-head">
+          <a href="#/" class="logo"><span class="logo-mark"></span><span class="logo-text"><b>TS <span>SUPERLIGHT</span></b></span></a>
+          <button class="nav-close" id="navClose" aria-label="Đóng menu">✕</button>
+        </div>
+        <ul id="navMenu"></ul>
+      </nav>
       <div class="header-actions">
-        <div class="hotline">
+        <button class="icon-btn" id="searchBtn" aria-label="Tìm kiếm">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20L16.5 16.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <a class="hotline" id="hdrHotlineLink">
           <span class="ico">☎</span>
           <div><small>Hotline / Zalo</small><b id="hdrHotline"></b></div>
-        </div>
-        <a href="#/cart" class="cart-btn">📋 <span class="lbl">Đặt chỗ</span><span class="count" id="cartCount">0</span></a>
+        </a>
+        <a href="#/cart" class="cart-btn" aria-label="Đặt chỗ">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20.5" r="1.3" fill="currentColor"/><circle cx="17" cy="20.5" r="1.3" fill="currentColor"/></svg>
+          <span class="count" id="cartCount">0</span>
+        </a>
       </div>
     </div>
-    <nav class="nav"><ul class="wrap" id="navMenu"></ul></nav>
   </header>
+  <div class="nav-backdrop" id="navBackdrop"></div>
+
+  <div class="search-overlay" id="searchOverlay">
+    <button class="search-close" id="searchClose" aria-label="Đóng tìm kiếm">✕</button>
+    <div class="search-box">
+      <p>Tìm kiếm sản phẩm</p>
+      <form class="search" id="searchForm">
+        <input id="searchInput" type="search" placeholder="Tìm đèn theo tên, dòng xe: Vario, AB, bi cầu Kenzo…" autocomplete="off">
+        <button type="submit" aria-label="Tìm"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M20 20L16.5 16.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      </form>
+    </div>
+  </div>
 
   <main id="app" class="wrap"></main>
 
@@ -45,6 +68,7 @@
   <div class="float-contact" id="floatContact"></div>
   <div class="toast" id="toast"></div>
 
+  <script src="assets/js/config.js"></script>
   <script src="assets/js/media.js"></script>
   <script src="assets/js/data.js"></script>
   <script src="assets/js/app.js"></script>

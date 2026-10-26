@@ -36,6 +36,18 @@
   function updateCartCount() { $('#cartCount').textContent = Cart.count(); }
   const stars = n => '★★★★★'.slice(0, Math.round(n)) + '☆☆☆☆☆'.slice(0, 5 - Math.round(n));
   const activeProducts = () => D().products.filter(p => p.active);
+
+  /* ---------------- Video theo dòng xe (phân loại dùng chung với Admin — xem DB.videosFor) ---------------- */
+  const allVideos = () => DB.allVideos();
+  const videoVehicleList = () => DB.videoVehicleList();
+  const videosFor = v => DB.videosFor(v);
+  function vehicleChips(sel) {
+    return `<div class="chips">
+      <a class="chip ${sel ? '' : 'on'}" href="#/videos">Tất cả <small>${allVideos().length}</small></a>
+      ${videoVehicleList().map(v => [v, videosFor(v).length]).filter(([, n]) => n).map(([v, n]) =>
+        `<a class="chip ${v === sel ? 'on' : ''}" href="#/vehicle/${encodeURIComponent(v)}">${esc(v)} <small>${n}</small></a>`).join('')}
+    </div>`;
+  }
   const zaloLink = () => `https://zalo.me/${S().zalo}`;
   const phoneFmt = p => String(p).replace(/(\d{4})(\d{3})(\d+)/, '$1.$2.$3');
 
@@ -91,12 +103,33 @@
     tb.textContent = pr.topbar?.text || '';
     tb.classList.toggle('hidden', !pr.topbar?.active);
     $('#hdrHotline').textContent = phoneFmt(s.hotline);
+    $('#hdrHotlineLink').href = 'tel:' + String(s.hotline || '').replace(/\D/g, '');
+    const arrow = `<button class="arrow" type="button" aria-label="Mở menu con"><svg viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
+    const vehicles = videoVehicleList().filter(v => videosFor(v).length);
     $('#navMenu').innerHTML = `
-      <li><a href="#/" data-nav="home">Trang chủ</a></li>
-      ${D().promos.flash.active ? '<li><a href="#/flash" class="hot" data-nav="flash">⚡ Flash Sale</a></li>' : ''}
-      ${D().categories.map(c => `<li><a href="#/category/${c.id}" data-nav="${c.id}">${esc(c.name)}</a></li>`).join('')}
-      <li><a href="#/vehicles" data-nav="vehicles">Theo dòng xe</a></li>
-      <li><a href="#/videos" data-nav="videos">Video TikTok</a></li>`;
+      <li class="nav-item"><a href="#/" data-nav="home">Trang chủ</a></li>
+      <li class="nav-item"><a href="#/category/all" data-nav="all">Sản phẩm</a>${arrow}
+        <ul class="nav-sub">
+          <li class="sub-all"><a href="#/category/all">Tất cả sản phẩm</a></li>
+          ${D().categories.map(c => {
+            const list = activeProducts().filter(p => p.cat === c.id);
+            return `<li class="has-child"><a href="#/category/${c.id}" data-nav="${c.id}">${esc(c.name)}</a>${list.length ? `
+            <ul class="nav-sub-child">
+              ${list.slice(0, 12).map(p => `<li><a href="#/product/${p.id}">${esc(p.name)}</a></li>`).join('')}
+              ${list.length > 12 ? `<li class="sub-all"><a href="#/category/${c.id}">Xem tất cả ${list.length} sản phẩm →</a></li>` : ''}
+            </ul>` : ''}</li>`;
+          }).join('')}
+        </ul>
+      </li>
+      <li class="nav-item"><a href="#/videos" data-nav="videos">Video theo xe</a>${arrow}
+        <ul class="nav-sub${vehicles.length > 8 ? ' cols' : ''}">
+          <li class="sub-all" style="grid-column:1/-1"><a href="#/videos">Tất cả video (${allVideos().length})</a></li>
+          ${vehicles.map(v => `<li><a href="#/vehicle/${encodeURIComponent(v)}">${esc(v)} <small class="muted">(${videosFor(v).length})</small></a></li>`).join('')}
+        </ul>
+      </li>
+      <li class="nav-item"><a href="#/policy" data-nav="policy">Bảo hành</a></li>
+      <li class="nav-item"><a href="#/cart" data-nav="cart">Đặt chỗ</a></li>
+      <li class="nav-item"><a href="${zaloLink()}" target="_blank" rel="noopener">Liên hệ</a></li>`;
     $('#footer').innerHTML = `
       <div>
         <a href="#/" class="logo" style="margin-bottom:12px"><span class="logo-mark"></span><span class="logo-text"><b style="color:#fff">TS <span>SUPERLIGHT</span></b></span></a>
@@ -109,7 +142,6 @@
       <div><h5>Danh mục</h5><ul>${D().categories.map(c => `<li><a href="#/category/${c.id}">${esc(c.name)}</a></li>`).join('')}</ul></div>
       <div><h5>Hỗ trợ</h5><ul>
         <li><a href="#/cart">Đặt chỗ của bạn</a></li>
-        <li><a href="#/flash">Khuyến mãi</a></li>
         <li><a href="#/policy">Chính sách bảo hành</a></li>
         <li><a href="#/policy">Đặt chỗ &amp; tiền cọc</a></li>
       </ul></div>
@@ -125,7 +157,10 @@
       <a class="t" href="${esc(s.tiktok)}" target="_blank" rel="noopener" title="TikTok">TT</a>`;
     updateCartCount();
   }
-  function setNav(key) { $$('#navMenu a').forEach(a => a.classList.toggle('on', a.dataset.nav === key)); }
+  function setNav(key) {
+    $$('#navMenu a').forEach(a => a.classList.toggle('on', !!key && a.dataset.nav === key));
+    $$('#navMenu .nav-item').forEach(li => li.classList.toggle('on', !!li.querySelector('a.on')));
+  }
 
   /* ---------------- Pages ---------------- */
   let slideTimer;
@@ -178,7 +213,6 @@
         <div class="flash-head">
           <h3>${esc(f.title)}</h3>
           <span>Kết thúc sau</span>${countdownHTML('cdHome')}
-          <a href="#/flash" style="margin-left:auto;color:var(--brand);font-weight:600">Xem tất cả →</a>
         </div>
         ${grid(flashList, '', { flash: true })}
       </section>` : ''}
@@ -191,8 +225,8 @@
       </section>
 
       <section class="section">
-        <div class="section-head"><h3>Tìm đèn theo dòng xe</h3><a href="#/vehicles">Tất cả →</a></div>
-        <div class="chips">${D().vehicles.filter(v => v !== 'Tất cả dòng xe').map(v => `<a class="chip" href="#/vehicle/${encodeURIComponent(v)}">${esc(v)}</a>`).join('')}</div>
+        <div class="section-head"><h3>Video lắp đèn theo dòng xe</h3><a href="#/videos">Tất cả video →</a></div>
+        ${vehicleChips('')}
       </section>
 
       <section class="section">
@@ -323,19 +357,14 @@
     if (!c) return pageNotFound();
     pageListing({ title: c.name, list: activeProducts().filter(p => p.cat === id), crumbs: [esc(c.name)], key: id, baseCat: id });
   }
-  function pageVehicle(v) {
-    v = decodeURIComponent(v);
-    pageListing({ title: `Đèn cho ${v}`, list: activeProducts().filter(p => p.vehicles.includes(v) || p.vehicles.includes('Tất cả dòng xe')), crumbs: ['<a href="#/vehicles">Theo dòng xe</a>', esc(v)], key: 'vehicles' });
-  }
+  // Trang dòng xe = video lắp đèn của dòng xe đó + sản phẩm lắp được cho xe
+  function pageVehicle(v) { pageVideos(decodeURIComponent(v)); }
   function pageVehicles() {
-    setNav('vehicles');
-    const vs = D().vehicles.filter(v => v !== 'Tất cả dòng xe');
+    setNav('videos');
     app.innerHTML = `
-      <nav class="crumbs"><a href="#/">Trang chủ</a><span>Theo dòng xe</span></nav>
-      <div class="cats">${vs.map(v => {
-        const list = activeProducts().filter(p => p.vehicles.includes(v));
-        return `<a class="cat" href="#/vehicle/${encodeURIComponent(v)}"><div class="ic">${list[0] ? `<img src="${esc(list[0].image)}" alt="" loading="lazy">` : ''}</div><b>${esc(v)}</b><small>${list.length} sản phẩm</small></a>`;
-      }).join('')}</div>`;
+      <nav class="crumbs"><a href="#/">Trang chủ</a><span><a href="#/videos">Video theo xe</a></span><span>Dòng xe</span></nav>
+      <div class="cats">${videoVehicleList().map(v => [v, videosFor(v)]).filter(([, l]) => l.length).map(([v, list]) =>
+        `<a class="cat" href="#/vehicle/${encodeURIComponent(v)}"><div class="ic"><img src="assets/img/${list[0].id}.jpg" alt="" loading="lazy"></div><b>${esc(v)}</b><small>${list.length} video</small></a>`).join('')}</div>`;
   }
   function pageSearch(q) {
     q = decodeURIComponent(q);
@@ -349,23 +378,24 @@
     $('#searchInput').value = q;
     pageListing({ title: `Kết quả cho “${q}”`, list, crumbs: ['Tìm kiếm'], key: '' });
   }
-  function pageFlash() {
-    setNav('flash');
-    const f = D().promos.flash;
-    const on = f.active && new Date(f.endsAt) > new Date();
-    const list = on ? f.items.map(i => DB.product(i.productId)).filter(p => p && p.active) : [];
-    app.innerHTML = `
-      <nav class="crumbs"><a href="#/">Trang chủ</a><span>Khuyến mãi</span></nav>
-      <section class="flash">
-        <div class="flash-head"><h3>${esc(f.title)}</h3>${on ? `<span>Kết thúc sau</span>${countdownHTML('cdFlash')}` : '<span>Chương trình đã kết thúc — hẹn bạn lần sau!</span>'}</div>
-        ${on ? `<p class="muted" style="margin:0 0 12px">Liên hệ Hotline/Zalo để nhận giá ưu đãi Flash Sale.</p>${grid(list, '', { flash: true })}` : ''}
-      </section>`;
-    if (on) startCountdowns();
-  }
-  function pageVideos() {
+  function pageVideos(v = '') {
     setNav('videos');
-    const media = [...(window.TIKTOK_MEDIA || [])].sort((a, b) => (b.video - a.video) || (b.views - a.views));
-    app.innerHTML = `<nav class="crumbs"><a href="#/">Trang chủ</a><span>Video TikTok</span></nav>${tiktokBlock(media, true)}`;
+    const media = v ? videosFor(v) : allVideos();
+    const products = v ? activeProducts().filter(p => p.vehicles.includes(v) || p.vehicles.includes('Tất cả dòng xe')).sort((a, b) => b.featured - a.featured) : [];
+    app.innerHTML = `
+      <nav class="crumbs"><a href="#/">Trang chủ</a>${v ? `<span><a href="#/videos">Video theo xe</a></span><span>${esc(v)}</span>` : '<span>Video theo xe</span>'}</nav>
+      <section class="section" style="margin-top:8px">
+        <div class="section-head"><h3>${v ? `Video lắp đèn ${esc(v)}` : 'Video lắp đèn theo dòng xe'}</h3><span class="muted">${media.length} video${v ? '' : ' · chọn dòng xe để lọc'}</span></div>
+        ${vehicleChips(v)}
+      </section>
+      <section class="section" style="margin-top:16px">
+        ${media.length ? tiktokBlock(media, true) : `<div class="empty panel"><div class="big">🎬</div><p>Chưa có video cho dòng xe ${esc(v)}.</p><a class="btn btn-outline" href="#/videos">Xem tất cả video</a></div>`}
+      </section>
+      ${products.length ? `
+      <section class="section">
+        <div class="section-head"><h3>Đèn lắp được cho ${esc(v)}</h3><a href="#/category/all">Xem tất cả →</a></div>
+        ${grid(products.slice(0, 10))}
+      </section>` : ''}`;
   }
 
   function pageProduct(id) {
@@ -487,7 +517,7 @@
   }
 
   function pageCart() {
-    setNav('');
+    setNav('cart');
     Cart.clean();
     const lines = Cart.lines();
     if (!lines.length) {
@@ -622,7 +652,35 @@
     };
   }
 
-  function placeOrder(order) {
+  /* Gửi đơn về Google Sheets (URL trong assets/js/config.js). Chưa cấu hình → chỉ lưu trên trình duyệt (chế độ thử) */
+  async function sendOrder(order) {
+    const url = window.SHOP_CONFIG?.orderEndpoint;
+    if (!url) return;
+    // text/plain để không bị chặn CORS preflight của Google Apps Script
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'create', order }) });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Lỗi không xác định');
+  }
+
+  async function placeOrder(order) {
+    const btn = $('#checkoutForm button[type=submit]');
+    const label = btn?.innerHTML;
+    if (btn) { btn.disabled = true; btn.innerHTML = 'Đang gửi đơn…'; }
+    try {
+      await sendOrder(order);
+    } catch (e) {
+      if (btn) { btn.disabled = false; btn.innerHTML = label; }
+      openModal(`
+        <div class="popup-ad"><div class="body">
+          <h3>Chưa gửi được đơn 😥</h3>
+          <p class="muted">Kết nối bị gián đoạn nên shop chưa nhận được đơn của bạn. Vui lòng thử lại, hoặc nhắn Zalo để shop giữ lịch giúp bạn.</p>
+          <div style="display:grid;gap:8px;margin-top:12px">
+            <button class="btn btn-brand btn-lg" data-close>Thử lại</button>
+            <a class="btn btn-zalo" href="${zaloLink()}" target="_blank" rel="noopener">Nhắn Zalo ${phoneFmt(S().zalo)}</a>
+          </div>
+        </div></div>`);
+      return;
+    }
     DB.load(); // tránh ghi đè thay đổi từ tab admin
     order.items.forEach(i => { const p = DB.product(i.pid); if (p) { p.stock = Math.max(0, p.stock - i.qty); p.sold += i.qty; } });
     DB.data.orders.unshift(order);
@@ -681,7 +739,7 @@
   }
 
   function pagePolicy() {
-    setNav('');
+    setNav('policy');
     app.innerHTML = `
       <nav class="crumbs"><a href="#/">Trang chủ</a><span>Chính sách</span></nav>
       <section class="panel desc">
@@ -730,17 +788,33 @@
       return;
     }
   });
-  $('#searchForm').onsubmit = e => { e.preventDefault(); const q = $('#searchInput').value.trim(); if (q) location.hash = '#/search/' + encodeURIComponent(q); };
+  $('#searchForm').onsubmit = e => { e.preventDefault(); const q = $('#searchInput').value.trim(); if (q) { closeSearch(); location.hash = '#/search/' + encodeURIComponent(q); } };
+
+  /* ---------------- Header: menu mobile & ô tìm kiếm ---------------- */
+  const openNav = on => { $('#nav').classList.toggle('open', on); $('#navBackdrop').classList.toggle('show', on); };
+  function openSearch() { $('#searchOverlay').classList.add('show'); setTimeout(() => $('#searchInput').focus(), 50); }
+  function closeSearch() { $('#searchOverlay').classList.remove('show'); }
+  $('#menuBtn').onclick = () => openNav(true);
+  $('#navClose').onclick = $('#navBackdrop').onclick = () => openNav(false);
+  $('#searchBtn').onclick = openSearch;
+  $('#searchClose').onclick = closeSearch;
+  $('#searchOverlay').addEventListener('click', e => { if (e.target.id === 'searchOverlay') closeSearch(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeSearch(); openNav(false); } });
+  $('#navMenu').addEventListener('click', e => {
+    const arrow = e.target.closest('.arrow');
+    if (arrow) { arrow.parentElement.classList.toggle('open'); return; }
+    if (e.target.closest('a')) openNav(false);
+  });
 
   /* ---------------- Router ---------------- */
   function route() {
-    closeModal(); clearInterval(cdTimer);
+    closeModal(); closeSearch(); openNav(false); clearInterval(cdTimer);
     const [path] = (location.hash.slice(1) || '/').split('?');
     const [, a, b] = path.split('/');
     ({
       '': pageHome, category: () => pageCategory(b || 'all'), vehicle: () => pageVehicle(b), vehicles: pageVehicles,
       search: () => pageSearch(b), product: () => pageProduct(b), cart: pageCart, checkout: pageCheckout,
-      success: () => pageSuccess(b), flash: pageFlash, videos: pageVideos, policy: pagePolicy,
+      success: () => pageSuccess(b), videos: pageVideos, policy: pagePolicy,
     }[a || ''] || pageNotFound)();
     window.scrollTo(0, 0);
   }

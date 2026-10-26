@@ -7,36 +7,11 @@
   const KEY = 'tsl_db_v1';
   const img = id => `assets/img/${id}.jpg`;
   const vid = id => `assets/video/${id}.mp4`;
-  const tt = id => `https://www.tiktok.com/@ts.superlight/video/${id}`;
 
-  const CATEGORIES = [
-    { id: 'bi-cau', name: 'Bi cầu', icon: '◉', desc: 'Bi cầu LED projector Kenzo, Aozoom, CB150…' },
-    { id: 'audi', name: 'Đèn Audi', icon: '≋', desc: 'Demi/xi nhan Audi A7, A8, đổi màu' },
-    { id: 'den-hau', name: 'Đèn hậu', icon: '▭', desc: 'Hậu Audi, hậu bảng LED, hậu chỉnh app' },
-    { id: 'combo', name: 'Combo trước sau', icon: '⇄', desc: 'Full option trọn bộ, tiết kiệm hơn' },
-    { id: 'tro-sang', name: 'Trợ sáng · Bimini', icon: '✦', desc: 'Demi, zhipat, bimini, trợ sáng' },
-    { id: 'phu-kien', name: 'Phụ kiện đèn', icon: '⚙', desc: 'Chóa, dây, relay, bảng LED' },
-  ];
+  // Danh mục của bộ sản phẩm cũ (đã ngừng bán) — dùng để dọn dữ liệu cũ trong migrate5
+  const OLD_CATEGORY_IDS = ['bi-cau', 'audi', 'den-hau', 'combo', 'tro-sang', 'phu-kien'];
 
   const VEHICLES = ['Vario', 'Air Blade', 'Vision', 'SH', 'SH Mode', 'Lead', 'Scoopy', 'Future', 'NVX', 'Click', 'Vespa', 'Tất cả dòng xe'];
-
-  const P = (id, name, cat, vehicles, price, oldPrice, imgId, extra = {}) => ({
-    id, name, cat, vehicles, price, oldPrice, image: img(imgId),
-    gallery: extra.gallery ? extra.gallery.map(img) : [],
-    video: extra.video ? vid(imgId) : '',
-    tiktok: tt(imgId),
-    stock: extra.stock ?? 20,
-    sold: extra.sold ?? Math.floor(20 + (parseInt(imgId.slice(-3)) % 180)),
-    rating: extra.rating ?? 5,
-    featured: !!extra.featured,
-    isNew: !!extra.isNew,
-    warranty: extra.warranty || '12 tháng',
-    short: extra.short || '',
-    desc: extra.desc || '',
-    specs: extra.specs || {},
-    vehicleImages: {}, // { 'Vario': 'assets/img/…jpg' } — ảnh riêng theo dòng xe
-    active: true,
-  });
 
   /* Tự gợi ý ảnh theo dòng xe từ caption TikTok: caption phải nhắc tới dòng xe VÀ loại đèn của sản phẩm */
   const VEH_RE = {
@@ -64,174 +39,88 @@
     return out;
   }
 
-  /* Giá bên dưới là GIÁ MẪU — chỉnh lại trong trang Admin */
-  const PRODUCTS = [
-    P('p01', 'Bi cầu Kenzo S600 Pro V2', 'bi-cau', ['Vario', 'Air Blade', 'Vision', 'SH'], 1850000, 2200000, '7482386436822519048', {
-      featured: true, gallery: ['7513134420300352775', '7497615096949116167'],
-      short: 'Bi cầu LED 2 chế độ cos/pha, vệt cắt sắc nét, không chói xe đối diện.',
-      specs: { 'Công suất': '55W / bóng', 'Nhiệt màu': '6000K trắng', 'Điện áp': '12V', 'Chống nước': 'IP67' },
-    }),
-    P('p02', 'Bi cầu Kenzo S700 Pro V2', 'bi-cau', ['Air Blade', 'Vario', 'SH'], 2450000, 2750000, '7675338859588193543', {
-      isNew: true, short: 'Thế hệ mới sáng hơn S600, tăng tầm chiếu xa, chip LED làm mát chủ động.',
-      specs: { 'Công suất': '70W / bóng', 'Nhiệt màu': '5800K', 'Điện áp': '12V', 'Chống nước': 'IP67' },
-    }),
-    P('p03', 'Bi cầu Aozoom EX3', 'bi-cau', ['Scoopy', 'Lead', 'Vision', 'Air Blade'], 2650000, 2900000, '7622881459195399444', {
-      featured: true, gallery: ['7634428134279925013', '7568740538187369735'],
-      short: 'Aozoom chính hãng, ánh sáng tập trung, bảo hành 24 tháng.', warranty: '24 tháng',
-      specs: { 'Thương hiệu': 'Aozoom', 'Công suất': '60W', 'Nhiệt màu': '6000K', 'Chống nước': 'IP68' },
-    }),
-    P('p04', 'Cặp bi cầu CB150 Pro', 'bi-cau', ['NVX', 'Vario', 'Air Blade'], 1650000, 0, '7681273723789495560', {
-      short: 'Cặp 2 bi nhỏ gọn, phù hợp mặt nạ NVX, Vario.',
-      specs: { 'Số lượng': '2 bi', 'Công suất': '45W / bi', 'Nhiệt màu': '6000K' },
-    }),
-    P('p05', 'Bi cầu mắt xoay Sharingan', 'bi-cau', ['Air Blade', 'Vario', 'SH'], 2900000, 3300000, '7676341375083793682', {
-      isNew: true, featured: true, short: 'Kenzo S600 Pro V3 kèm mắt xoay Sharingan hiệu ứng động — cực nổi.',
-      specs: { 'Hiệu ứng': 'Mắt xoay RGB', 'Điều khiển': 'App Bluetooth', 'Công suất': '55W' },
-    }),
-    P('p06', 'Mắt chớp (mắt quỷ) bi cầu', 'phu-kien', ['Tất cả dòng xe'], 450000, 550000, '7475295111216155922', {
-      short: 'Mắt quỷ gắn trong bi cầu, nhiều màu, chớp theo nhịp.',
-      specs: { 'Màu': 'Đỏ / Xanh / RGB', 'Điện áp': '12V' },
-    }),
-    P('p07', 'Demi Audi A7 Pro V3', 'audi', ['Air Blade', 'Vario', 'Vision', 'SH'], 1350000, 1550000, '7623267460459924757', {
-      featured: true, gallery: ['7639196270099172628', '7616596969569406229'],
-      short: 'Dải LED Audi chạy đuổi, tích hợp xi nhan, lắp như zin.',
-      specs: { 'Chế độ': 'Demi + xi nhan chạy đuổi', 'Màu': 'Trắng / Vàng', 'Điện áp': '12V' },
-    }),
-    P('p08', 'Demi Audi A8 Pro ngôi sao', 'audi', ['Vario', 'Air Blade', 'NVX'], 1650000, 0, '7688304356801662226', {
-      isNew: true, short: 'Audi A8 Pro hoạ tiết ngôi sao, sáng đều, không hắt sáng.',
-      specs: { 'Chế độ': 'Demi + xi nhan', 'Màu': 'Trắng', 'Điện áp': '12V' },
-    }),
-    P('p09', 'Audi đổi màu RGB', 'audi', ['Air Blade', 'Vario', 'Vision'], 1550000, 1790000, '7670084619982916882', {
-      short: 'Đổi màu theo ý thích qua app, nhiều hiệu ứng chạy.',
-      specs: { 'Màu': 'RGB 16 triệu màu', 'Điều khiển': 'App điện thoại', 'Điện áp': '12V' },
-    }),
-    P('p10', 'Audi A7 cho Air Blade 2026', 'audi', ['Air Blade'], 1350000, 0, '7631484082240670996', {
-      video: true, featured: true, gallery: ['7661850610035182869', '7636993325802818837'],
-      short: 'Bản riêng cho AB 2026, cắm giắc zin, không cắt dây.',
-      specs: { 'Đời xe': 'Air Blade 2026', 'Chế độ': 'Demi + xi nhan chạy đuổi' },
-    }),
-    P('p11', 'Hậu Audi A7 Vario', 'den-hau', ['Vario'], 1250000, 1450000, '7613980016220671253', {
-      video: true, featured: true, gallery: ['7625123255896001812', '7647764770388479253', '7611750448004893972'],
-      short: 'Mẫu hậu bán chạy nhất shop — phanh, xi nhan chạy đuổi, demi hậu.',
-      specs: { 'Đời xe': 'Vario 125/150/160', 'Chức năng': 'Hậu + phanh + xi nhan', 'Lắp đặt': 'Giắc zin' },
-    }),
-    P('p12', 'Hậu Audi A7 Air Blade', 'den-hau', ['Air Blade'], 1250000, 1400000, '7628819982461390101', {
-      gallery: ['7649992336075672852', '7614716092409335061'],
-      short: 'Gắn như zin, sáng rõ, tăng an toàn khi phanh.',
-      specs: { 'Đời xe': 'AB 2016 – 2026', 'Chức năng': 'Hậu + phanh + xi nhan' },
-    }),
-    P('p13', 'Hậu Audi chỉnh app đổi hiệu ứng', 'den-hau', ['Vario', 'Air Blade'], 1690000, 1990000, '7623651883256679700', {
-      isNew: true, gallery: ['7624354499867561237', '7614337085796896020'],
-      short: 'Chỉnh hiệu ứng trên app — thích kiểu nào chỉnh kiểu đó.',
-      specs: { 'Điều khiển': 'App Bluetooth', 'Hiệu ứng': '20+ kiểu', 'Chức năng': 'Hậu + phanh + xi nhan' },
-    }),
-    P('p14', 'Hậu bảng LED + Audi Vario', 'den-hau', ['Vario'], 1450000, 0, '7658584023949659399', {
-      short: 'Bảng LED ma trận kết hợp dải Audi, nhìn cực hiện đại.',
-      specs: { 'Đời xe': 'Vario', 'Loại': 'Bảng LED ma trận' },
-    }),
-    P('p15', 'Hậu Audi Lead 2020 – 2026', 'den-hau', ['Lead'], 1190000, 1350000, '7629736608509611285', {
-      short: 'Dành riêng cho Lead 4 van, lắp đặt nhanh.',
-      specs: { 'Đời xe': 'Lead 2020 – 2026', 'Chức năng': 'Hậu + phanh + xi nhan' },
-    }),
-    P('p16', 'Hậu Audi SH Mode', 'den-hau', ['SH Mode'], 1290000, 0, '7617699797549518101', {
-      short: 'Tinh tế, sang trọng, hợp phong cách SH Mode.',
-      specs: { 'Đời xe': 'SH Mode', 'Chức năng': 'Hậu + phanh + xi nhan' },
-    }),
-    P('p17', 'Hậu Audi A7 Future 125 Fi', 'den-hau', ['Future'], 1150000, 1300000, '7615485842877910293', {
-      short: 'Cho Future 125 Fi, dải Audi chạy đuổi.',
-      specs: { 'Đời xe': 'Future 125 Fi', 'Chức năng': 'Hậu + phanh + xi nhan' },
-    }),
-    P('p18', 'Combo Audi trước sau + Zhipat Vision 2017–2019', 'combo', ['Vision'], 3290000, 3800000, '7477175155995757831', {
-      video: true, featured: true, sold: 312,
-      short: 'Video 112K lượt xem! Full combo Audi trước sau + zhipat cho Vision.',
-      specs: { 'Đời xe': 'Vision 2017 – 2019', 'Bao gồm': 'Audi trước, hậu Audi, zhipat', 'Lắp đặt': 'Miễn phí tại shop' },
-    }),
-    P('p19', 'Full đèn Vario 160 — 4 bi vòng 3D', 'combo', ['Vario'], 5900000, 6500000, '7632184781651840276', {
-      featured: true, short: '4 bi cầu thật nét và sáng, vòng 3D cực ngầu.',
-      specs: { 'Đời xe': 'Vario 160', 'Bao gồm': '4 bi cầu + vòng 3D + demi' },
-    }),
-    P('p20', 'Combo Bi cầu + Audi Scoopy 2020–2024', 'combo', ['Scoopy'], 3950000, 4400000, '7639587781437689109', {
-      gallery: ['7584317182306274581'],
-      short: 'Đi Scoopy là phải lên đèn — bi cầu + Audi trọn bộ.',
-      specs: { 'Đời xe': 'Scoopy 2020 – 2024', 'Bao gồm': 'Bi cầu + Audi' },
-    }),
-    P('p21', 'Combo Audi A7 trước sau Vision 2016–2019', 'combo', ['Vision'], 2490000, 2800000, '7503537333468253448', {
-      short: 'Combo Audi A7 trước + hậu cho Vision, lắp như zin.',
-      specs: { 'Đời xe': 'Vision 2016 – 2019', 'Bao gồm': 'Audi trước + hậu Audi' },
-    }),
-    P('p22', 'Full option Audi + Bi cầu Vario', 'combo', ['Vario'], 4650000, 5200000, '7654074125723421970', {
-      gallery: ['7611872850621877511', '7579255653617782034'],
-      short: 'Full option trước sau cho Vario, sáng — đẹp — an toàn.',
-      specs: { 'Đời xe': 'Vario 125/150/160', 'Bao gồm': 'Bi cầu + Audi trước + hậu Audi' },
-    }),
-    P('p23', 'Combo Aozoom EX3 + Audi A7 cho Lead', 'combo', ['Lead'], 3590000, 3990000, '7546259462840061192', {
-      short: 'Bi cầu Aozoom EX3 kết hợp Audi A7 cho Lead.',
-      specs: { 'Đời xe': 'Lead', 'Bao gồm': 'Bi EX3 + Audi A7' },
-    }),
-    P('p24', 'Demi Future chữ X', 'tro-sang', ['Future'], 450000, 0, '7627722033517907220', {
-      short: 'Demi hình chữ X cho Future 125, nổi bật ban đêm.',
-      specs: { 'Đời xe': 'Future 125 Fi', 'Màu': 'Trắng' },
-    }),
-    P('p25', 'Hậu bảng LED + Audi V3 + Zhipat Future', 'combo', ['Future'], 2850000, 3150000, '7621018915308670228', {
-      short: 'Combo bảng LED + Audi V3 + zhipat cho Future — quá nét!',
-      specs: { 'Đời xe': 'Future 125 Fi', 'Bao gồm': 'Hậu bảng LED + Audi V3 + zhipat' },
-    }),
-    P('p26', 'Chóa đèn pha Vario mẫu X mới', 'phu-kien', ['Vario'], 3450000, 0, '7623989432148053269', {
-      video: true, isNew: true, featured: true,
-      short: 'Mẫu mới 74K lượt xem — chóa pha thiết kế chữ X kèm hậu đồng bộ.',
-      specs: { 'Đời xe': 'Vario 2023+', 'Bao gồm': 'Chóa pha + hậu' },
-    }),
-    P('p27', 'Zhipat trợ sáng đa năng', 'tro-sang', ['Tất cả dòng xe'], 390000, 490000, '7497615096949116167', {
-      short: 'Trợ sáng / zhipat lắp mọi dòng xe, tăng khả năng nhận diện.',
-      specs: { 'Điện áp': '12V', 'Chống nước': 'IP67' },
-    }),
-    P('p28', 'Bimini LED mini 2 màu', 'tro-sang', ['Tất cả dòng xe'], 650000, 750000, '7507577085100068104', {
-      short: 'Bi mini 2 màu vàng/trắng, xuyên sương mưa tốt.',
-      specs: { 'Màu': 'Trắng / Vàng', 'Công suất': '30W' },
-    }),
+  /* Sản phẩm chính hãng Kenzo (theo kenzolight.com/san-pham-kenzo-2 — không gồm Bi LED gầm).
+     Giá = giá bán lẻ khuyến nghị cho xe máy của Kenzo, đã gồm lắp đặt. */
+  const KENZO_CATEGORIES = [
+    { id: 'kenzo-bi-led', name: 'Bi LED & Laser Kenzo', icon: '◎', desc: 'Kenzo M18 Mini 1.8″ & S-Series chính hãng' },
+    { id: 'kenzo-tro-sang', name: 'Trợ sáng Kenzo', icon: '✧', desc: 'Trợ sáng, bi mini, bóng LED Kenzo' },
   ];
-  PRODUCTS.forEach(p => {
-    p.vehicleImages = suggestVehicleImages(p);
-    if (!p.desc) p.desc = `${p.name} — ${p.short}\n\nSản phẩm được TS SUPERLIGHT tuyển chọn và lắp đặt trực tiếp tại shop. Test sáng miễn phí trước khi lắp, bảo hành ${p.warranty}, hỗ trợ đổi mới 7 ngày nếu lỗi nhà sản xuất.\n\nGiá tuỳ đời xe — liên hệ Hotline/Zalo để được báo giá và tư vấn. Đặt chỗ online, cọc trước để giữ hàng và lịch lắp.`;
+  const K = (id, name, cat, price, short, desc, extra = {}) => ({
+    id, name, cat, vehicles: ['Tất cả dòng xe'], price, oldPrice: 0, image: `assets/img/kenzo/${id}.jpg`,
+    gallery: [], video: '', tiktok: '', stock: 20, sold: 0, rating: 5,
+    featured: !!extra.featured, isNew: !!extra.isNew, warranty: 'Theo chính sách Kenzo',
+    short, desc: `${name} — ${short}\n\n${desc}\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.`,
+    specs: { 'Thương hiệu': 'Kenzo', ...(extra.specs || {}) }, vehicleImages: {}, active: true,
   });
+  const KENZO_PRODUCTS = [
+    K('kz-m18', 'Bi LED Kenzo M18', 'kenzo-bi-led', 5000000, 'Nhỏ gọn – dành cho moto.', 'Bi LED Mini 1.8″ thuộc dòng Kenzo M-Series, chip LED thế hệ mới từ CHLB Đức, tiêu thụ điện ít nhưng cường độ sáng cao.', { specs: { 'Kích thước': '1.8″' } }),
+    K('kz-m18-matrix', 'Bi LED Kenzo M18 Matrix', 'kenzo-bi-led', 6500000, 'Nhỏ gọn – siêu việt.', 'Nhỏ gọn nhưng sở hữu hiệu suất siêu việt, Bi LED 1.8″ Kenzo M18 Matrix thế hệ mới là lựa chọn tăng sáng lý tưởng.', { specs: { 'Kích thước': '1.8″' } }),
+    K('kz-m18-laser', 'Bi LED Kenzo M18 Laser Matrix', 'kenzo-bi-led', 9000000, 'Nhỏ gọn – laser siêu việt.', 'Trang bị 9 chip LED OSRAM và 10W Laser Nichia. Kenzo M18 Laser Matrix là lựa chọn tăng sáng hoàn hảo cho các dòng xe chóa nhỏ.', { specs: { 'Kích thước': '1.8″', 'Chip': '9 LED OSRAM + Laser Nichia 10W' } }),
+    K('kz-s500-mini', 'Bi LED Kenzo S500 Mini', 'kenzo-bi-led', 4000000, 'Kích thước nhỏ, hiệu suất cao.', 'Phiên bản nhỏ gọn của dòng Kenzo S-Series, phù hợp nhiều dòng xe máy.'),
+    K('kz-s500-pro-v2', 'Bi LED Kenzo S500 Pro V2', 'kenzo-bi-led', 5000000, 'Nâng cấp mạnh mẽ, giá không đổi.', 'Ra mắt 20/12/2025, Bi LED Kenzo S500 Pro V2 là phiên bản nâng cấp dựa trên thành công của S500 Pro V1.', { isNew: true }),
+    K('kz-s600-25', 'Bi LED Kenzo S600 2.5', 'kenzo-bi-led', 5200000, 'Thoát sáng đỉnh cao, chấp bụi chấp bão.', 'Thiết kế nhỏ gọn chỉ 2.5″ cùng công nghệ thoát sáng đỉnh cao mang lại hiệu suất chiếu sáng vượt trội.', { specs: { 'Kích thước': '2.5″' } }),
+    K('kz-s600-pro-v3', 'Bi LED Kenzo S600 Pro V3', 'kenzo-bi-led', 6000000, 'Sáng như mong đợi.', 'Phiên bản mới nhất S600 Pro V3 nâng cấp toàn diện: chip LED 12 nhân hiệu năng cao, tăng sáng 25%, tối ưu vận hành đô thị với City Mode.', { featured: true, isNew: true }),
+    K('kz-s700-pro', 'Bi LED Kenzo S700 Pro V2', 'kenzo-bi-led', 7500000, 'Kỷ nguyên mới của Bi LED.', 'Hội tụ các công nghệ đột phá lần đầu tiên xuất hiện trên Bi LED Kenzo S700 Pro.', { featured: true }),
+    K('kz-s800', 'Bi LED Kenzo S800', 'kenzo-bi-led', 8000000, 'Hiệu suất vượt trội.', 'Chip LED OSRAM từ CHLB Đức, công suất Cos 65W – Pha 75W, Bi LED Kenzo S800 hiệu suất cao cho độ sáng vượt trội.', { specs: { 'Công suất': 'Cos 65W – Pha 75W' } }),
+    K('kz-s900-pro', 'Bi LED Laser Kenzo S900 Pro', 'kenzo-bi-led', 13500000, 'Không chỉ là tầm nhìn.', 'Dòng Bi LED Laser cao cấp nhất của Kenzo S-Series.', { featured: true }),
+    K('kz-x3-pro', 'Đèn trợ sáng dạng rời Kenzo X3 Pro', 'kenzo-tro-sang', 5000000, 'Trợ sáng dạng rời toàn diện nhất phân khúc.', 'Kenzo X3 Pro được phát triển để trở thành lựa chọn đèn trợ sáng dạng rời toàn diện nhất trong phân khúc.', { isNew: true }),
+    K('kz-v9s', 'Đèn LED Kenzo V9S', 'kenzo-tro-sang', 2400000, 'Đỉnh cao công nghệ đèn LED cho ô tô và xe máy.', 'Nối tiếp thành công của dòng Kenzo V8S, Kenzo ra mắt mẫu đèn mới V9S kế thừa người tiền nhiệm.'),
+    K('kz-v16', 'Đèn LED Kenzo V16', 'kenzo-tro-sang', 2500000, 'Mẫu bóng đèn LED thế hệ mới.', 'Kenzo V16 – mẫu bóng đèn LED cao cấp mới nhất, nâng tầm hiệu suất chiếu sáng cho mọi dòng xe, kể cả ô tô và xe máy.', { isNew: true }),
+    K('kz-z20', 'Bi LED Mini Kenzo Z20 V2', 'kenzo-tro-sang', 1400000, 'Thiết kế nhỏ gọn – dễ lắp đặt.', 'Super Bi LED Mini Kenzo Z20 là đèn trợ sáng hiệu quả cho đèn chính, tích hợp 2 chế độ pha/cos trong 1 và driver tích hợp trên thân đèn.'),
+    K('kz-x100', 'Đèn trợ sáng Mini Kenzo X100 V4', 'kenzo-tro-sang', 1500000, 'Trợ sáng mini thế hệ mới.', 'Thiết kế nhỏ gọn – linh hoạt – dễ lắp đặt, Kenzo X100 là lựa chọn tối ưu cho những ai cần bổ sung ánh sáng an toàn.'),
+    K('kz-x200', 'Đèn trợ sáng Kenzo X200', 'kenzo-tro-sang', 2500000, 'Trợ sáng thế hệ mới, mạnh mẽ trong từng chi tiết.', 'Thiết kế nhỏ gọn – dễ lắp đặt, đèn trợ sáng mini Kenzo X200 mang đến hiệu suất vượt trội cho mọi hành trình.', { specs: { 'Công suất': '45W', 'Nhiệt màu': '5500K', 'Chống nước': 'IP68' } }),
+    K('kz-kz40-v5', 'Đèn trợ sáng pha thế hệ mới Kenzo KZ40 V5.0', 'kenzo-tro-sang', 2500000, 'Trợ sáng pha thế hệ mới.', 'Đèn trợ sáng pha Kenzo KZ40 phiên bản V5.0.'),
+    K('kz-cx80-v2', 'Đèn trợ sáng bi cầu Kenzo CX80 V2 2026', 'kenzo-tro-sang', 4200000, 'Đèn trợ sáng văn minh, an toàn.', 'Kenzo CX80 V2 – đèn LED trợ sáng dạng bi cầu (projector) văn minh, sáng mạnh, an toàn cho anh em đi phố, offroad…'),
+  ];
 
+  // Nhận cả cách viết tắt/sai chính tả hay gặp trong caption TikTok: Ab/Airbalde → Air Blade, Fuled → Future…
+  const VIDEO_VEH_RE = {
+    'Vario': /vario/, 'Air Blade': /\bab\b|air ?b(la|al)de/, 'Vision': /vision/, 'SH': /\bsh\b(?! ?mode)/, 'SH Mode': /\bsh ?mode/,
+    'Lead': /\blead\b/, 'Scoopy': /scoopy/, 'Future': /future|fuled/, 'NVX': /\bnvx\b/, 'Click': /\bclick\b/, 'Vespa': /vespa/,
+    'Ô tô': /innova|\bcrv\b|ô tô|\boto\b/,
+  };
+
+  const kimg = id => `assets/img/kenzo/${id}.jpg`;
   const BANNERS = [
-    { id: 'b1', title: 'Lên đèn cháy phố', subtitle: 'Full combo Audi trước sau + Zhipat cho Vision — giảm đến 500K', image: img('7477175155995757831'), video: vid('7477175155995757831'), cta: 'Xem combo', link: '#/product/p18', active: true, theme: 'amber' },
-    { id: 'b2', title: 'Vario mẫu đèn mới', subtitle: 'Chóa pha chữ X + hậu đồng bộ — mẫu hot 74K lượt xem', image: img('7623989432148053269'), video: vid('7623989432148053269'), cta: 'Khám phá', link: '#/product/p26', active: true, theme: 'cyan' },
-    { id: 'b3', title: 'Bi cầu Kenzo · Aozoom', subtitle: 'Sáng — nét — không chói. Test sáng miễn phí tại shop', image: img('7482386436822519048'), video: '', cta: 'Chọn bi cầu', link: '#/category/bi-cau', active: true, theme: 'red' },
+    { id: 'b1', title: 'Bi LED Kenzo S600 Pro V3', subtitle: 'Chip LED 12 nhân, tăng sáng 25%, City Mode — lắp đặt & test sáng tại shop', image: kimg('kz-s600-pro-v3'), video: '', cta: 'Xem chi tiết', link: '#/product/kz-s600-pro-v3', active: true, theme: 'amber' },
+    { id: 'b2', title: 'Kenzo S500 Pro V2', subtitle: 'Nâng cấp mạnh mẽ, giá không đổi — Bi LED chính hãng Kenzo', image: kimg('kz-s500-pro-v2'), video: '', cta: 'Khám phá', link: '#/product/kz-s500-pro-v2', active: true, theme: 'cyan' },
+    { id: 'b3', title: 'Trợ sáng Kenzo', subtitle: 'X3 Pro · X100 · X200 · CX80 — sáng mạnh, an toàn khi đi đêm', image: kimg('kz-x3-pro'), video: '', cta: 'Chọn trợ sáng', link: '#/category/kenzo-tro-sang', active: true, theme: 'red' },
   ];
 
   const SIDE_ADS = [
-    { id: 'a1', title: 'Hậu Audi A7', subtitle: 'Liên hệ báo giá', image: img('7625123255896001812'), link: '#/category/den-hau', active: true },
-    { id: 'a2', title: 'Audi AB 2026', subtitle: 'Lắp như zin', image: img('7661850610035182869'), link: '#/product/p10', active: true },
+    { id: 'a1', title: 'Laser Kenzo S900 Pro', subtitle: 'Liên hệ báo giá', image: kimg('kz-s900-pro'), link: '#/product/kz-s900-pro', active: true },
+    { id: 'a2', title: 'Kenzo M18 Laser Matrix', subtitle: 'Nhỏ gọn – laser siêu việt', image: kimg('kz-m18-laser'), link: '#/product/kz-m18-laser', active: true },
   ];
+
+  /* Nội dung mặc định cũ (trước khi chuyển sang hàng Kenzo) — migrate6 chỉ thay những mục chủ shop chưa tự sửa */
+  const OLD_DEFAULTS = {
+    banners: { b1: 'Lên đèn cháy phố', b2: 'Vario mẫu đèn mới', b3: 'Bi cầu Kenzo · Aozoom' },
+    sideAds: { a1: 'Hậu Audi A7', a2: 'Audi AB 2026' },
+    popupImage: img('7613980016220671253'),
+    slogan: 'Chuyên làm Bi cầu · Audi · Trợ sáng · Bimini',
+    lenden200: 'Giảm 200K cho combo từ 3 triệu',
+  };
 
   const in7days = () => new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 16);
   const PROMOS = {
     coupons: [
       { code: 'SUPERLIGHT10', type: 'percent', value: 10, min: 1000000, max: 500000, expires: '2026-12-31', active: true, desc: 'Giảm 10% đơn từ 1 triệu (tối đa 500K)' },
-      { code: 'LENDEN200', type: 'fixed', value: 200000, min: 3000000, max: 0, expires: '2026-12-31', active: true, desc: 'Giảm 200K cho combo từ 3 triệu' },
+      { code: 'LENDEN200', type: 'fixed', value: 200000, min: 3000000, max: 0, expires: '2026-12-31', active: true, desc: 'Giảm 200K cho đơn từ 3 triệu' },
       { code: 'FREESHIP', type: 'ship', value: 0, min: 0, max: 0, expires: '2026-12-31', active: true, desc: 'Miễn phí vận chuyển' },
     ],
     flash: {
       active: true,
       title: 'Flash Sale cuối tuần',
       endsAt: in7days(),
-      items: [
-        { productId: 'p11', salePrice: 1090000 },
-        { productId: 'p07', salePrice: 1190000 },
-        { productId: 'p01', salePrice: 1690000 },
-        { productId: 'p18', salePrice: 2990000 },
-        { productId: 'p27', salePrice: 290000 },
-      ],
+      items: [], // thêm sản phẩm Flash Sale trong Admin
     },
-    popup: { active: true, title: 'Đặt chỗ lắp đèn online', text: 'Chọn mẫu đèn, hẹn giờ lắp và cọc trước để giữ hàng. Lắp đặt miễn phí tại shop Bình Thạnh!', image: img('7613980016220671253'), link: '#/category/den-hau' },
+    popup: { active: true, title: 'Đặt chỗ lắp đèn online', text: 'Chọn mẫu đèn, hẹn giờ lắp và cọc trước để giữ hàng. Lắp đặt miễn phí tại shop Bình Thạnh!', image: kimg('kz-s700-pro'), link: '#/category/all' },
     topbar: { active: true, text: '🔥 Lắp đặt miễn phí tại shop · Đặt chỗ online, cọc giữ lịch · Bảo hành đến 24 tháng' },
   };
 
   const SETTINGS = {
     shopName: 'TS SUPERLIGHT',
-    slogan: 'Chuyên làm Bi cầu · Audi · Trợ sáng · Bimini',
+    slogan: 'Chuyên lắp Bi LED · Laser · Trợ sáng Kenzo chính hãng',
     zalo: '0769678981',
     hotline: '0769678981',
     address: 'Bình Thạnh, TP. Hồ Chí Minh',
@@ -244,10 +133,10 @@
   };
 
   const seed = () => ({
-    version: 3,
-    categories: CATEGORIES,
+    version: 6,
+    categories: KENZO_CATEGORIES,
     vehicles: VEHICLES,
-    products: PRODUCTS,
+    products: KENZO_PRODUCTS,
     banners: BANNERS,
     sideAds: SIDE_ADS,
     promos: PROMOS,
@@ -264,6 +153,9 @@
       } catch (e) { this.data = seed(); }
       this.migrate();
       this.migrate3();
+      this.migrate4();
+      this.migrate5();
+      this.migrate6();
       return this.data;
     },
     /* v2: bỏ giao hàng, chuyển sang đặt chỗ + cọc */
@@ -285,6 +177,49 @@
       if ((d.version || 1) >= 3) return;
       d.products.forEach(p => { if (!p.vehicleImages) p.vehicleImages = suggestVehicleImages(p); });
       d.version = 3;
+      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+    },
+    /* v4: thêm danh mục + sản phẩm Kenzo, giữ nguyên dữ liệu đã có */
+    migrate4() {
+      const d = this.data;
+      if ((d.version || 1) >= 4) return;
+      KENZO_CATEGORIES.forEach(c => { if (!d.categories.some(x => x.id === c.id)) d.categories.push({ ...c }); });
+      KENZO_PRODUCTS.forEach(p => { if (!d.products.some(x => x.id === p.id)) d.products.push(JSON.parse(JSON.stringify(p))); });
+      d.version = 4;
+      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+    },
+    /* v5: xoá toàn bộ sản phẩm & danh mục cũ, chỉ giữ hàng Kenzo; dọn các liên kết trỏ tới sản phẩm đã xoá */
+    migrate5() {
+      const d = this.data;
+      if ((d.version || 1) >= 5) return;
+      const kenzoIds = new Set(KENZO_PRODUCTS.map(p => p.id));
+      d.products = d.products.filter(p => kenzoIds.has(p.id));
+      d.categories = d.categories.filter(c => !OLD_CATEGORY_IDS.includes(c.id));
+      d.promos.flash.items = d.promos.flash.items.filter(i => kenzoIds.has(i.productId));
+      const fixLink = l => {
+        const [, type, id] = String(l || '').match(/^#\/(product|category)\/([^/?]+)/) || [];
+        if (type === 'product' && !kenzoIds.has(id)) return '#/category/all';
+        if (type === 'category' && OLD_CATEGORY_IDS.includes(id)) return id === 'bi-cau' ? '#/category/kenzo-bi-led' : '#/category/all';
+        return l;
+      };
+      [...(d.banners || []), ...(d.sideAds || []), d.promos.popup].forEach(x => { if (x) x.link = fixLink(x.link); });
+      d.version = 5;
+      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+    },
+    /* v6: đổi banner, quảng cáo, popup, slogan sang hàng Kenzo (giữ nguyên mục chủ shop đã tự sửa) */
+    migrate6() {
+      const d = this.data;
+      if ((d.version || 1) >= 6) return;
+      const swap = (list, defs, olds) => (list || []).forEach((x, i) => {
+        const nw = defs.find(n => n.id === x.id);
+        if (nw && olds[x.id] === x.title) list[i] = { ...nw, active: x.active };
+      });
+      swap(d.banners, BANNERS, OLD_DEFAULTS.banners);
+      swap(d.sideAds, SIDE_ADS, OLD_DEFAULTS.sideAds);
+      if (d.promos.popup?.image === OLD_DEFAULTS.popupImage) d.promos.popup.image = PROMOS.popup.image;
+      if (d.settings.slogan === OLD_DEFAULTS.slogan) d.settings.slogan = SETTINGS.slogan;
+      d.promos.coupons.forEach(c => { if (c.desc === OLD_DEFAULTS.lenden200) c.desc = 'Giảm 200K cho đơn từ 3 triệu'; });
+      d.version = 6;
       try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
     },
     save() {
@@ -324,6 +259,16 @@
       else if (c.type === 'ship') freeShip = true;
       return { ok: true, code: c.code, discount, freeShip, msg: c.desc };
     },
+    /* Video TikTok theo dòng xe: tự phân loại từ caption (dùng chung cho trang khách + Admin) */
+    allVideos() { return [...(window.TIKTOK_MEDIA || [])].sort((a, b) => (b.video - a.video) || (b.views - a.views)); },
+    // Dòng xe trong Admin + nhóm "Ô tô" (có video lắp cho Innova, CRV…)
+    videoVehicleList() { return [...new Set([...this.data.vehicles.filter(v => v !== 'Tất cả dòng xe'), 'Ô tô'])]; },
+    videoMatches(m, v) {
+      const re = VIDEO_VEH_RE[v] || new RegExp(v.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+      return re.test((m.cap || '').toLowerCase());
+    },
+    videoVehiclesOf(m) { return this.videoVehicleList().filter(v => this.videoMatches(m, v)); },
+    videosFor(v) { return this.allVideos().filter(m => this.videoMatches(m, v)); },
     uid(prefix) { return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); },
   };
 

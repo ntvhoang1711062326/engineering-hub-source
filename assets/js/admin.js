@@ -24,6 +24,59 @@
   }
   const save = msg => { if (DB.save()) toast(msg || 'Đã lưu <b>✓</b>'); };
   const pill = ([t, c]) => `<span class="pill ${c}">${t}</span>`;
+
+  /* ---------------- Google Sheets: tải đơn khách đặt trên web về máy này ----------------
+     URL + mã bí mật (ADMIN_KEY) chỉ lưu trên máy admin, không nằm trong file tải lên web. */
+  const SHEET_CFG = 'tsl_sheet';
+  const Sheet = {
+    lastSync: null,
+    cfg() {
+      let c = {}; try { c = JSON.parse(localStorage.getItem(SHEET_CFG)) || {}; } catch (e) {}
+      return { url: c.url || window.SHOP_CONFIG?.orderEndpoint || '', key: c.key || '' };
+    },
+    setCfg(c) { try { localStorage.setItem(SHEET_CFG, JSON.stringify(c)); } catch (e) {} },
+    ready() { const c = this.cfg(); return !!(c.url && c.key); },
+    async call(params, body) {
+      const { url, key } = this.cfg();
+      const res = body
+        ? await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ ...body, key }) })
+        : await fetch(`${url}?${new URLSearchParams({ ...params, key })}`);
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'Lỗi không xác định');
+      return data;
+    },
+    // Gộp đơn trên Sheets vào dữ liệu admin (Sheets là bản chính); đơn mới về thì trừ kho như lúc khách đặt
+    async pull() {
+      const { orders } = await this.call({ action: 'list' });
+      const local = new Map(D().orders.map(o => [o.id, o]));
+      let added = 0;
+      orders.forEach(r => {
+        if (!local.has(r.id)) {
+          added++;
+          r.items.forEach(i => { const p = DB.product(i.pid); if (p) { p.stock = Math.max(0, p.stock - i.qty); p.sold += i.qty; } });
+        }
+        local.set(r.id, { ...local.get(r.id), ...r });
+      });
+      D().orders = [...local.values()].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+      DB.save();
+      this.lastSync = new Date();
+      return { added, total: orders.length };
+    },
+    push(o) { return this.call(null, { action: 'update', id: o.id, status: o.status, paymentStatus: o.paymentStatus }); },
+    remove(id) { return this.call(null, { action: 'delete', id }); },
+  };
+  async function syncOrders(silent) {
+    if (!Sheet.ready()) { if (!silent) toast('Chưa kết nối Google Sheets — vào <b>Cài đặt</b> để nhập URL &amp; mã bí mật'); return; }
+    const btn = $('#syncSheet'); if (btn) { btn.disabled = true; btn.textContent = '⟳ Đang tải…'; }
+    try {
+      const r = await Sheet.pull();
+      toast(r.added ? `Đã tải <b>${r.added}</b> đơn mới từ Google Sheets` : 'Đơn hàng đã cập nhật mới nhất <b>✓</b>');
+      if (location.hash.startsWith('#/orders') || location.hash.startsWith('#/dashboard') || !location.hash) route();
+    } catch (e) {
+      toast('Không tải được đơn: ' + esc(e.message));
+      if (btn) { btn.disabled = false; btn.textContent = '⟳ Tải đơn từ Google Sheets'; }
+    }
+  }
   const dt = s => new Date(s).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   const num = v => Number(String(v).replace(/[^\d]/g, '')) || 0;
   const catName = id => DB.category(id)?.name || id;
@@ -271,7 +324,7 @@
       <div class="m-head">${isNew ? 'Thêm sản phẩm mới' : 'Sửa: ' + esc(d.name)}</div>
       <form class="m-body" id="pForm">
         <div class="form-grid">
-          <div class="field full"><label>Tên sản phẩm *</label><input name="name" required value="${esc(d.name)}" placeholder="VD: Bi cầu Kenzo S600 Pro V2"></div>
+          <div class="field full"><label>Tên sản phẩm *</label><input name="name" required value="${esc(d.name)}" placeholder="VD: Bi LED Kenzo S600 Pro V3"></div>
           <div class="field"><label>Danh mục</label><select name="cat">${D().categories.map(c => `<option value="${c.id}" ${d.cat === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></div>
           <div class="field"><label>Bảo hành</label><input name="warranty" value="${esc(d.warranty)}"></div>
         </div>
@@ -384,8 +437,10 @@
   }
   function bindOrderRows() { $$('[data-order]').forEach(b => b.onclick = () => orderDetail(b.dataset.order)); }
   function viewOrders() {
-    $('#admTopActions').innerHTML = `<button class="btn btn-outline" id="exportCsv">⬇ Xuất Excel (CSV)</button>`;
+    $('#admTopActions').innerHTML = `<button class="btn btn-brand" id="syncSheet">⟳ Tải đơn từ Google Sheets</button> <button class="btn btn-outline" id="exportCsv">⬇ Xuất Excel (CSV)</button>`;
     $('#exportCsv').onclick = exportCsv;
+    $('#syncSheet').onclick = () => syncOrders();
+    if (Sheet.ready() && !Sheet.lastSync) setTimeout(() => syncOrders(true)); // tự tải khi mở trang lần đầu
     const draw = () => {
       const q = oFilter.q.toLowerCase();
       const list = D().orders.filter(o => (!oFilter.status || o.status === oFilter.status) && (!q || o.id.toLowerCase().includes(q) || o.customer.name.toLowerCase().includes(q) || o.customer.phone.includes(q)));
@@ -393,6 +448,9 @@
     };
     const counts = Object.fromEntries(Object.keys(STATUS).map(k => [k, D().orders.filter(o => o.status === k).length]));
     $('#view').innerHTML = `
+      <div class="sheet-note ${Sheet.ready() ? 'ok' : ''}">${Sheet.ready()
+        ? `📗 Đơn khách đặt trên web được lưu ở Google Sheets.${Sheet.lastSync ? ` Lần tải gần nhất: <b>${Sheet.lastSync.toLocaleTimeString('vi-VN')}</b>.` : ''} Đổi trạng thái đơn ở đây sẽ cập nhật lên Sheets.`
+        : '⚠ Chưa kết nối Google Sheets nên chưa thấy được đơn khách đặt trên web. Vào <a href="#/settings">Cài đặt → Google Sheets</a> để nhập URL &amp; mã bí mật.'}</div>
       <div class="card-a">
         <div class="bar-tools">
           <input id="oq" placeholder="Tìm mã đơn, tên, số điện thoại…" value="${esc(oFilter.q)}">
@@ -443,16 +501,26 @@
         </div>
       </div>
       <div class="m-foot"><button class="btn btn-outline" id="oDel" style="margin-right:auto;color:var(--sale)">Xoá đơn</button><button class="btn btn-outline" data-close>Đóng</button><button class="btn btn-brand" id="oSave">Cập nhật</button></div>`);
-    $('#oSave', m).onclick = () => {
-      const st = $('#oStatus', m).value;
+    $('#oSave', m).onclick = async () => {
+      const st = $('#oStatus', m).value, pay = $('#oPay', m).value;
+      if (Sheet.ready()) {
+        const b = $('#oSave', m); b.disabled = true; b.textContent = 'Đang lưu lên Sheets…';
+        try { await Sheet.push({ id: o.id, status: st, paymentStatus: pay }); }
+        catch (e) { b.disabled = false; b.textContent = 'Cập nhật'; return toast('Không cập nhật được lên Google Sheets: ' + esc(e.message)); }
+      }
       if (st === 'cancelled' && o.status !== 'cancelled') o.items.forEach(i => { const p = DB.product(i.pid); if (p) { p.stock += i.qty; p.sold = Math.max(0, p.sold - i.qty); } });
       o.status = st;
-      const pay = $('#oPay', m).value;
       if (pay === 'paid' && o.paymentStatus !== 'paid') o.paidAt = new Date().toISOString();
       o.paymentStatus = pay;
       save('Đã cập nhật đơn <b>✓</b>'); m.remove(); route();
     };
-    $('#oDel', m).onclick = () => { if (confirm('Xoá vĩnh viễn đơn này?')) { D().orders = D().orders.filter(x => x.id !== o.id); save('Đã xoá đơn'); m.remove(); route(); } };
+    $('#oDel', m).onclick = async () => {
+      if (!confirm(Sheet.ready() ? 'Xoá vĩnh viễn đơn này (xoá cả trên Google Sheets)?' : 'Xoá vĩnh viễn đơn này?')) return;
+      if (Sheet.ready()) {
+        try { await Sheet.remove(o.id); } catch (e) { return toast('Không xoá được trên Google Sheets: ' + esc(e.message)); }
+      }
+      D().orders = D().orders.filter(x => x.id !== o.id); save('Đã xoá đơn'); m.remove(); route();
+    };
   }
   function exportCsv() {
     const rows = [['Mã đơn', 'Thời gian', 'Khách hàng', 'SĐT', 'Lịch hẹn', 'Sản phẩm', 'Số tiền (cọc)', 'Thanh toán', 'TT thanh toán', 'Trạng thái']];
@@ -513,7 +581,8 @@
     $('#tbOn').onchange = () => { tb.active = $('#tbOn').checked; save(); };
   }
   function linkOptions(cur) {
-    const opts = [['#/', 'Trang chủ'], ['#/flash', 'Trang khuyến mãi'], ['#/videos', 'Video TikTok'],
+    const opts = [['#/', 'Trang chủ'],['#/videos', 'Video theo xe: Tất cả'],
+      ...DB.videoVehicleList().filter(v => DB.videosFor(v).length).map(v => [`#/vehicle/${encodeURIComponent(v)}`, `Video theo xe: ${v}`]),
       ...D().categories.map(c => [`#/category/${c.id}`, `Danh mục: ${c.name}`]),
       ...D().products.map(p => [`#/product/${p.id}`, `SP: ${p.name}`])];
     return opts.map(([v, l]) => `<option value="${esc(v)}" ${cur === v ? 'selected' : ''}>${esc(l)}</option>`).join('');
@@ -650,19 +719,22 @@
       <div class="card-a">
         <h3>Ảnh & video từ TikTok @ts.superlight<span class="sp"></span><a class="ib" href="${esc(D().settings.tiktok)}" target="_blank">Mở TikTok ↗</a></h3>
         <p class="muted" style="margin-top:-6px">${MEDIA.length} ảnh bìa video · ${MEDIA.filter(m => m.video).length} video đã tải về · <span class="pill green">Đang dùng</span> = ảnh đã gắn vào sản phẩm. Bấm vào ảnh để tạo nhanh sản phẩm.</p>
-        <div class="bar-tools"><input id="mq" placeholder="Lọc theo caption…"><select id="mf"><option value="">Tất cả</option><option value="unused">Chưa dùng</option><option value="video">Có video</option></select></div>
+        <div class="bar-tools"><input id="mq" placeholder="Lọc theo caption…"><select id="mv"><option value="">Mọi dòng xe (${MEDIA.length})</option>${DB.videoVehicleList().map(v => [v, DB.videosFor(v).length]).filter(([, n]) => n).map(([v, n]) => `<option value="${esc(v)}">${esc(v)} (${n})</option>`).join('')}<option value="-">Chưa rõ dòng xe (${MEDIA.filter(x => !DB.videoVehiclesOf(x).length).length})</option></select><select id="mf"><option value="">Tất cả</option><option value="unused">Chưa dùng</option><option value="video">Có video</option></select></div>
+        <p class="muted" style="margin:0 0 10px;font-size:12.5px">Dòng xe được tự nhận từ caption (vd: “Ab”, “Airbalde” → Air Blade; “Fuled” → Future) — giống mục <b>Video theo xe</b> trên trang bán hàng.</p>
         <div class="lib" id="mGrid"></div>
       </div>`;
     const draw = () => {
-      const q = $('#mq').value.toLowerCase(), fl = $('#mf').value;
-      $('#mGrid').innerHTML = MEDIA.filter(x => (!q || x.cap.toLowerCase().includes(q)) && (fl !== 'unused' || !used.has(x.id)) && (fl !== 'video' || x.video)).map(x => `
+      const q = $('#mq').value.toLowerCase(), fl = $('#mf').value, fv = $('#mv').value;
+      const vehOk = x => !fv || (fv === '-' ? !DB.videoVehiclesOf(x).length : DB.videoMatches(x, fv));
+      $('#mGrid').innerHTML = MEDIA.filter(x => (!q || x.cap.toLowerCase().includes(q)) && vehOk(x) && (fl !== 'unused' || !used.has(x.id)) && (fl !== 'video' || x.video)).map(x => `
         <div class="it" data-mid="${x.id}" title="${esc(x.cap)}">
           <img src="assets/img/${x.id}.jpg" loading="lazy" alt="">
           ${used.has(x.id) ? '<span class="used">Đang dùng</span>' : ''}${x.video ? '<span class="v">VIDEO</span>' : ''}
+          ${DB.videoVehiclesOf(x).length ? `<span class="veh">${esc(DB.videoVehiclesOf(x).join(' · '))}</span>` : ''}
           <div class="cap">👁 ${x.views.toLocaleString('vi-VN')} · ${esc(x.cap || '—')}</div>
         </div>`).join('');
     };
-    $('#mq').oninput = draw; $('#mf').onchange = draw; draw();
+    $('#mq').oninput = draw; $('#mf').onchange = draw; $('#mv').onchange = draw; draw();
     $('#mGrid').onclick = e => {
       const it = e.target.closest('[data-mid]'); if (!it) return;
       const x = MEDIA.find(m => m.id === it.dataset.mid);
@@ -673,6 +745,7 @@
           <div style="flex:1;min-width:220px">
             <p><b>${esc(x.cap || '—')}</b></p>
             <p class="muted">👁 ${x.views.toLocaleString('vi-VN')} lượt xem · ❤ ${x.likes.toLocaleString('vi-VN')}</p>
+            <p>Dòng xe: <b>${esc(DB.videoVehiclesOf(x).join(', ') || 'Chưa rõ (chỉ hiện ở “Tất cả video”)')}</b></p>
             <div class="field"><label>Đường dẫn ảnh</label><input readonly value="assets/img/${x.id}.jpg" onclick="this.select()"></div>
             <div style="display:grid;gap:8px;margin-top:12px">
               <button class="btn btn-brand" id="mkP">+ Tạo sản phẩm từ ảnh này</button>
@@ -714,6 +787,18 @@
         <div class="form-grid g3">${F('bankName', 'Mã ngân hàng')}${F('bankAccount', 'Số tài khoản')}${F('bankOwner', 'Tên chủ tài khoản')}</div>
       </div>
       <div style="display:flex;gap:10px;margin:14px 0"><button class="btn btn-brand btn-lg" id="sSave">Lưu cài đặt</button></div>
+      <div class="card-a" id="sheetCard"><h3>Google Sheets — nhận đơn từ trang web</h3>
+        <p class="muted" style="margin-top:-6px">Khách đặt chỗ trên web → đơn ghi vào Google Sheets và gửi mail báo cho bạn. Nhập thông tin dưới đây để trang admin này tải đơn về. Mã bí mật chỉ lưu trên máy này. Hướng dẫn cài: file <b>HUONG-DAN-GOOGLE-SHEETS.md</b>.</p>
+        <div class="form-grid">
+          <div class="field full"><label>URL Web App (kết thúc bằng /exec)</label><input id="shUrl" value="${esc(Sheet.cfg().url)}" placeholder="https://script.google.com/macros/s/…/exec"></div>
+          <div class="field full"><label>Mã bí mật (ADMIN_KEY trong Apps Script)</label><input id="shKey" type="password" value="${esc(Sheet.cfg().key)}" autocomplete="off"></div>
+        </div>
+        ${window.SHOP_CONFIG?.orderEndpoint ? '' : '<p class="msg err" style="margin-top:10px">⚠ File <b>assets/js/config.js</b> chưa có URL — trang web chưa gửi đơn về Google Sheets.</p>'}
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+          <button class="btn btn-brand" id="shSave">Lưu &amp; kiểm tra kết nối</button>
+          <span id="shMsg" class="msg" style="align-self:center;margin:0"></span>
+        </div>
+      </div>
       <div class="card-a"><h3>Sao lưu dữ liệu</h3>
         <p class="muted" style="margin-top:-6px">Dữ liệu đang lưu trong trình duyệt này. Xuất file để sao lưu hoặc chuyển sang máy khác.</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -727,6 +812,16 @@
       $$('[data-sn]').forEach(i => s[i.dataset.sn] = num(i.value));
       s.bankName = s.bankName.toUpperCase();
       save('Đã lưu cài đặt <b>✓</b>');
+    };
+    $('#shSave').onclick = async () => {
+      Sheet.setCfg({ url: $('#shUrl').value.trim(), key: $('#shKey').value.trim() });
+      const msg = $('#shMsg');
+      if (!Sheet.ready()) { msg.className = 'msg err'; msg.textContent = 'Nhập đủ URL và mã bí mật'; return; }
+      msg.className = 'msg'; msg.textContent = 'Đang kiểm tra…';
+      try {
+        const r = await Sheet.pull();
+        msg.className = 'msg ok'; msg.textContent = `✓ Kết nối thành công — có ${r.total} đơn trên Sheets (${r.added} đơn mới đã tải về).`;
+      } catch (e) { msg.className = 'msg err'; msg.textContent = '✕ ' + e.message; }
     };
     $('#bkExport').onclick = () => {
       const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(D(), null, 2)], { type: 'application/json' }));
