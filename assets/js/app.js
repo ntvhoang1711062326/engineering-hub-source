@@ -215,15 +215,6 @@
         ${grid(featured.slice(0, 10))}
       </section>
 
-      ${D().categories.map(c => {
-        const list = activeProducts().filter(p => p.cat === c.id);
-        return list.length ? `
-        <section class="section">
-          <div class="section-head"><h3>${esc(c.name)}</h3><a href="#/category/${c.id}">Xem tất cả ${list.length} sản phẩm →</a></div>
-          ${grid(list.slice(0, 5))}
-        </section>` : '';
-      }).join('')}
-
       <section class="section">
         <div class="section-head"><h3>Video lắp đèn theo dòng xe</h3><a href="#/videos">Tất cả video →</a></div>
         ${vehicleChips('')}
