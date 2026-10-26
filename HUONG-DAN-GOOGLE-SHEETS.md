@@ -79,7 +79,7 @@ Vào web trên tên miền → chọn sản phẩm → **Đặt chỗ**. Kiểm 
 
 ## Đồng bộ video TikTok
 
-Nút **🔄 Đồng bộ TikTok** (Admin → **Thư viện TikTok**) dùng chung Apps Script này để đọc các kênh TikTok ở **Cài đặt → Link TikTok (kênh chính)** và **Link TikTok kênh 2** (trình duyệt không tự đọc TikTok được). Mỗi kênh có một dải video kéo ngang ở trang chủ; số người theo dõi, lượt thích, ảnh đại diện cũng được cập nhật khi đồng bộ.
+Nút **🔄 Đồng bộ TikTok** (Admin → **Thư viện TikTok**) dùng chung Apps Script này để đọc các kênh TikTok ở **Cài đặt → Link TikTok (kênh chính)** và **Link TikTok kênh 2** (trình duyệt không tự đọc TikTok được). Đồng bộ TikTok **chỉ cần URL Web App**, không cần mã bí mật. Mỗi kênh có một dải video kéo ngang ở trang chủ; số người theo dõi, lượt thích, ảnh đại diện cũng được cập nhật khi đồng bộ.
 
 - Mỗi lần bấm lấy được khoảng **10–12 video mới nhất** của mỗi kênh: video chưa có thì thêm vào thư viện (kèm ảnh bìa), video đã có thì cập nhật caption + lượt xem. Dòng xe tự nhận theo caption như cũ.
 - Sau khi đồng bộ, bấm **🚀 Xuất bản lên web** để khách thấy video mới.

@@ -921,7 +921,8 @@
      Trình duyệt không đọc thẳng được TikTok (bị chặn CORS) → nhờ Apps Script (cùng URL với Google Sheets)
      lấy ~12 video mới nhất từ trang nhúng của kênh. Video mới được thêm vào thư viện, video cũ cập nhật caption + lượt xem. */
   async function syncTikTok() {
-    if (!Sheet.ready()) { location.hash = '#/settings'; return toast('Đồng bộ TikTok chạy qua Google Apps Script — nhập <b>URL &amp; mã bí mật</b> ở Cài đặt trước'); }
+    // Chỉ cần URL Apps Script — đồng bộ TikTok không đụng tới dữ liệu đơn nên không cần mã bí mật
+    if (!Sheet.cfg().url) { location.hash = '#/settings'; return toast('Đồng bộ TikTok chạy qua Google Apps Script — nhập <b>URL Web App</b> ở Cài đặt trước'); }
     const btn = $('#ttSync'); if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Đang đồng bộ…'; }
     try {
       const base = new Set((window.TIKTOK_MEDIA || []).map(m => m.id));
@@ -1033,7 +1034,7 @@
         <p class="muted" style="margin-top:-6px">Khách đặt chỗ trên web → đơn ghi vào Google Sheets và gửi mail báo cho bạn. Nhập thông tin dưới đây để trang admin này tải đơn về. Mã bí mật chỉ lưu trên máy này. Hướng dẫn cài: file <b>HUONG-DAN-GOOGLE-SHEETS.md</b>.</p>
         <div class="form-grid">
           <div class="field full"><label>URL Web App (kết thúc bằng /exec)</label><input id="shUrl" value="${esc(Sheet.cfg().url)}" placeholder="https://script.google.com/macros/s/…/exec"></div>
-          <div class="field full"><label>Mã bí mật (ADMIN_KEY trong Apps Script)</label><input id="shKey" type="password" value="${esc(Sheet.cfg().key)}" autocomplete="off"></div>
+          <div class="field full"><label>Mã bí mật (ADMIN_KEY trong Apps Script) — chỉ cần khi tải đơn; Đồng bộ TikTok chỉ cần URL</label><input id="shKey" type="password" value="${esc(Sheet.cfg().key)}" autocomplete="off"></div>
         </div>
         ${window.SHOP_CONFIG?.orderEndpoint ? '' : '<p class="msg err" style="margin-top:10px">⚠ File <b>assets/js/config.js</b> chưa có URL — trang web chưa gửi đơn về Google Sheets.</p>'}
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
@@ -1087,8 +1088,15 @@
     $('#shSave').onclick = async () => {
       Sheet.setCfg({ url: $('#shUrl').value.trim(), key: $('#shKey').value.trim() });
       const msg = $('#shMsg');
-      if (!Sheet.ready()) { msg.className = 'msg err'; msg.textContent = 'Nhập đủ URL và mã bí mật'; return; }
+      if (!Sheet.cfg().url) { msg.className = 'msg err'; msg.textContent = 'Nhập URL Web App'; return; }
       msg.className = 'msg'; msg.textContent = 'Đang kiểm tra…';
+      if (!Sheet.ready()) {
+        try {
+          await Sheet.call({ action: 'ping' });
+          msg.className = 'msg ok'; msg.textContent = '✓ Đã lưu URL — dùng được Đồng bộ TikTok. Nhập thêm mã bí mật nếu cần tải đơn.';
+        } catch (e) { msg.className = 'msg err'; msg.textContent = '✕ ' + e.message; }
+        return;
+      }
       try {
         const r = await Sheet.pull();
         msg.className = 'msg ok'; msg.textContent = `✓ Kết nối thành công — có ${r.total} đơn trên Sheets (${r.added} đơn mới đã tải về).`;

@@ -5,7 +5,7 @@
    - Trang bán hàng gửi đơn mới  → POST { action: 'create', order }
    - Trang admin (máy cá nhân)   → GET  ?action=list&key=ADMIN_KEY      (tải đơn về)
                                  → POST { action: 'update' | 'delete', key, ... }
-                                 → GET  ?action=tiktok&user=…&known=…&key=ADMIN_KEY (nút "Đồng bộ TikTok")
+                                 → GET  ?action=tiktok&user=…&known=…   (nút "Đồng bộ TikTok", không cần mã bí mật)
    ============================================================ */
 
 // ⚠️ BẮT BUỘC đổi thành một chuỗi bí mật của riêng bạn (dài, khó đoán).
@@ -30,8 +30,9 @@ const keyOf = (map, label) => Object.keys(map).find(k => map[k] === label);
 function doGet(e) {
   const p = (e && e.parameter) || {};
   if (p.action === 'ping') return json({ ok: true, shop: SHOP_NAME });
-  const auth = checkKey(p.key); if (auth) return json(auth);
+  // Chỉ đọc video công khai trên TikTok, không đụng tới đơn hàng → không cần mã bí mật
   if (p.action === 'tiktok') return json(syncTikTok(p.user, p.known));
+  const auth = checkKey(p.key); if (auth) return json(auth);
   return json({ ok: true, orders: listOrders() });
 }
 
