@@ -56,7 +56,7 @@
   ];
   const K = (id, name, cat, price, short, desc, extra = {}) => ({
     id, name, cat, vehicles: ['Tất cả dòng xe'], price, oldPrice: 0, image: `assets/img/kenzo/${id}.webp`,
-    gallery: [], video: '', tiktok: '', stock: 20, sold: 0, rating: 5,
+    gallery: [], video: '', tiktok: '',
     featured: !!extra.featured, isNew: !!extra.isNew, warranty: 'Theo chính sách Kenzo',
     short, desc: `${name} — ${short}\n\n${desc}\n\nSản phẩm chính hãng Kenzo Việt Nam, lắp đặt trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn và báo giá theo dòng xe.`,
     specs: { 'Thương hiệu': 'Kenzo', ...(extra.specs || {}) }, vehicleImages: {}, active: true,
@@ -90,7 +90,7 @@
   ];
   const T = (id, name, cat, price, short, extra = {}) => ({
     id, name, cat, vehicles: ['Tất cả dòng xe'], price, oldPrice: extra.oldPrice || 0, image: `assets/img/titan/${id}.webp`,
-    gallery: [], video: '', tiktok: '', stock: 20, sold: 0, rating: 5, featured: false, isNew: false, warranty: extra.warranty,
+    gallery: [], video: '', tiktok: '', featured: false, isNew: false, warranty: extra.warranty,
     short, desc: `${name} — ${short}
 
 Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.`,
@@ -188,7 +188,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
   };
 
   const seed = () => ({
-    version: 11,
+    version: 12,
     categories: [...KENZO_CATEGORIES, ...TITAN_CATEGORIES],
     vehicles: VEHICLES,
     products: [...KENZO_PRODUCTS, ...TITAN_PRODUCTS],
@@ -219,6 +219,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       this.migrate9();
       this.migrate10();
       this.migrate11();
+      this.migrate12();
       if (this.data.settings.tiktok2 == null) this.data.settings.tiktok2 = SETTINGS.tiktok2;
       return this.data;
     },
@@ -333,6 +334,14 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       });
       [...(d.banners || []), ...(d.sideAds || []), d.promos.popup].forEach(x => { if (x) x.image = fix(x.image); });
       d.version = 11;
+      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+    },
+    /* v12: web chỉ giới thiệu sản phẩm — bỏ tồn kho, số đã bán, số sao */
+    migrate12() {
+      const d = this.data;
+      if ((d.version || 1) >= 12) return;
+      d.products.forEach(p => { delete p.stock; delete p.sold; delete p.rating; });
+      d.version = 12;
       try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
     },
     save() {

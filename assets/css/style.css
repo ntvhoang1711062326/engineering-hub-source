@@ -222,13 +222,8 @@ button { cursor: pointer; }
 .price { display: flex; align-items: baseline; justify-content: center; gap: 8px; flex-wrap: wrap; }
 .price b { color: var(--sale); font-size: 16px; font-weight: 800; }
 .price s { color: var(--muted); font-size: 12.5px; }
-.card-meta { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; margin-top: auto; }
-.stars { color: #f5a623; letter-spacing: 1px; }
-.card-add { display: block; text-align: center; margin-top: 6px; border: 1.5px solid var(--dark); background: #fff; border-radius: 8px; padding: 7px; font-weight: 700; font-size: 12.5px; transition: all .15s; }
+.card-add { display: block; text-align: center; margin-top: auto; border: 1.5px solid var(--dark); background: #fff; border-radius: 8px; padding: 7px; font-weight: 700; font-size: 12.5px; transition: all .15s; }
 .card-add:hover { background: var(--dark); color: var(--brand); }
-.flash .card-meta .bar { flex: 1; height: 16px; border-radius: 8px; background: #ffe2b3; position: relative; overflow: hidden; font-size: 10.5px; font-weight: 700; color: #7a3a00; text-align: center; line-height: 16px; }
-.flash .card-meta .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, var(--brand-2), var(--sale)); border-radius: 8px; }
-.flash .card-meta .bar span { position: relative; z-index: 1; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
 
 /* ---------- TikTok videos ---------- */
 .tiktok-head { display: flex; align-items: center; gap: 14px; background: var(--dark); color: #fff; padding: 16px 18px; border-radius: var(--radius) var(--radius) 0 0; flex-wrap: wrap; }
@@ -501,7 +496,6 @@ table.specs td:first-child { color: var(--muted); width: 38%; background: #fafaf
   .grid, .grid.cols-4, .listing .grid { gap: 8px; }
   .card-body { padding: 8px 8px 10px; gap: 4px; }
   .card-name { font-size: 13px; min-height: 34px; }
-  .card-meta { font-size: 11px; }
   .card-add { font-size: 12px; padding: 6px; }
   .policies { grid-template-columns: 1fr; }
   .cats { grid-template-columns: repeat(2, 1fr); }

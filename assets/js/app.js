@@ -21,7 +21,6 @@
     const t = $('#toast'); t.innerHTML = html; t.classList.add('show');
     clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2400);
   }
-  const stars = n => '★★★★★'.slice(0, Math.round(n)) + '☆☆☆☆☆'.slice(0, 5 - Math.round(n));
   const activeProducts = () => D().products.filter(p => p.active);
 
   /* ---------------- Video theo dòng xe (phân loại dùng chung với Admin — xem DB.videosFor) ---------------- */
@@ -40,9 +39,8 @@
   const ttTop = () => DB.channels()[0]?.url || S().tiktok;
   const phoneFmt = p => String(p).replace(/(\d{4})(\d{3})(\d+)/, '$1.$2.$3');
 
-  function card(p, opts = {}) {
+  function card(p) {
     const fi = DB.flashItem(p.id);
-    const soldPct = Math.min(95, Math.round(p.sold / (p.sold + p.stock) * 100));
     return `
     <article class="card">
       <a href="#/product/${p.id}" class="card-img">
@@ -56,17 +54,12 @@
       <div class="card-body">
         <a href="#/product/${p.id}" class="card-name">${esc(p.name)}</a>
         <div class="price">${priceHTML(p)}</div>
-        <div class="card-meta">
-          ${opts.flash
-            ? `<div class="bar"><i style="width:${soldPct}%"></i><span>Đã bán ${p.sold}</span></div>`
-            : `<span class="stars">${stars(p.rating)}</span><span>Đã bán ${p.sold}</span>`}
-        </div>
         <a class="card-add" href="${zaloLink()}" target="_blank" rel="noopener">💬 Tư vấn Zalo</a>
       </div>
     </article>`;
   }
-  const grid = (list, cls = '', opts) => list.length
-    ? `<div class="grid ${cls}">${list.map(p => card(p, opts)).join('')}</div>`
+  const grid = (list, cls = '') => list.length
+    ? `<div class="grid ${cls}">${list.map(card).join('')}</div>`
     : `<div class="empty panel"><div class="big">🔦</div><p>Chưa có sản phẩm phù hợp.</p><a class="btn btn-dark" href="#/">Về trang chủ</a></div>`;
 
   function countdownHTML(id) { return `<div class="countdown" id="${id}"><span>00</span><em>:</em><span>00</span><em>:</em><span>00</span><em>:</em><span>00</span></div>`; }
@@ -159,7 +152,7 @@
     const flashOn = f.active && new Date(f.endsAt) > new Date();
     const flashList = flashOn ? f.items.map(i => DB.product(i.productId)).filter(p => p && p.active) : [];
     // Nổi bật trước, thiếu thì lấy thêm hàng mới / bán chạy cho đủ 10 — CSS chỉ hiện số vừa khít hàng (.grid.fill)
-    const featured = [...activeProducts()].sort((a, b) => b.featured - a.featured || b.isNew - a.isNew || b.sold - a.sold).slice(0, 10);
+    const featured = [...activeProducts()].sort((a, b) => b.featured - a.featured || b.isNew - a.isNew).slice(0, 10);
     const catImg = cid => (activeProducts().find(p => p.cat === cid) || {}).image || '';
 
     app.innerHTML = `
@@ -201,7 +194,7 @@
           <h3>${esc(f.title)}</h3>
           <span>Kết thúc sau</span>${countdownHTML('cdHome')}
         </div>
-        ${grid(flashList, '', { flash: true })}
+        ${grid(flashList)}
       </section>` : ''}
 
       <section class="section">
@@ -321,8 +314,12 @@
     const veh = params.get('v') || '';
     let items = list.slice();
     if (veh) items = items.filter(p => p.vehicles.includes(veh) || p.vehicles.includes('Tất cả dòng xe'));
+    // Giá 0 = "Liên hệ" → luôn xếp sau các sản phẩm có giá
+    const price = p => DB.priceOf(p).price || Infinity;
     if (sort === 'new') items.sort((a, b) => b.isNew - a.isNew);
-    else items.sort((a, b) => b.sold - a.sold);
+    else if (sort === 'asc') items.sort((a, b) => price(a) - price(b));
+    else if (sort === 'desc') items.sort((a, b) => (DB.priceOf(b).price || -1) - (DB.priceOf(a).price || -1));
+    else items.sort((a, b) => b.featured - a.featured || b.isNew - a.isNew);
 
     const base = location.hash.split('?')[0];
     const q = (k, v) => { const p = new URLSearchParams(params); v ? p.set(k, v) : p.delete(k); return `${base}?${p}`; };
@@ -346,7 +343,7 @@
           <div class="toolbar">
             <h2>${esc(title)} <small class="muted" style="font-size:14px;font-weight:500">(${items.length} sản phẩm)</small></h2>
             <select class="sort" onchange="location.hash=this.value">
-              ${[['pop', 'Bán chạy'], ['new', 'Mới nhất']].map(([v, l]) => `<option value="${q('sort', v)}" ${sort === v ? 'selected' : ''}>${l}</option>`).join('')}
+              ${[['pop', 'Nổi bật'], ['new', 'Mới nhất'], ['asc', 'Giá thấp → cao'], ['desc', 'Giá cao → thấp']].map(([v, l]) => `<option value="${q('sort', v)}" ${sort === v ? 'selected' : ''}>${l}</option>`).join('')}
             </select>
           </div>
           ${grid(items)}
@@ -424,8 +421,8 @@
         <div class="pd-info">
           <h1>${esc(p.name)}</h1>
           <div class="pd-meta">
-            <span class="stars">${stars(p.rating)}</span><span>Đã bán ${p.sold}</span>
-            <span>Kho: ${p.stock > 0 ? `<b style="color:var(--ok)">Còn hàng</b>` : '<b style="color:var(--sale)">Hết hàng</b>'}</span>
+            ${p.specs?.['Thương hiệu'] ? `<span>Thương hiệu: <b>${esc(p.specs['Thương hiệu'])}</b></span>` : ''}
+            ${cat ? `<span>Danh mục: <a href="#/category/${cat.id}"><b>${esc(cat.name)}</b></a></span>` : ''}
             <span>Mã: ${esc(p.id.toUpperCase())}</span>
           </div>
           ${pr.flash ? `<div class="pd-flash">⚡ FLASH SALE · Kết thúc sau ${countdownHTML('cdPd')}</div>` : ''}

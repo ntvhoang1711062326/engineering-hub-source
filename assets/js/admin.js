@@ -281,13 +281,13 @@
 
   /* ---------------- Dashboard ---------------- */
   function viewDashboard() {
-    const ps = D().products, on = ps.filter(p => p.active), low = on.filter(p => p.stock <= 5);
+    const ps = D().products, on = ps.filter(p => p.active);
     const f = D().promos.flash, flashOn = f.active && new Date(f.endsAt) > new Date();
     const vids = MEDIA(), synced = syncedAt();
     const latest = [...vids].sort((a, b) => b.id.length - a.id.length || b.id.localeCompare(a.id)).slice(0, 6);
     $('#view').innerHTML = `
       <div class="kpis">
-        <div class="kpi"><small>Sản phẩm đang hiện</small><b>${on.length}</b><span>Tổng ${ps.length} · ${low.length ? `<b style="color:var(--sale)">${low.length}</b> sắp hết hàng` : 'tồn kho ổn định'}</span></div>
+        <div class="kpi"><small>Sản phẩm đang hiện</small><b>${on.length}</b><span>Tổng ${ps.length}${ps.length > on.length ? ` · ${ps.length - on.length} đang ẩn` : ''} · <a href="#/products">Quản lý →</a></span></div>
         <div class="kpi"><small>Danh mục</small><b>${D().categories.length}</b><span><a href="#/categories">Quản lý danh mục →</a></span></div>
         <div class="kpi"><small>Video TikTok</small><b>${vids.length}</b><span>${synced ? 'Đồng bộ ' + dt(synced) : 'Chưa đồng bộ'}</span></div>
         <div class="kpi"><small>Flash Sale</small><b>${flashOn ? f.items.length + ' SP' : 'Tắt'}</b><span>${flashOn ? 'Kết thúc ' + dt(f.endsAt) : '<a href="#/promos">Bật Flash Sale →</a>'}</span></div>
@@ -295,9 +295,7 @@
       <div class="card-a" style="margin-top:14px">
         <h3>Video TikTok mới nhất<span class="sp"></span><a href="#/media" class="ib">Thư viện →</a></h3>
         <div class="lib">${latest.map(x => `<div class="it"><img src="${esc(DB.cover(x))}" loading="lazy" alt=""><div class="cap">👁 ${x.views.toLocaleString('vi-VN')} · ${esc(x.cap || '—')}</div></div>`).join('')}</div>
-      </div>
-      ${low.length ? `<div class="card-a"><h3>⚠ Sắp hết hàng</h3>${productsTable(low)}</div>` : ''}`;
-    bindProductRows();
+      </div>`;
   }
 
   /* ---------------- Products ---------------- */
@@ -305,7 +303,7 @@
   function productsTable(list) {
     if (!list.length) return '<div class="empty">Không có sản phẩm</div>';
     return `<div class="tbl-wrap"><table class="tbl">
-      <thead><tr><th></th><th>Sản phẩm</th><th>Danh mục</th><th class="num">Giá bán</th><th class="num">Giá gốc</th><th class="num">Kho</th><th class="num">Đã bán</th><th>Hiển thị</th><th></th></tr></thead>
+      <thead><tr><th></th><th>Sản phẩm</th><th>Danh mục</th><th class="num">Giá bán</th><th class="num">Giá gốc</th><th>Hiển thị</th><th></th></tr></thead>
       <tbody>${list.map(p => {
         const fi = DB.flashItem(p.id);
         return `<tr>
@@ -315,8 +313,6 @@
         <td>${esc(catName(p.cat))}</td>
         <td class="num"><b>${p.price ? fmt(p.price) : 'Liên hệ'}</b></td>
         <td class="num muted">${p.oldPrice ? fmt(p.oldPrice) : '—'}</td>
-        <td class="num" style="${p.stock <= 5 ? 'color:var(--sale);font-weight:700' : ''}">${p.stock}</td>
-        <td class="num">${p.sold}</td>
         <td><label class="switch"><input type="checkbox" data-toggle="${p.id}" ${p.active ? 'checked' : ''}><span></span></label></td>
         <td class="acts"><button class="ib" data-edit="${p.id}">Sửa</button> <button class="ib" data-dup="${p.id}" title="Nhân bản">⧉</button> <button class="ib danger" data-del="${p.id}" title="Xoá">🗑</button></td>
       </tr>`; }).join('')}</tbody></table></div>`;
@@ -326,7 +322,7 @@
     $$('[data-edit]').forEach(b => b.onclick = () => productForm(DB.product(b.dataset.edit)));
     $$('[data-dup]').forEach(b => b.onclick = () => {
       const src = DB.product(b.dataset.dup);
-      const cp = JSON.parse(JSON.stringify(src)); cp.id = DB.uid('p'); cp.name += ' (bản sao)'; cp.sold = 0; cp.active = false;
+      const cp = JSON.parse(JSON.stringify(src)); cp.id = DB.uid('p'); cp.name += ' (bản sao)'; cp.active = false;
       D().products.unshift(cp); save('Đã nhân bản — sản phẩm mới đang <b>ẩn</b>'); route();
     });
     $$('[data-del]').forEach(b => b.onclick = () => {
@@ -344,7 +340,7 @@
       const q = pFilter.q.toLowerCase();
       const list = D().products.filter(p => (!q || p.name.toLowerCase().includes(q) || p.id.includes(q))
         && (!pFilter.cat || p.cat === pFilter.cat)
-        && (!pFilter.status || (pFilter.status === 'on' ? p.active : pFilter.status === 'off' ? !p.active : p.stock <= 5)));
+        && (!pFilter.status || (pFilter.status === 'on' ? p.active : !p.active)));
       $('#pTable').innerHTML = productsTable(list);
       $('#pCount').textContent = `${list.length} / ${D().products.length} sản phẩm`;
       bindProductRows();
@@ -354,7 +350,7 @@
         <div class="bar-tools">
           <input id="pq" placeholder="Tìm tên hoặc mã sản phẩm…" value="${esc(pFilter.q)}">
           <select id="pc"><option value="">Tất cả danh mục</option>${D().categories.map(c => `<option value="${c.id}" ${pFilter.cat === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>
-          <select id="ps"><option value="">Mọi trạng thái</option><option value="on">Đang hiện</option><option value="off">Đang ẩn</option><option value="low">Sắp hết hàng (≤5)</option></select>
+          <select id="ps"><option value="">Mọi trạng thái</option><option value="on">Đang hiện</option><option value="off">Đang ẩn</option></select>
           <span class="sp"></span><span class="muted" id="pCount"></span>
         </div>
         <div id="pTable"></div>
@@ -370,7 +366,7 @@
     const isNew = !p;
     const d = p ? JSON.parse(JSON.stringify(p)) : {
       id: DB.uid('p'), name: '', cat: D().categories[0].id, vehicles: [], price: 0, oldPrice: 0, image: '', gallery: [], vehicleImages: {}, video: '', tiktok: '',
-      stock: 10, sold: 0, rating: 5, featured: false, isNew: true, warranty: '12 tháng', short: '', desc: '', specs: {}, active: true,
+      featured: false, isNew: true, warranty: '12 tháng', short: '', desc: '', specs: {}, active: true,
       ...preset,
     };
     if (!d.vehicleImages) d.vehicleImages = {};
@@ -383,10 +379,9 @@
           <div class="field"><label>Danh mục</label><select name="cat">${D().categories.map(c => `<option value="${c.id}" ${d.cat === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></div>
           <div class="field"><label>Bảo hành</label><input name="warranty" value="${esc(d.warranty)}"></div>
         </div>
-        <div class="form-grid g3" style="margin-top:12px">
+        <div class="form-grid" style="margin-top:12px">
           <div class="field"><label>Giá bán (đ)</label><input name="price" inputmode="numeric" value="${d.price ? d.price.toLocaleString('vi-VN') : ''}" placeholder="0"><div class="hint">Để trống hoặc 0 → web hiện “Liên hệ”</div></div>
           <div class="field"><label>Giá gốc / giá gạch (đ)</label><input name="oldPrice" inputmode="numeric" value="${d.oldPrice ? d.oldPrice.toLocaleString('vi-VN') : ''}"><div class="hint">Để trống nếu không giảm giá</div></div>
-          <div class="field"><label>Tồn kho</label><input name="stock" type="number" min="0" value="${d.stock}"></div>
         </div>
         <div class="field" style="margin-top:12px"><label>Dòng xe tương thích</label>
           <div class="checks">${D().vehicles.map(v => `<label><input type="checkbox" name="veh" value="${esc(v)}" ${d.vehicles.includes(v) ? 'checked' : ''}> ${esc(v)}</label>`).join('')}</div>
@@ -458,7 +453,7 @@
       if (!d.image) return toast('Chọn <b>ảnh đại diện</b>');
       Object.assign(d, {
         name: f.name.value.trim(), cat: f.cat.value, warranty: f.warranty.value.trim(),
-        price: num(f.price.value), oldPrice: num(f.oldPrice.value), stock: Math.max(0, +f.stock.value || 0),
+        price: num(f.price.value), oldPrice: num(f.oldPrice.value),
         vehicles: $$('input[name=veh]:checked', f).map(x => x.value),
         video: f.video.value, tiktok: f.tiktok.value.trim(), short: f.short.value.trim(), desc: f.desc.value.trim(),
         specs: Object.fromEntries(f.specs.value.split('\n').map(l => l.split(':')).filter(a => a.length > 1 && a[0].trim()).map(([k, ...v]) => [k.trim(), v.join(':').trim()])),
