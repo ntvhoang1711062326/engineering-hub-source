@@ -134,11 +134,14 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
   ];
 
   // Nhận cả cách viết tắt/sai chính tả hay gặp trong caption TikTok: Ab/Airbalde → Air Blade, Fuled → Future…
+  // Tên xe viết liền đời xe vẫn nhận: "Ab2026", "Sh2025", "Lead125" (sau tên xe không được là chữ cái)
   const VIDEO_VEH_RE = {
-    'Vario': /vario/, 'Air Blade': /\bab\b|air ?b(la|al)de/, 'Vision': /vision/, 'SH': /\bsh\b(?! ?mode)/, 'SH Mode': /\bsh ?mode/,
-    'Lead': /\blead\b/, 'Scoopy': /scoopy/, 'Future': /future|fuled/, 'NVX': /\bnvx\b/, 'Click': /\bclick\b/, 'Vespa': /vespa/,
+    'Vario': /vario/, 'Air Blade': /\bab(?![a-zà-ỹđ])|air ?b(la|al)de/, 'Vision': /vision/, 'SH': /\bsh(?![a-zà-ỹđ])(?! ?mode)/, 'SH Mode': /\bsh ?mode/,
+    'Lead': /\blead(?![a-zà-ỹđ])/, 'Scoopy': /scoopy/, 'Future': /future|fuled/, 'NVX': /\bnvx(?![a-z])/, 'Click': /\bclick(?![a-z])/, 'Vespa': /vespa/,
     'Ô tô': /innova|\bcrv\b|ô tô|\boto\b/,
   };
+  // Mã video TikTok tăng dần theo thời gian đăng → mã lớn hơn = video mới hơn
+  const newestFirst = (a, b) => b.id.length - a.id.length || b.id.localeCompare(a.id);
 
   const kimg = id => `assets/img/kenzo/${id}.jpg`;
   const BANNERS = [
@@ -381,9 +384,9 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       const base = (window.TIKTOK_MEDIA || []).map(m => sync.has(m.id) ? { ...m, ...sync.get(m.id) } : m);
       const known = new Set(base.map(m => m.id));
       const added = [...sync.values()].filter(x => !known.has(x.id)).map(x => ({ cap: '', views: 0, likes: 0, video: false, ...x }));
-      return [...added.sort((a, b) => b.id.length - a.id.length || b.id.localeCompare(a.id)), ...base];
+      return [...added.sort(newestFirst), ...base];
     },
-    allVideos() { return this.media().sort((a, b) => (b.video - a.video) || (b.views - a.views)); },
+    allVideos() { return this.media().sort(newestFirst); },
     // Video mới đồng bộ chưa xuất bản: ảnh bìa còn nằm trong bản nháp (data:…)
     cover(m) { return m.cover || img(m.id); },
     /* Kênh TikTok: link ở Cài đặt (tiktok, tiktok2) + thông tin kênh (media.js, số liệu mới từ Đồng bộ) */
@@ -396,7 +399,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
         url: 'https://www.tiktok.com/@' + user,
       }));
     },
-    channelVideos(user) { return this.media().filter(m => this.chOf(m) === user).sort((a, b) => b.id.length - a.id.length || b.id.localeCompare(a.id)); },
+    channelVideos(user) { return this.media().filter(m => this.chOf(m) === user).sort(newestFirst); },
     // Dòng xe trong Admin + nhóm "Ô tô" (có video lắp cho Innova, CRV…)
     videoVehicleList() { return [...new Set([...this.data.vehicles.filter(v => v !== 'Tất cả dòng xe'), 'Ô tô'])]; },
     videoMatches(m, v) {
