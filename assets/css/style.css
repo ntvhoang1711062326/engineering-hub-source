@@ -155,15 +155,11 @@ button { cursor: pointer; }
 .policy small { color: var(--muted); font-size: 12px; }
 
 /* ---------- Sections ---------- */
-.section { margin-top: 40px; }
-/* Tiêu đề mục căn giữa + đường kẻ hình thoi (title-separator kiểu cuongden) */
-.section-head { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; margin-bottom: 22px; color: var(--on-bg); }
-.section-head h3 { margin: 0; font-size: clamp(18px, 1.4vw + 12px, 26px); font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
-.section-head h3::after {
-  content: ''; display: block; width: 154px; height: 12px; margin: 10px auto 0;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 154 12'%3E%3Cg fill='none' stroke='%23ff8a00'%3E%3Cpath d='M0 6h60M94 6h60'/%3E%3Cpath d='M71 1.5l4.5 4.5-4.5 4.5-4.5-4.5z'/%3E%3Cpath d='M83 1.5l4.5 4.5-4.5 4.5-4.5-4.5z'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
-}
-.section-head a { color: var(--brand-2); font-weight: 600; font-size: 14px; }
+.section { margin-top: 28px; }
+/* Tiêu đề mục gọn 1 hàng: tên mục (vạch màu bên trái) — link "Xem tất cả" bên phải */
+.section-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 16px; margin-bottom: 14px; color: var(--on-bg); }
+.section-head h3 { margin: 0; font-size: clamp(17px, .8vw + 12px, 22px); font-weight: 800; text-transform: uppercase; letter-spacing: .3px; padding-left: 12px; border-left: 4px solid var(--brand); line-height: 1.15; }
+.section-head a { color: var(--brand-2); font-weight: 600; font-size: 14px; white-space: nowrap; }
 .section-head a:hover { text-decoration: underline; }
 .panel { background: var(--card); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); }
 
@@ -178,17 +174,25 @@ button { cursor: pointer; }
 .countdown em { font-style: normal; color: var(--brand); font-weight: 800; }
 .flash .grid .card { border: 0; color: var(--ink); }
 
-/* Category tiles */
-.cats { display: grid; grid-template-columns: repeat(auto-fit, minmax(135px, 200px)); justify-content: center; gap: 12px; }
-.cat { background: var(--card); border-radius: var(--radius); padding: 16px 12px; text-align: center; box-shadow: var(--shadow); transition: transform .2s, box-shadow .2s; border: 1.5px solid transparent; }
+/* Category tiles: dàn đều hết chiều ngang, ảnh bên trái — chữ bên phải */
+.cats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.cat { display: flex; align-items: center; gap: 14px; background: var(--card); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow); transition: transform .2s, box-shadow .2s; border: 1.5px solid transparent; min-width: 0; }
 .cat:hover { transform: translateY(-3px); border-color: var(--brand); }
-.cat .ic { width: 64px; height: 64px; margin: 0 auto 10px; border-radius: 50%; overflow: hidden; background: var(--dark); box-shadow: 0 0 0 3px #fff6de; }
+.cat .ic { flex: 0 0 76px; height: 76px; border-radius: 12px; overflow: hidden; background: #f4f4f4; }
 .cat .ic img { width: 100%; height: 100%; object-fit: cover; }
-.cat b { display: block; font-size: 13.5px; }
-.cat small { color: var(--muted); font-size: 11.5px; }
+.cat > div:last-child { min-width: 0; }
+.cat b { display: block; font-size: 14.5px; line-height: 1.3; }
+.cat small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cat em { display: block; font-style: normal; color: var(--brand-2); font-weight: 700; font-size: 12.5px; margin-top: 4px; }
+/* Máy tính bảng: ô hẹp → ảnh trên, chữ dưới cho khỏi bị ép nhiều dòng */
+@media (min-width: 641px) and (max-width: 1100px) {
+  .cat { flex-direction: column; text-align: center; gap: 8px; padding: 12px 8px; }
+  .cat .ic { flex: 0 0 auto; width: 64px; height: 64px; }
+  .cat small { display: none; }
+}
 
 /* Vehicle chips */
-.chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip { padding: 8px 14px; border-radius: 999px; background: var(--card); border: 1.5px solid var(--line); font-weight: 600; font-size: 13px; transition: all .15s; }
 .chip:hover, .chip.on { background: var(--dark); color: var(--brand); border-color: var(--dark); }
 .chip small { margin-left: 4px; font-size: 11px; font-weight: 700; color: var(--muted); }
@@ -198,6 +202,10 @@ button { cursor: pointer; }
 /* ---------- Product grid & card ---------- */
 .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
 .grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+/* .grid.fill (Sản phẩm nổi bật): luôn đủ hàng — 10 = 5×2, 8 = 4×2, 9 = 3×3, 6 = 2×3 */
+@media (min-width: 901px) and (max-width: 1100px) { .grid.fill > :nth-child(n+9) { display: none; } }
+@media (min-width: 641px) and (max-width: 900px) { .grid.fill > :nth-child(n+10) { display: none; } }
+@media (max-width: 640px) { .grid.fill > :nth-child(n+7) { display: none; } }
 .card { background: var(--card); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); display: flex; flex-direction: column; transition: box-shadow .2s, transform .2s; position: relative; }
 .card:hover { box-shadow: 0 10px 30px -10px rgba(0,0,0,.25); transform: translateY(-2px); }
 .card-img { position: relative; aspect-ratio: 1 / 1; overflow: hidden; background: var(--dark); }
@@ -448,10 +456,13 @@ table.specs td:first-child { color: var(--muted); width: 38%; background: #fafaf
   .videos { grid-template-columns: repeat(2, 1fr); }
   .rail { grid-auto-columns: 42%; }
   .rail-nav { display: none; }
-  .cats { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; }
-  .cat { padding: 12px 6px; }
-  .cat .ic { width: 50px; height: 50px; }
+  .cats { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .cat { padding: 10px; gap: 10px; }
+  .cat .ic { flex-basis: 48px; height: 48px; border-radius: 10px; }
+  .cat b { font-size: 13px; }
   .cat small { display: none; }
+  .cat em { font-size: 11.5px; }
+  .cat:last-child:nth-child(odd) { grid-column: 1 / -1; } /* số danh mục lẻ → ô cuối trải hết hàng */
   .policies { gap: 8px; }
   .policy { padding: 10px; gap: 8px; align-items: flex-start; }
   .policy i { width: 30px; height: 30px; font-size: 15px; border-radius: 8px; }

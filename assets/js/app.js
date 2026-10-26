@@ -158,7 +158,8 @@
     const f = D().promos.flash;
     const flashOn = f.active && new Date(f.endsAt) > new Date();
     const flashList = flashOn ? f.items.map(i => DB.product(i.productId)).filter(p => p && p.active) : [];
-    const featured = activeProducts().filter(p => p.featured);
+    // Nổi bật trước, thiếu thì lấy thêm hàng mới / bán chạy cho đủ 10 — CSS chỉ hiện số vừa khít hàng (.grid.fill)
+    const featured = [...activeProducts()].sort((a, b) => b.featured - a.featured || b.isNew - a.isNew || b.sold - a.sold).slice(0, 10);
     const catImg = cid => (activeProducts().find(p => p.cat === cid) || {}).image || '';
 
     app.innerHTML = `
@@ -204,15 +205,15 @@
       </section>` : ''}
 
       <section class="section">
-        <div class="section-head"><h3>Danh mục sản phẩm</h3></div>
+        <div class="section-head"><h3>Danh mục sản phẩm</h3><a href="#/category/all">Xem tất cả →</a></div>
         <div class="cats">
-          ${D().categories.map(c => `<a class="cat" href="#/category/${c.id}"><div class="ic">${catImg(c.id) ? `<img src="${esc(catImg(c.id))}" alt="" loading="lazy">` : ''}</div><b>${esc(c.name)}</b><small>${esc(c.desc)}</small></a>`).join('')}
+          ${D().categories.map(c => [c, activeProducts().filter(p => p.cat === c.id).length]).filter(([, n]) => n).map(([c, n]) => `<a class="cat" href="#/category/${c.id}"><div class="ic">${catImg(c.id) ? `<img src="${esc(catImg(c.id))}" alt="" loading="lazy">` : ''}</div><div><b>${esc(c.name)}</b><small>${esc(c.desc)}</small><em>${n} sản phẩm →</em></div></a>`).join('')}
         </div>
       </section>
 
       <section class="section">
         <div class="section-head"><h3>Sản phẩm nổi bật</h3><a href="#/category/all">Xem tất cả →</a></div>
-        ${grid(featured.slice(0, 10))}
+        ${grid(featured, 'fill')}
       </section>
 
       <section class="section">
