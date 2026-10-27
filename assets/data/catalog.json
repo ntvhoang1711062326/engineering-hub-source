@@ -1,5 +1,5 @@
 {
- "version": 6,
+ "version": 13,
  "categories": [
   {
    "id": "kenzo-bi-led",
@@ -12,6 +12,24 @@
    "name": "Trợ sáng Kenzo",
    "icon": "✧",
    "desc": "Trợ sáng, bi mini, bóng LED Kenzo"
+  },
+  {
+   "id": "titan-bi-led",
+   "name": "Đèn Bi LED Titan Moto",
+   "icon": "◎",
+   "desc": "Bi LED Black Mini, CB150, CB100, F200 chính hãng"
+  },
+  {
+   "id": "titan-tro-sang",
+   "name": "Đèn trợ sáng Titan Moto",
+   "icon": "✧",
+   "desc": "Trợ sáng M10, M20, M60, F1, F2 Zero GT"
+  },
+  {
+   "id": "titan-bong-led",
+   "name": "Bóng LED Titan Moto",
+   "icon": "✦",
+   "desc": "Bóng LED, Bi LED mini Titan Moto"
   }
  ],
  "vehicles": [
@@ -469,6 +487,966 @@
    },
    "vehicleImages": {},
    "active": true
+  },
+  {
+   "id": "tt-black-mini-20-version-2",
+   "name": "Bi LED Titan Moto Black Mini 2.0 Version 2",
+   "cat": "titan-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 3400000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-black-mini-20-version-2.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Cos 45W – Pha 50W · 5000K.",
+   "desc": "Bi LED Titan Moto Black Mini 2.0 Version 2 — Cos 45W – Pha 50W · 5000K.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "45W",
+    "Công suất Pha": "50W",
+    "Nhân LED": "6+1 chip Led (Osram)",
+    "Nhiệt màu": "5000K",
+    "Điện áp": "12V"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-black-mini-20-version-2-square",
+   "name": "Bi LED Titan Moto Black Mini 2.0 Version 2 Square",
+   "cat": "titan-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 3400000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-black-mini-20-version-2-square.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Cos 45W – Pha 50W · 5500K · Ánh sáng mịn đều.",
+   "desc": "Bi LED Titan Moto Black Mini 2.0 Version 2 Square — Cos 45W – Pha 50W · 5500K · Ánh sáng mịn đều.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "45W",
+    "Công suất Pha": "50W",
+    "Nhân LED": "6+1 chip Led (Osram)",
+    "Nhiệt màu": "5500K",
+    "Điện áp": "12 - 16V",
+    "Đặc điểm nổi bật": "Ánh sáng mịn đều"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-cb150-pro-square",
+   "name": "Bi LED Titan Moto CB150 Pro Square",
+   "cat": "titan-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 5000000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-cb150-pro-square.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "2 năm",
+   "short": "Công suất 55W · 5500K · Công nghệ thoát sáng TWR.",
+   "desc": "Bi LED Titan Moto CB150 Pro Square — Công suất 55W · 5500K · Công nghệ thoát sáng TWR.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "55W",
+    "Nhân LED": "9+1+1 (Osram)",
+    "Nhiệt màu": "5500K",
+    "Tuổi thọ": "30000 giờ",
+    "Kích thước lens": "3.0 inch",
+    "Vật liệu tản nhiệt": "Quạt + Khối Nhôm",
+    "Đặc điểm nổi bật": "Công nghệ thoát sáng TWR"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-black-mini-20-square",
+   "name": "Titan Moto Black Mini 2.0 Square",
+   "cat": "titan-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 3400000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-black-mini-20-square.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Cos 40W – Pha 45W · 5000K.",
+   "desc": "Titan Moto Black Mini 2.0 Square — Cos 40W – Pha 45W · 5000K.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "40W",
+    "Công suất Pha": "45W",
+    "Nhiệt màu": "5000K"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-cb150-pro",
+   "name": "Bi LED Titan Moto CB150 Pro",
+   "cat": "titan-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 5000000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-cb150-pro.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "2 năm",
+   "short": "Cos 55W – Pha 65W · 5500K · Công nghệ thoát sáng TWR.",
+   "desc": "Bi LED Titan Moto CB150 Pro — Cos 55W – Pha 65W · 5500K · Công nghệ thoát sáng TWR.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "55W",
+    "Công suất Pha": "65W",
+    "Nhân LED": "9+1+1 (Osram)",
+    "Nhiệt màu": "5500K",
+    "Tuổi thọ": "30000 giờ",
+    "Kích thước lens": "3.0 inch",
+    "Vật liệu tản nhiệt": "Quạt + Khối Nhôm",
+    "Đặc điểm nổi bật": "Công nghệ thoát sáng TWR"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-f200-storm",
+   "name": "Bi LED Titan Moto F200 Storm",
+   "cat": "titan-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 6000000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-f200-storm.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "2 năm",
+   "short": "Cos 50W – Pha 80W · 5500K · Hai trợ pha - siêu nhỏ gọn.",
+   "desc": "Bi LED Titan Moto F200 Storm — Cos 50W – Pha 80W · 5500K · Hai trợ pha - siêu nhỏ gọn.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "50W",
+    "Công suất Pha": "80W",
+    "Nhân LED": "9",
+    "Nhiệt màu": "5500K",
+    "Mắt trợ pha": "1+1",
+    "Kích thước lens": "3.0 inch",
+    "Đặc điểm nổi bật": "Hai trợ pha - siêu nhỏ gọn"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-cb100-pro",
+   "name": "Bi LED Titan Moto CB100 Pro",
+   "cat": "titan-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 4000000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-cb100-pro.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "2 năm",
+   "short": "Cos 55W – Pha 65W · 5500K · Phiên bản tiết kiệm - Công nghệ đầy đủ.",
+   "desc": "Bi LED Titan Moto CB100 Pro — Cos 55W – Pha 65W · 5500K · Phiên bản tiết kiệm - Công nghệ đầy đủ.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "55W",
+    "Công suất Pha": "65W",
+    "Nhân LED": "6 (big) + 1",
+    "Nhiệt màu": "5500K",
+    "Đặc điểm nổi bật": "Phiên bản tiết kiệm - Công nghệ đầy đủ"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-cb100-pro-square",
+   "name": "Bi LED Titan Moto CB100 Pro Square",
+   "cat": "titan-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 4000000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-cb100-pro-square.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Cos 55W – Pha 65W · 5500K · Phiên bản tiết kiệm - công nghệ đầy đủ.",
+   "desc": "Bi LED Titan Moto CB100 Pro Square — Cos 55W – Pha 65W · 5500K · Phiên bản tiết kiệm - công nghệ đầy đủ.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "55W",
+    "Công suất Pha": "65W",
+    "Nhân LED": "6 (Big) + 1",
+    "Nhiệt màu": "5500K",
+    "Kích thước lens": "3.0 inch",
+    "Đặc điểm nổi bật": "Phiên bản tiết kiệm - công nghệ đầy đủ"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-mini-f15",
+   "name": "Bi LED Mini Titan Moto F15",
+   "cat": "titan-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 2200000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-mini-f15.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "1 năm",
+   "short": "Cos 35W – Pha 50W · 5500K.",
+   "desc": "Bi LED Mini Titan Moto F15 — Cos 35W – Pha 50W · 5500K.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "35W",
+    "Công suất Pha": "50W",
+    "Số nhân LED": "6 (Big) + 6",
+    "Nhiệt màu": "5500K",
+    "Vật liệu tản nhiệt": "Aluminum"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-black-mini-2",
+   "name": "Bi LED Titan Moto Black Mini 2.0 Inch",
+   "cat": "titan-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 3400000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-black-mini-2.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Cos 40W – Pha 45W · 5000K.",
+   "desc": "Bi LED Titan Moto Black Mini 2.0 Inch — Cos 40W – Pha 45W · 5000K.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "40W",
+    "Công suất Pha": "45W",
+    "Nhân LED": "6+1 Osram",
+    "Nhiệt màu": "5000K",
+    "Điện áp": "12V"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-cb750",
+   "name": "Bi LED Titan Moto CB750",
+   "cat": "titan-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 3000000,
+   "oldPrice": 3500000,
+   "image": "assets/img/titan/tt-cb750.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Cos 45W – Pha 55W · 5000K.",
+   "desc": "Bi LED Titan Moto CB750 — Cos 45W – Pha 55W · 5000K.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "45W",
+    "Công suất Pha": "55W",
+    "Nhiệt màu": "5000K"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-cb150",
+   "name": "Bi LED Titan Moto CB150",
+   "cat": "titan-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 5000000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-cb150.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Cos 55W – Pha 65W · 5000K.",
+   "desc": "Bi LED Titan Moto CB150 — Cos 55W – Pha 65W · 5000K.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "55W",
+    "Công suất Pha": "65W",
+    "Nhiệt màu": "5000K"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-black-mini-18-laser",
+   "name": "Titan Moto Black Mini 1.8 Laser",
+   "cat": "titan-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 4000000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-black-mini-18-laser.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Cos 50W – Pha 60W · 5000K.",
+   "desc": "Titan Moto Black Mini 1.8 Laser — Cos 50W – Pha 60W · 5000K.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "50W",
+    "Công suất Pha": "60W",
+    "Nhiệt màu": "5000K"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-black-mini-18",
+   "name": "Bi LED Titan Black Mini 1.8",
+   "cat": "titan-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 4000000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-black-mini-18.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Cos 40W – Pha 45W · 5000K.",
+   "desc": "Bi LED Titan Black Mini 1.8 — Cos 40W – Pha 45W · 5000K.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "40W",
+    "Công suất Pha": "45W",
+    "Nhiệt màu": "5000K"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-cb150-hp",
+   "name": "Bi LED Titan Moto CB150 HP",
+   "cat": "titan-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 6500000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-cb150-hp.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Cos 45W – Pha 75W · 5800K.",
+   "desc": "Bi LED Titan Moto CB150 HP — Cos 45W – Pha 75W · 5800K.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "45W",
+    "Công suất Pha": "75W",
+    "Nhiệt màu": "5800K"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-black-mini-15-inch",
+   "name": "Bi LED Titan Black Mini 1.5 Inch",
+   "cat": "titan-bi-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 4000000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-black-mini-15-inch.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Cos 40W – Pha 45W · 5000K.",
+   "desc": "Bi LED Titan Black Mini 1.5 Inch — Cos 40W – Pha 45W · 5000K.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "40W",
+    "Công suất Pha": "45W",
+    "Nhiệt màu": "5000K"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-m45-hyper",
+   "name": "Đèn trợ sáng Titan Moto M45 Hyper",
+   "cat": "titan-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 3500000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-m45-hyper.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Công suất 45W · 6000K - 3000K · Vùng sáng rộng, sắc nét.",
+   "desc": "Đèn trợ sáng Titan Moto M45 Hyper — Công suất 45W · 6000K - 3000K · Vùng sáng rộng, sắc nét.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất": "45W",
+    "Nhân LED": "6+6 (Big) thế hệ mới",
+    "Nhiệt màu": "6000K - 3000K",
+    "Đặc điểm nổi bật": "Vùng sáng rộng, sắc nét"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-m60-ultra-v2",
+   "name": "Đèn trợ sáng Titan Moto M60 Ultra V2",
+   "cat": "titan-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 2500000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-m60-ultra-v2.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Công suất 65W · 6000K.",
+   "desc": "Đèn trợ sáng Titan Moto M60 Ultra V2 — Công suất 65W · 6000K.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất": "65W",
+    "Nhân LED": "Sft-40",
+    "Nhiệt màu": "6000K"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-m10-ultra-v2",
+   "name": "Đèn trợ sáng M10 Ultra V2",
+   "cat": "titan-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 1700000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-m10-ultra-v2.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Công suất 28W · 6000K/3000K · Cường độ sáng mạnh, mặt cắt sắc nét.",
+   "desc": "Đèn trợ sáng M10 Ultra V2 — Công suất 28W · 6000K/3000K · Cường độ sáng mạnh, mặt cắt sắc nét.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất": "28W",
+    "Nhân LED": "3 Vàng + 3 Trắng",
+    "Nhiệt màu": "6000K/3000K",
+    "Chống nước": "IP68",
+    "Điện áp": "12 - 16V",
+    "Đặc điểm nổi bật": "Cường độ sáng mạnh, mặt cắt sắc nét"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-f1-turbo-s",
+   "name": "Đèn trợ sáng Titan Moto F1 Turbo S",
+   "cat": "titan-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 4200000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-f1-turbo-s.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "1 năm",
+   "short": "Cos 42W – Pha 67W · 4300K/5500K · Trợ pha kép, giả lập laser.",
+   "desc": "Đèn trợ sáng Titan Moto F1 Turbo S — Cos 42W – Pha 67W · 4300K/5500K · Trợ pha kép, giả lập laser.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "42W",
+    "Công suất Pha": "67W",
+    "Nhân LED": "6 (big) + 1 + 1 (osram)",
+    "Nhiệt màu": "4300K/5500K",
+    "Chống nước": "IP68",
+    "Tuổi thọ": "30.000 GIỜ",
+    "Vật liệu tản nhiệt": "Chủ động và thụ động",
+    "Đặc điểm nổi bật": "Trợ pha kép, giả lập laser"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-f1-gt",
+   "name": "Đèn trợ sáng Titan Moto F1 GT",
+   "cat": "titan-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 2500000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-f1-gt.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "1 năm",
+   "short": "Cos ~30W – Pha ~40W · 5500K/3000K & 5500K/5500K · Trợ sáng nhỏ gọn - chuẩn sáng Bi LED.",
+   "desc": "Đèn trợ sáng Titan Moto F1 GT — Cos ~30W – Pha ~40W · 5500K/3000K & 5500K/5500K · Trợ sáng nhỏ gọn - chuẩn sáng Bi LED.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "~30W",
+    "Công suất Pha": "~40W",
+    "Nhân LED": "3+3",
+    "Nhiệt màu": "5500K/3000K & 5500K/5500K",
+    "Đặc điểm nổi bật": "Trợ sáng nhỏ gọn - chuẩn sáng Bi LED"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-m10-plus",
+   "name": "Đèn trợ sáng Titan Moto M10 Plus",
+   "cat": "titan-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 1200000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-m10-plus.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Công suất 20W · Nhỏ gọn, tối ưu hiệu ứng.",
+   "desc": "Đèn trợ sáng Titan Moto M10 Plus — Công suất 20W · Nhỏ gọn, tối ưu hiệu ứng.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "20W",
+    "Công suất": "20W",
+    "Nhân LED": "3 Trắng + 3 Vàng",
+    "Điện áp": "12 - 16V",
+    "Đặc điểm nổi bật": "Nhỏ gọn, tối ưu hiệu ứng"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-f2-zero-gt",
+   "name": "Đèn trợ sáng Titan Moto F2 Zero GT",
+   "cat": "titan-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 3500000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-f2-zero-gt.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "2 năm",
+   "short": "Cos ~45W – Pha ~65W · 4800K/3000K & 5500K/3000K · Hai nguồn sáng cos, ba nguồn sáng pha.",
+   "desc": "Đèn trợ sáng Titan Moto F2 Zero GT — Cos ~45W – Pha ~65W · 4800K/3000K & 5500K/3000K · Hai nguồn sáng cos, ba nguồn sáng pha.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "~45W",
+    "Công suất Pha": "~65W",
+    "Nhân LED": "6+6+1+1+1",
+    "Nhiệt màu": "4800K/3000K & 5500K/3000K",
+    "Đặc điểm nổi bật": "Hai nguồn sáng cos, ba nguồn sáng pha"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-m90-ultra",
+   "name": "Đèn trợ sáng Titan Moto M90 Ultra",
+   "cat": "titan-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 2999000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-m90-ultra.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "12 tháng",
+   "short": "5500K.",
+   "desc": "Đèn trợ sáng Titan Moto M90 Ultra — 5500K.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Nhân LED": "Luminus SBT90.2",
+    "Nhiệt màu": "5500K",
+    "Điện áp": "12-16V",
+    "Vật liệu tản nhiệt": "Thụ động"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-m60-ultra-high",
+   "name": "Đèn trợ sáng Titan Moto M60 Ultra High",
+   "cat": "titan-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 2800000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-m60-ultra-high.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "12 tháng",
+   "short": "Cos 70W – Pha 70W.",
+   "desc": "Đèn trợ sáng Titan Moto M60 Ultra High — Cos 70W – Pha 70W.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "70W",
+    "Công suất Pha": "70W"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-m10-ultra",
+   "name": "Đèn trợ sáng Titan Moto M10 Ultra",
+   "cat": "titan-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 1400000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-m10-ultra.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "12 tháng",
+   "short": "Công suất 25W.",
+   "desc": "Đèn trợ sáng Titan Moto M10 Ultra — Công suất 25W.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Pha": "25W",
+    "Nhân LED": "Titan Custom",
+    "Cường độ ánh sáng": "7.500 lux",
+    "Điện áp": "12V"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-m60-ultra",
+   "name": "Đèn trợ sáng Titan Moto M60 Ultra",
+   "cat": "titan-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 2500000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-m60-ultra.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "12 tháng",
+   "short": "Công suất 60W.",
+   "desc": "Đèn trợ sáng Titan Moto M60 Ultra — Công suất 60W.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Pha": "60W",
+    "Cường độ ánh sáng": "7.500 lux"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-m20-ultra",
+   "name": "Đèn trợ sáng Titan Moto M20 Ultra",
+   "cat": "titan-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 2800000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-m20-ultra.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Cos 50W – Pha 50W · 3000K, 6000K.",
+   "desc": "Đèn trợ sáng Titan Moto M20 Ultra — Cos 50W – Pha 50W · 3000K, 6000K.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "50W",
+    "Công suất Pha": "50W",
+    "Nhiệt màu": "3000K, 6000K"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-z20",
+   "name": "Titan Moto Z20",
+   "cat": "titan-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 0,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-z20.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "Theo chính sách Titan Moto",
+   "short": "Cos 35W – Pha 60W.",
+   "desc": "Titan Moto Z20 — Cos 35W – Pha 60W.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "35W",
+    "Công suất Pha": "60W",
+    "Cường độ ánh sáng": "7.500 lux"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-z40",
+   "name": "Titan Moto Z40",
+   "cat": "titan-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 0,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-z40.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "12 tháng",
+   "short": "Cos 45-50W – Pha 90-100W.",
+   "desc": "Titan Moto Z40 — Cos 45-50W – Pha 90-100W.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "45-50W",
+    "Công suất Pha": "90-100W"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-l60",
+   "name": "Titan Moto L60",
+   "cat": "titan-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 0,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-l60.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "12 tháng",
+   "short": "Cos 30-35W – Pha 90-100W.",
+   "desc": "Titan Moto L60 — Cos 30-35W – Pha 90-100W.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "30-35W",
+    "Công suất Pha": "90-100W"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-f60",
+   "name": "Titan Moto F60",
+   "cat": "titan-tro-sang",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 0,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-f60.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "12 tháng",
+   "short": "Cos 110w – Pha 150w.",
+   "desc": "Titan Moto F60 — Cos 110w – Pha 150w.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "110w",
+    "Công suất Pha": "150w"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-mini-f15-v2",
+   "name": "Bi LED Mini Titan Moto F-15 V2",
+   "cat": "titan-bong-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 2200000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-mini-f15-v2.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "12 tháng",
+   "short": "Cos ~40W/đèn – Pha ~65W/đèn · 5500K.",
+   "desc": "Bi LED Mini Titan Moto F-15 V2 — Cos ~40W/đèn – Pha ~65W/đèn · 5500K.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất Cos": "~40W/đèn",
+    "Công suất Pha": "~65W/đèn",
+    "Chân bóng": "H4",
+    "Nhiệt màu": "5500K"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "tt-bong-led-a7-ultra",
+   "name": "Bóng LED Titan A7 Ultra",
+   "cat": "titan-bong-led",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 2200000,
+   "oldPrice": 0,
+   "image": "assets/img/titan/tt-bong-led-a7-ultra.webp",
+   "gallery": [],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": false,
+   "warranty": "2 năm",
+   "short": "Công suất ~70W · 6000K · Tăng sáng 300%.",
+   "desc": "Bóng LED Titan A7 Ultra — Công suất ~70W · 6000K · Tăng sáng 300%.\n\nSản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Titan Moto",
+    "Công suất": "~70W",
+    "Chân bóng": "H4, H7, H11, 9005",
+    "Nhiệt màu": "6000K",
+    "Vật liệu tản nhiệt": "Quạt + 2 Ống đồng + Lá tản nhiệt",
+    "Đặc điểm nổi bật": "Tăng sáng 300%"
+   },
+   "vehicleImages": {},
+   "active": true
   }
  ],
  "banners": [
@@ -550,7 +1528,9 @@
   "hotline": "0769678981",
   "address": "38/8A Đường Đinh Bộ Lĩnh, Bình Thạnh, Hồ Chí Minh",
   "hours": "8:00 – 20:00 (Cả T7 & CN)",
-  "tiktok": "https://www.tiktok.com/@ts.superlight"
+  "tiktok": "https://www.tiktok.com/@ts.superlight",
+  "tiktok2": "https://www.tiktok.com/@_superlightshop_",
+  "mapUrl": "https://www.google.com/maps/place/SUPERLIGHTSHOP/@10.8043472,106.7101415,17z/data=!4m6!3m5!1s0x317529001f4e1eb7:0xf6c3433ab829efc7!8m2!3d10.8043457!4d106.7106266"
  },
- "publishedAt": "2026-10-26T08:51:20.516Z"
+ "publishedAt": "2026-10-27T02:17:01.932Z"
 }

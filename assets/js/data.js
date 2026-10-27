@@ -231,6 +231,11 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
         this.data = { ...seed(), ...pick(cat, CATALOG_KEYS) };
         this.previewDraft = !!(IS_LOCAL && draft);
       }
+      return this.normalize();
+    },
+    /* Nâng dữ liệu cũ lên bản mới nhất — chạy cho cả bản nháp Admin lẫn catalog tải từ web
+       (catalog.json xuất bản từ bản cũ vẫn có đủ sản phẩm Titan, link bản đồ…) */
+    normalize() {
       this.migrate();
       this.migrate3();
       this.migrate4();
@@ -250,6 +255,10 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       return this.data;
     },
     /* v2: bỏ giao hàng, chuyển sang đặt chỗ + cọc */
+    // Bước nâng cấp chỉ lưu vào bản nháp khi đang ở Admin / xem trước bản nháp — trang khách không tự tạo "bản nháp" giả
+    persistDraft() {
+      if (IS_ADMIN || this.previewDraft) try { localStorage.setItem(KEY, JSON.stringify(this.data)); } catch (e) {}
+    },
     migrate() {
       const d = this.data;
       if ((d.version || 1) >= 2) return;
@@ -259,7 +268,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       if (pr.popup && /SUPERLIGHT10/.test(pr.popup.text)) Object.assign(pr.popup, { title: PROMOS.popup.title, text: PROMOS.popup.text });
       (d.sideAds || []).forEach(a => { if (/Chỉ từ/.test(a.subtitle)) a.subtitle = 'Liên hệ báo giá'; });
       d.version = 2;
-      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+      this.persistDraft();
     },
     /* v3: ảnh theo dòng xe */
     migrate3() {
@@ -267,7 +276,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       if ((d.version || 1) >= 3) return;
       d.products.forEach(p => { if (!p.vehicleImages) p.vehicleImages = suggestVehicleImages(p); });
       d.version = 3;
-      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+      this.persistDraft();
     },
     /* v4: thêm danh mục + sản phẩm Kenzo, giữ nguyên dữ liệu đã có */
     migrate4() {
@@ -276,7 +285,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       KENZO_CATEGORIES.forEach(c => { if (!d.categories.some(x => x.id === c.id)) d.categories.push({ ...c }); });
       KENZO_PRODUCTS.forEach(p => { if (!d.products.some(x => x.id === p.id)) d.products.push(JSON.parse(JSON.stringify(p))); });
       d.version = 4;
-      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+      this.persistDraft();
     },
     /* v5: xoá toàn bộ sản phẩm & danh mục cũ, chỉ giữ hàng Kenzo; dọn các liên kết trỏ tới sản phẩm đã xoá */
     migrate5() {
@@ -294,7 +303,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       };
       [...(d.banners || []), ...(d.sideAds || []), d.promos.popup].forEach(x => { if (x) x.link = fixLink(x.link); });
       d.version = 5;
-      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+      this.persistDraft();
     },
     /* v6: đổi banner, quảng cáo, popup, slogan sang hàng Kenzo (giữ nguyên mục chủ shop đã tự sửa) */
     migrate6() {
@@ -310,7 +319,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       if (d.settings.slogan === OLD_DEFAULTS.slogan) d.settings.slogan = SETTINGS.slogan;
       (d.promos.coupons || []).forEach(c => { if (c.desc === OLD_DEFAULTS.lenden200) c.desc = 'Giảm 200K cho đơn từ 3 triệu'; });
       d.version = 6;
-      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+      this.persistDraft();
     },
     /* v7: thêm danh mục + sản phẩm Titan Moto, giữ nguyên dữ liệu đã có */
     migrate7() {
@@ -319,7 +328,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       TITAN_CATEGORIES.forEach(c => { if (!d.categories.some(x => x.id === c.id)) d.categories.push({ ...c }); });
       TITAN_PRODUCTS.forEach(p => { if (!d.products.some(x => x.id === p.id)) d.products.push(JSON.parse(JSON.stringify(p))); });
       d.version = 7;
-      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+      this.persistDraft();
     },
     /* v8: địa chỉ shop cụ thể (chỉ thay khi chủ shop chưa tự sửa địa chỉ mặc định cũ) */
     migrate8() {
@@ -327,7 +336,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       if ((d.version || 1) >= 8) return;
       if (d.settings.address === 'Bình Thạnh, TP. Hồ Chí Minh') d.settings.address = SETTINGS.address;
       d.version = 8;
-      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+      this.persistDraft();
     },
     /* v9: bỏ đặt chỗ & tiền cọc trên trang khách → đổi chữ thanh thông báo / popup mặc định (giữ nguyên nếu chủ shop đã tự sửa) */
     migrate9() {
@@ -337,7 +346,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       if (pr.popup?.title === 'Đặt chỗ lắp đèn online') pr.popup.title = PROMOS.popup.title;
       if (pr.popup?.text === 'Chọn mẫu đèn, hẹn giờ lắp và cọc trước để giữ hàng. Lắp đặt miễn phí tại shop Bình Thạnh!') pr.popup.text = PROMOS.popup.text;
       d.version = 9;
-      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+      this.persistDraft();
     },
     /* v10: bỏ nhận đơn qua web → xoá đơn hàng, mã giảm giá, tiền cọc, tài khoản ngân hàng */
     migrate10() {
@@ -347,7 +356,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       delete d.promos.coupons;
       ['deposit', 'bankName', 'bankAccount', 'bankOwner'].forEach(k => delete d.settings[k]);
       d.version = 10;
-      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+      this.persistDraft();
     },
     /* v11: ảnh sản phẩm Kenzo / Titan chuyển sang WebP 800px (nhẹ hơn ~60%) → đổi đường dẫn .jpg → .webp */
     migrate11() {
@@ -360,7 +369,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       });
       [...(d.banners || []), ...(d.sideAds || []), d.promos.popup].forEach(x => { if (x) x.image = fix(x.image); });
       d.version = 11;
-      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+      this.persistDraft();
     },
     /* v12: web chỉ giới thiệu sản phẩm — bỏ tồn kho, số đã bán, số sao */
     migrate12() {
@@ -368,7 +377,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       if ((d.version || 1) >= 12) return;
       d.products.forEach(p => { delete p.stock; delete p.sold; delete p.rating; });
       d.version = 12;
-      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+      this.persistDraft();
     },
     /* v13: tắt popup lúc mở trang — trùng nội dung thanh thông báo & ô cam kết, dễ làm khách mobile thoát (bật lại được ở Admin) */
     migrate13() {
@@ -376,7 +385,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       if ((d.version || 1) >= 13) return;
       if (d.promos.popup) d.promos.popup.active = false;
       d.version = 13;
-      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+      this.persistDraft();
     },
     save() {
       try {
@@ -396,9 +405,10 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
         const cat = pick(await res.json(), CATALOG_KEYS);
         if (!cat.products) return;
         try { localStorage.setItem(CATALOG_CACHE, JSON.stringify(cat)); } catch (e) {}
-        if (JSON.stringify(cat) === JSON.stringify(this.catalog())) return;
-        Object.assign(this.data, cat);
-        window.dispatchEvent(new Event('db-changed'));
+        const before = JSON.stringify(this.catalog());
+        this.data = { ...seed(), ...cat };
+        this.normalize();
+        if (JSON.stringify(this.catalog()) !== before) window.dispatchEvent(new Event('db-changed'));
       } catch (e) { /* mất mạng / mở file:// → giữ bản đang có */ }
     },
     product(id) { return this.data.products.find(p => p.id === id); },
