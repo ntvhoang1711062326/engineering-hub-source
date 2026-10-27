@@ -36,6 +36,12 @@
   }
   const zaloLink = () => `https://zalo.me/${S().zalo}`;
   // Nút TikTok (góc dưới, chân trang) mở kênh đứng đầu — kênh nhiều người theo dõi nhất
+  /* Link "Chỉ đường": lấy toạ độ ghim (!3d…!4d…) trong link Google Maps; link rút gọn thì mở thẳng link đó */
+  const directionsLink = () => {
+    const s = S(), u = String(s.mapUrl || ''), m = u.match(/!3d(-?[\d.]+)!4d(-?[\d.]+)/) || u.match(/@(-?[\d.]+),(-?[\d.]+)/);
+    if (m) return `https://www.google.com/maps/dir/?api=1&destination=${m[1]},${m[2]}`;
+    return u || `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.address || '')}`;
+  };
   const ttTop = () => DB.channels()[0]?.url || S().tiktok;
   const phoneFmt = p => String(p).replace(/(\d{4})(\d{3})(\d+)/, '$1.$2.$3');
 
@@ -136,6 +142,11 @@
     $('#floatContact').innerHTML = `
       <a class="z" href="${zaloLink()}" target="_blank" rel="noopener" title="Chat Zalo">Zalo</a>
       <a class="t" href="${esc(ttTop())}" target="_blank" rel="noopener" title="TikTok" aria-label="TikTok">${TIKTOK_ICON}</a>`;
+    // Thanh liên hệ cố định dưới đáy — chỉ hiện trên điện thoại/máy tính bảng
+    $('#mobileBar').innerHTML = `
+      <a class="call" href="tel:${String(s.hotline || '').replace(/\D/g, '')}"><i>📞</i>Gọi</a>
+      <a class="zalo" href="${zaloLink()}" target="_blank" rel="noopener"><i>💬</i>Zalo</a>
+      <a class="map" href="${esc(directionsLink())}" target="_blank" rel="noopener"><i>📍</i>Chỉ đường</a>`;
   }
   function setNav(key) {
     $$('#navMenu a').forEach(a => a.classList.toggle('on', !!key && a.dataset.nav === key));
@@ -450,7 +461,6 @@
           </div>
           <div class="pd-perks">
             <div>Lắp đặt miễn phí tại shop — test sáng trước khi lắp</div>
-            <div>1 đổi 1 trong 7 ngày nếu lỗi nhà sản xuất</div>
             <div>Thanh toán tại shop sau khi lắp và test sáng</div>
           </div>
         </div>
@@ -503,7 +513,6 @@
       <nav class="crumbs"><a href="#/">Trang chủ</a><span>Chính sách</span></nav>
       <section class="panel desc">
 <h2 style="margin-top:0">Chính sách bảo hành</h2>• Bảo hành 12 – 24 tháng tuỳ sản phẩm (ghi rõ tại trang chi tiết).
-• 1 đổi 1 trong 7 ngày nếu lỗi nhà sản xuất.
 • Không bảo hành khi sản phẩm bị va chạm, cháy nổ do tự ý đấu nối sai.
 
 <h2>Mua hàng &amp; lắp đặt</h2>• Giá sản phẩm tuỳ đời xe — vui lòng liên hệ Hotline/Zalo ${phoneFmt(S().hotline)} để được tư vấn, báo giá.

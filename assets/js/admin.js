@@ -778,7 +778,7 @@
       <div class="card-a"><h3>Thông tin cửa hàng</h3>
         <div class="form-grid">
           ${F('shopName', 'Tên shop')}${F('slogan', 'Slogan')}${F('hotline', 'Hotline')}${F('zalo', 'Số Zalo')}
-          ${F('address', 'Địa chỉ', 'full')}${F('hours', 'Giờ mở cửa')}${F('tiktok', 'Link TikTok (kênh chính)')}${F('tiktok2', 'Link TikTok kênh 2')}
+          ${F('address', 'Địa chỉ', 'full')}${F('hours', 'Giờ mở cửa')}${F('mapUrl', 'Link Google Maps của shop', 'full')}${F('tiktok', 'Link TikTok (kênh chính)')}${F('tiktok2', 'Link TikTok kênh 2')}
         </div>
       </div>
       <div style="display:flex;gap:10px;margin:14px 0"><button class="btn btn-brand btn-lg" id="sSave">Lưu cài đặt</button></div>

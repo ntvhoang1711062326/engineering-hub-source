@@ -9,13 +9,6 @@ window.TIKTOK_MEDIA = [
 "video": false
 },
 {
-"id": "7687198787852422418",
-"cap": "Chung đam mê thì hãy liên hệ ngay cho shop nhá 🙋🏻",
-"views": 1118,
-"likes": 9,
-"video": false
-},
-{
 "id": "7681273723789495560",
 "cap": "NVX lên 1 cặp CB150pro + Audi A8pro 🔥🥰",
 "views": 710,
