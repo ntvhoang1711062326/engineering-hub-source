@@ -202,7 +202,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
     slogan: 'Chuyên lắp Bi LED · Laser · Trợ sáng Kenzo chính hãng',
     zalo: '0769678981',
     hotline: '0769678981',
-    address: '38/8 Đường Đinh Bộ Lĩnh, Bình Thạnh, Hồ Chí Minh',
+    address: '38/8A Đường Đinh Bộ Lĩnh, Bình Thạnh, Hồ Chí Minh',
     hours: '8:00 – 20:00 (Cả T7 & CN)',
     mapUrl: 'https://www.google.com/maps/place/SUPERLIGHTSHOP/@10.8043472,106.7101415,17z/data=!4m6!3m5!1s0x317529001f4e1eb7:0xf6c3433ab829efc7!8m2!3d10.8043457!4d106.7106266',
     tiktok: 'https://www.tiktok.com/@ts.superlight',
@@ -245,6 +245,8 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       this.migrate13();
       if (this.data.settings.tiktok2 == null) this.data.settings.tiktok2 = SETTINGS.tiktok2;
       if (this.data.settings.mapUrl == null) this.data.settings.mapUrl = SETTINGS.mapUrl;
+      // Địa chỉ cũ 38/8 → 38/8A (bản nháp Admin lưu trên máy còn địa chỉ cũ)
+      if (this.data.settings.address === '38/8 Đường Đinh Bộ Lĩnh, Bình Thạnh, Hồ Chí Minh') this.data.settings.address = SETTINGS.address;
       return this.data;
     },
     /* v2: bỏ giao hàng, chuyển sang đặt chỗ + cọc */

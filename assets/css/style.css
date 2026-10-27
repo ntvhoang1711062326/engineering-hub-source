@@ -362,6 +362,8 @@ table.specs td:first-child { color: var(--muted); width: 38%; background: #fafaf
 
 .float-contact { position: fixed; right: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 10px; z-index: 60; }
 .float-contact a { width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 12px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+.float-contact .p { background: linear-gradient(180deg, #5df27a, #28c840); animation: ring-green 2s infinite; }
+.float-contact .p svg { width: 50%; height: 50%; display: block; }
 .float-contact .z { background: #0068ff; animation: ring 2s infinite; }
 .float-contact .t { background: #000; border: 2px solid #fe2c55; }
 .float-contact .t svg { width: 46%; height: 46%; display: block; overflow: visible; }
@@ -381,6 +383,7 @@ table.specs td:first-child { color: var(--muted); width: 38%; background: #fafaf
   .toast { bottom: calc(70px + env(safe-area-inset-bottom)); }
 }
 @keyframes ring { 0%, 100% { box-shadow: 0 0 0 0 rgba(0,104,255,.5); } 50% { box-shadow: 0 0 0 12px rgba(0,104,255,0); } }
+@keyframes ring-green { 0%, 100% { box-shadow: 0 0 0 0 rgba(40,200,64,.5); } 50% { box-shadow: 0 0 0 12px rgba(40,200,64,0); } }
 
 /* ---------- Footer ---------- */
 .footer { background: var(--dark); color: #aab2bf; margin-top: 40px; padding: 36px 0 0; font-size: 13.5px; }

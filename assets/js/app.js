@@ -133,13 +133,15 @@
         <li><a href="tel:${esc(s.hotline)}">Gọi tư vấn ${phoneFmt(s.hotline)}</a></li>
       </ul></div>
       <div class="contact"><h5>Liên hệ</h5><ul>
-        <li>📍 ${esc(s.address)}</li>
+        <li><a href="${esc(directionsLink())}" target="_blank" rel="noopener" title="Chỉ đường đến shop">📍 ${esc(s.address)} <u>(Chỉ đường)</u></a></li>
         <li>☎ Hotline/Zalo: <b>${phoneFmt(s.hotline)}</b></li>
         <li>🕘 ${esc(s.hours)}</li>
         ${DB.channels().map(c => `<li>🎵 TikTok: <a href="${esc(c.url)}" target="_blank" rel="noopener">@${esc(c.user)}</a></li>`).join('')}
       </ul></div>`;
     $('#footerBottom').textContent = `© ${new Date().getFullYear()} ${s.shopName}. Chuyên độ đèn xe máy tại TP.HCM.`;
+    // Nút gọi kiểu app Điện thoại trên iPhone: nền xanh lá, ống nghe trắng
     $('#floatContact').innerHTML = `
+      <a class="p" href="tel:${String(s.hotline || '').replace(/\D/g, '')}" title="Gọi ${phoneFmt(s.hotline)}" aria-label="Gọi điện"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2z"/></svg></a>
       <a class="z" href="${zaloLink()}" target="_blank" rel="noopener" title="Chat Zalo">Zalo</a>
       <a class="t" href="${esc(ttTop())}" target="_blank" rel="noopener" title="TikTok" aria-label="TikTok">${TIKTOK_ICON}</a>`;
     // Thanh liên hệ cố định dưới đáy — chỉ hiện trên điện thoại/máy tính bảng
@@ -533,7 +535,7 @@
 • Không bảo hành khi sản phẩm bị va chạm, cháy nổ do tự ý đấu nối sai.
 
 <h2>Mua hàng &amp; lắp đặt</h2>• Giá sản phẩm tuỳ đời xe — vui lòng liên hệ Hotline/Zalo ${phoneFmt(S().hotline)} để được tư vấn, báo giá.
-• Shop không giao hàng — sản phẩm được lắp đặt trực tiếp tại shop: ${esc(S().address)}.
+• Shop không giao hàng — sản phẩm được lắp đặt trực tiếp tại shop: <a href="${esc(directionsLink())}" target="_blank" rel="noopener">${esc(S().address)}</a> (bấm để chỉ đường).
 • Thanh toán tại shop sau khi lắp và test sáng.
       </section>`;
   }
