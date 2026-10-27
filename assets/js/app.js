@@ -484,7 +484,24 @@
 • Mang xe đến shop để được bảo hành.</div>
       </section>
 
+      <div id="pdVideos"></div>
+
       ${related.length ? `<section class="section"><div class="section-head"><h3>Sản phẩm liên quan</h3></div>${grid(related)}</section>` : ''}`;
+
+    // Video TikTok gợi ý: đúng mã đèn này trước, rồi video lắp bi cầu khác — ưu tiên dòng xe đang chọn
+    const drawVideos = () => {
+      const { exact, related: rel } = DB.videosForProduct(p, selVeh), list = [...exact, ...rel].slice(0, 12);
+      $('#pdVideos').innerHTML = list.length ? `
+        <section class="section">
+          <div class="section-head"><h3>${exact.length ? `Video lắp ${esc(p.name)} thực tế` : 'Video lắp bi cầu thực tế tại shop'}</h3></div>
+          <div class="rail-wrap">
+            <button class="rail-nav prev" data-rail="-1" aria-label="Video trước">‹</button>
+            <div class="rail">${list.map(vidCard).join('')}</div>
+            <button class="rail-nav next" data-rail="1" aria-label="Video tiếp">›</button>
+          </div>
+        </section>` : '';
+    };
+    drawVideos();
 
     if (pr.flash) startCountdowns();
     const showMedia = i => {
@@ -497,7 +514,7 @@
     $$('[data-media]').forEach(b => b.onclick = () => showMedia(+b.dataset.media));
     // Chọn dòng xe → đổi ảnh chính sang ảnh của dòng xe đó
     $$('[data-veh]').forEach(b => b.onclick = () => {
-      $$('[data-veh]').forEach(x => x.classList.remove('on')); b.classList.add('on'); selVeh = b.dataset.veh;
+      $$('[data-veh]').forEach(x => x.classList.remove('on')); b.classList.add('on'); selVeh = b.dataset.veh; drawVideos();
       const src = DB.imageFor(p, selVeh);
       showMedia(media.findIndex(m => m.type === 'img' && m.src === src));
     });

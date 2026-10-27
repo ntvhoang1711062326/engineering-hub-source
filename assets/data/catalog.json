@@ -532,7 +532,7 @@
    "items": []
   },
   "popup": {
-   "active": true,
+   "active": false,
    "title": "Tư vấn lắp đèn miễn phí",
    "text": "Chọn mẫu đèn ưng ý rồi gọi hoặc nhắn Zalo để được tư vấn, báo giá theo dòng xe. Lắp đặt miễn phí tại shop Bình Thạnh!",
    "image": "assets/img/kenzo/kz-s700-pro.webp",

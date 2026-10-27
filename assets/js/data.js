@@ -140,6 +140,27 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
     'Lead': /\blead(?![a-zà-ỹđ])/, 'Scoopy': /scoopy/, 'Future': /future|fuled/, 'NVX': /\bnvx(?![a-z])/, 'Click': /\bclick(?![a-z])/, 'Vespa': /vespa/,
     'Ô tô': /innova|\bcrv\b|ô tô|\boto\b/,
   };
+  /* Loại đèn trong video — đoán từ caption ("hậu a7", "bicau", "1 bi s600"…) */
+  const VIDEO_LAMP_RE = {
+    'Bi cầu': /bi ?c[aầ]u|\b\d ?bi\b|\bbi s\d|kenzo|aozoom|\bex ?3\b|cb150|\bs ?[5-9]00/,
+    'Audi': /audi|\ba[78] ?pro|\ba[78]\b/,
+    'Đèn hậu': /hậu|hâj/,
+    'Bảng LED / Demi': /bảng led|demi/,
+  };
+  // Bi cầu hãng khác — không gợi ý vào trang sản phẩm Kenzo
+  const OTHER_BRAND_RE = /aozoom|\bex ?3\b|cb150|zhipat/;
+  // Mã đèn trong tên sản phẩm (S700, M18, X3, KZ40…) và các chữ phân biệt phiên bản (Pro, Mini, Matrix, Laser, 2.5…)
+  const MODEL_RE = /\b([a-z]{1,2}\d{1,3}s?)\b/i;
+  const modelOf = p => {
+    const name = String(p.name || ''), mm = name.match(MODEL_RE);
+    if (!mm) return null;
+    const code = mm[1].toLowerCase(), rest = name.slice(mm.index + mm[1].length).toLowerCase();
+    return {
+      // "s700" khớp "S700pro", "s 700", nhưng "x3" không khớp "ex3" (Aozoom)
+      re: new RegExp(`(?<![a-z0-9])${code.replace(/^([a-z]+)/, '$1 ?')}(?!\\d)`),
+      words: rest.split(/\s+/).filter(Boolean).map(w => w.replace(/\./g, '')),
+    };
+  };
   // Mã video TikTok tăng dần theo thời gian đăng → mã lớn hơn = video mới hơn
   const newestFirst = (a, b) => b.id.length - a.id.length || b.id.localeCompare(a.id);
 
@@ -172,7 +193,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       endsAt: in7days(),
       items: [], // thêm sản phẩm Flash Sale trong Admin
     },
-    popup: { active: true, title: 'Tư vấn lắp đèn miễn phí', text: 'Chọn mẫu đèn ưng ý rồi gọi hoặc nhắn Zalo để được tư vấn, báo giá theo dòng xe. Lắp đặt miễn phí tại shop Bình Thạnh!', image: kimg('kz-s700-pro'), link: '#/category/all' },
+    popup: { active: false, title: 'Tư vấn lắp đèn miễn phí', text: 'Chọn mẫu đèn ưng ý rồi gọi hoặc nhắn Zalo để được tư vấn, báo giá theo dòng xe. Lắp đặt miễn phí tại shop Bình Thạnh!', image: kimg('kz-s700-pro'), link: '#/category/all' },
     topbar: { active: true, text: '🔥 Lắp đặt miễn phí tại shop · Test sáng trước khi lắp · Bảo hành đến 24 tháng' },
   };
 
@@ -189,7 +210,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
   };
 
   const seed = () => ({
-    version: 12,
+    version: 13,
     categories: [...KENZO_CATEGORIES, ...TITAN_CATEGORIES],
     vehicles: VEHICLES,
     products: [...KENZO_PRODUCTS, ...TITAN_PRODUCTS],
@@ -221,6 +242,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       this.migrate10();
       this.migrate11();
       this.migrate12();
+      this.migrate13();
       if (this.data.settings.tiktok2 == null) this.data.settings.tiktok2 = SETTINGS.tiktok2;
       if (this.data.settings.mapUrl == null) this.data.settings.mapUrl = SETTINGS.mapUrl;
       return this.data;
@@ -346,6 +368,14 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       d.version = 12;
       try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
     },
+    /* v13: tắt popup lúc mở trang — trùng nội dung thanh thông báo & ô cam kết, dễ làm khách mobile thoát (bật lại được ở Admin) */
+    migrate13() {
+      const d = this.data;
+      if ((d.version || 1) >= 13) return;
+      if (d.promos.popup) d.promos.popup.active = false;
+      d.version = 13;
+      try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+    },
     save() {
       try {
         if (IS_ADMIN) localStorage.setItem(KEY, JSON.stringify(this.data));
@@ -432,6 +462,24 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
     },
     videoVehiclesOf(m) { return this.videoVehicleList().filter(v => this.videoMatches(m, v)); },
     videosFor(v) { return this.allVideos().filter(m => this.videoMatches(m, v)); },
+    videoLampsOf(m) { const c = (m.cap || '').toLowerCase(); return Object.keys(VIDEO_LAMP_RE).filter(k => VIDEO_LAMP_RE[k].test(c)); },
+    /* Sản phẩm xuất hiện trong video: caption nêu mã đèn (S600, S700…). Nhiều phiên bản cùng mã (S600 Pro V3 / S600 2.5)
+       → chọn bản khớp nhiều chữ phân biệt nhất ("s600prov3" → Pro V3); không phân biệt được ("1 bi s600") → gợi ý cả các bản */
+    videoProductsOf(m) {
+      const c = (m.cap || '').toLowerCase(), compact = c.replace(/[\s.]/g, '');
+      const hits = this.data.products.filter(p => p.active).map(p => [p, modelOf(p)]).filter(([, md]) => md && md.re.test(c))
+        .map(([p, md]) => [p, md.words.filter(w => compact.includes(w)).length]);
+      const best = Math.max(...hits.map(h => h[1]));
+      return hits.filter(h => h[1] === best).map(h => h[0]);
+    },
+    /* Video gợi ý cho trang sản phẩm: video đúng mã đèn trước, rồi video bi cầu chưa ghi mã đèn nào — ưu tiên dòng xe đang chọn */
+    videosForProduct(p, veh) {
+      const all = this.allVideos(), exact = all.filter(m => this.videoProductsOf(m).includes(p));
+      const lamp = p.cat === 'kenzo-bi-led' ? 'Bi cầu' : null;
+      const related = lamp ? all.filter(m => !exact.includes(m) && !this.videoProductsOf(m).length && this.videoLampsOf(m).includes(lamp) && !OTHER_BRAND_RE.test((m.cap || '').toLowerCase())) : [];
+      const vehFirst = list => veh && veh !== 'Tất cả dòng xe' ? [...list.filter(m => this.videoMatches(m, veh)), ...list.filter(m => !this.videoMatches(m, veh))] : list;
+      return { exact: vehFirst(exact), related: vehFirst(related) };
+    },
     uid(prefix) { return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); },
   };
 

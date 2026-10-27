@@ -734,7 +734,7 @@
         <div class="it" data-mid="${x.id}" title="${esc(x.cap)}">
           <img src="${esc(DB.cover(x))}" loading="lazy" alt="">
           ${used.has(x.id) ? '<span class="used">Đang dùng</span>' : ''}${x.video ? '<span class="v">VIDEO</span>' : ''}
-          ${DB.videoVehiclesOf(x).length ? `<span class="veh">${esc(DB.videoVehiclesOf(x).join(' · '))}</span>` : ''}
+          ${DB.videoVehiclesOf(x).length || DB.videoLampsOf(x).length ? `<span class="veh">${esc([...DB.videoVehiclesOf(x), ...DB.videoLampsOf(x)].join(' · '))}</span>` : ''}
           <div class="cap">👁 ${x.views.toLocaleString('vi-VN')} · ${esc(x.cap || '—')}</div>
         </div>`).join('');
     };
@@ -751,6 +751,8 @@
             <p><b>${esc(x.cap || '—')}</b></p>
             <p class="muted">👁 ${x.views.toLocaleString('vi-VN')} lượt xem · ❤ ${x.likes.toLocaleString('vi-VN')}</p>
             <p>Dòng xe: <b>${esc(DB.videoVehiclesOf(x).join(', ') || 'Chưa rõ (chỉ hiện ở “Tất cả video”)')}</b></p>
+            <p>Loại đèn: <b>${esc(DB.videoLampsOf(x).join(', ') || 'Chưa rõ')}</b>${DB.videoProductsOf(x).length ? ` · Gợi ý ở trang: <b>${esc(DB.videoProductsOf(x).map(p => p.name).join(', '))}</b>` : ''}</p>
+            <p class="muted" style="font-size:12.5px;margin-top:-6px">Tự nhận từ caption. Ghi mã đèn (vd “S700 Pro”) trong caption TikTok để video hiện đúng ở trang sản phẩm đó.</p>
             <div class="field"><label>Đường dẫn ảnh</label><input readonly value="assets/img/${x.id}.jpg" onclick="this.select()"></div>
             <div style="display:grid;gap:8px;margin-top:12px">
               <button class="btn btn-brand" id="mkP">+ Tạo sản phẩm từ ảnh này</button>
