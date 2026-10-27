@@ -1,5 +1,5 @@
 {
- "version": 13,
+ "version": 14,
  "categories": [
   {
    "id": "kenzo-bi-led",
@@ -30,6 +30,12 @@
    "name": "Bóng LED Titan Moto",
    "icon": "✦",
    "desc": "Bóng LED, Bi LED mini Titan Moto"
+  },
+  {
+   "id": "aozoom",
+   "name": "Đèn Aozoom",
+   "icon": "◈",
+   "desc": "Đèn gầm Extra 2, Extra 3, Extra Sapphire · Bi LED mini PI05"
   }
  ],
  "vehicles": [
@@ -1447,6 +1453,194 @@
    },
    "vehicleImages": {},
    "active": true
+  },
+  {
+   "id": "az-ex2",
+   "name": "Đèn gầm Aozoom Extra 2 (EX2)",
+   "cat": "aozoom",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 4400000,
+   "oldPrice": 0,
+   "image": "assets/img/aozoom/az-ex2.webp",
+   "gallery": [
+    "assets/img/aozoom/az-ex2-2.webp",
+    "assets/img/aozoom/az-ex2-3.webp",
+    "assets/img/aozoom/az-ex2-4.webp"
+   ],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": true,
+   "warranty": "2 năm",
+   "short": "Đèn gầm dạng rời 2 bi nhỏ gọn: cos chiếu rộng bao quát mặt đường và góc cua, pha chiếu xa tập trung.",
+   "desc": "Đèn gầm Aozoom Extra 2 (EX2) — Đèn gầm dạng rời 2 bi nhỏ gọn: cos chiếu rộng bao quát mặt đường và góc cua, pha chiếu xa tập trung.\n\nSản phẩm chính hãng Aozoom, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Aozoom",
+    "Nguồn sáng": "6 + 3 + 3",
+    "Cos": "1 chip 6 nhân 55×55mil + 1 chip 3 nhân 78×78mil",
+    "Pha": "1 chip 3 nhân 78×78mil",
+    "Công suất": "35W – 60W (±2W)",
+    "Nhiệt màu": "5000K",
+    "Điện áp": "9V – 16V",
+    "CRI": "85",
+    "Chống nước": "IP67",
+    "Nhiệt độ hoạt động": "-40°C đến +105°C",
+    "Tuổi thọ": "> 20.000 giờ"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "az-ex3",
+   "name": "Đèn gầm Aozoom Extra 3 (EX3)",
+   "cat": "aozoom",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 5200000,
+   "oldPrice": 0,
+   "image": "assets/img/aozoom/az-ex3.webp",
+   "gallery": [
+    "assets/img/aozoom/az-ex3-2.webp",
+    "assets/img/aozoom/az-ex3-3.webp",
+    "assets/img/aozoom/az-ex3-4.webp"
+   ],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": true,
+   "warranty": "2 năm",
+   "short": "Đèn gầm dạng rời 3 bi, kết hợp Double Cup và Single Direct Shot — sáng xa, vùng sáng rộng mà không chói xe ngược chiều.",
+   "desc": "Đèn gầm Aozoom Extra 3 (EX3) — Đèn gầm dạng rời 3 bi, kết hợp Double Cup và Single Direct Shot — sáng xa, vùng sáng rộng mà không chói xe ngược chiều.\n\nSản phẩm chính hãng Aozoom, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Aozoom",
+    "Công nghệ": "Double Cup & Single Direct Shot",
+    "Nguồn sáng": "6 + 6 + 3 + 3",
+    "Cos": "2 chip 6 nhân 50×55mil + 1 chip 3 nhân 60×68mil",
+    "Pha": "1 chip 3 nhân 60×68mil",
+    "Công suất": "60W – 95W (±2W)",
+    "Nhiệt màu": "3000K / 4500K / 5000K",
+    "Điện áp": "9V – 16V",
+    "CRI": "85",
+    "Chống nước": "IP67",
+    "Nhiệt độ hoạt động": "-40°C đến +105°C",
+    "Tuổi thọ": "20.000 giờ"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "az-sapphire",
+   "name": "Đèn gầm Aozoom Extra Sapphire",
+   "cat": "aozoom",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 8550000,
+   "oldPrice": 0,
+   "image": "assets/img/aozoom/az-sapphire.webp",
+   "gallery": [
+    "assets/img/aozoom/az-sapphire-2.webp",
+    "assets/img/aozoom/az-sapphire-3.webp",
+    "assets/img/aozoom/az-sapphire-4.webp"
+   ],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": true,
+   "warranty": "2 năm",
+   "short": "Đèn gầm cao cấp nhất của Aozoom: Dual Cup & Direct Beam, chùm sáng Ellipse Hyper-Spot 5000K rõ nét, bám đường.",
+   "desc": "Đèn gầm Aozoom Extra Sapphire — Đèn gầm cao cấp nhất của Aozoom: Dual Cup & Direct Beam, chùm sáng Ellipse Hyper-Spot 5000K rõ nét, bám đường.\n\nSản phẩm chính hãng Aozoom, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Aozoom",
+    "Công nghệ": "Dual Cup & Direct Beam",
+    "Cos": "2 chip 6 nhân 55×55mil + 2 chip 3 nhân 55×55mil",
+    "Pha": "2 chip đơn 50×66mil",
+    "Công suất": "62W (cos) – 98W (pha) ±2W",
+    "Nhiệt màu": "5000K",
+    "Điện áp": "9V – 16V",
+    "Bảo vệ nhiệt": "Cảm biến NTC",
+    "CRI": "85",
+    "Chống nước": "IP67",
+    "Nhiệt độ hoạt động": "-40°C đến +105°C",
+    "Tuổi thọ": "> 25.000 giờ"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "az-pi05",
+   "name": "Bi LED mini Aozoom PI05",
+   "cat": "aozoom",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 3250000,
+   "oldPrice": 0,
+   "image": "assets/img/aozoom/az-pi05.webp",
+   "gallery": [
+    "assets/img/aozoom/az-pi05-2.webp",
+    "assets/img/aozoom/az-pi05-3.webp",
+    "assets/img/aozoom/az-pi05-4.webp"
+   ],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": true,
+   "warranty": "18 tháng",
+   "short": "Bi LED mini chân H4 cắm zin cho xe dùng đèn halogen — không cần cắt chóa, sáng rõ hơn hẳn bóng zin.",
+   "desc": "Bi LED mini Aozoom PI05 — Bi LED mini chân H4 cắm zin cho xe dùng đèn halogen — không cần cắt chóa, sáng rõ hơn hẳn bóng zin.\n\nSản phẩm chính hãng Aozoom, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Aozoom",
+    "Công nghệ": "Dual Cup",
+    "Nguồn sáng": "6 + 1 (cos 6 chip 3570, pha 1 chip 5050)",
+    "Công suất": "60W – 70W",
+    "Nhiệt màu": "5500K",
+    "Điện áp": "9V – 18V",
+    "Chân đèn": "H4",
+    "Chống nước": "IP65",
+    "Nhiệt độ hoạt động": "-40°C đến +90°C"
+   },
+   "vehicleImages": {},
+   "active": true
+  },
+  {
+   "id": "az-pi05-app",
+   "name": "Bi LED mini Aozoom PI05 APP",
+   "cat": "aozoom",
+   "vehicles": [
+    "Tất cả dòng xe"
+   ],
+   "price": 3600000,
+   "oldPrice": 0,
+   "image": "assets/img/aozoom/az-pi05-app.webp",
+   "gallery": [
+    "assets/img/aozoom/az-pi05-app-2.webp",
+    "assets/img/aozoom/az-pi05-app-3.webp",
+    "assets/img/aozoom/az-pi05-app-4.webp"
+   ],
+   "video": "",
+   "tiktok": "",
+   "featured": false,
+   "isNew": true,
+   "warranty": "18 tháng",
+   "short": "Bản PI05 điều khiển bằng app điện thoại: tự chỉnh nhiệt màu 3000K – 5500K và độ sáng theo điều kiện đi đường.",
+   "desc": "Bi LED mini Aozoom PI05 APP — Bản PI05 điều khiển bằng app điện thoại: tự chỉnh nhiệt màu 3000K – 5500K và độ sáng theo điều kiện đi đường.\n\nSản phẩm chính hãng Aozoom, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.",
+   "specs": {
+    "Thương hiệu": "Aozoom",
+    "Công nghệ": "Single Cup, điều khiển qua app",
+    "Nguồn sáng": "6 + 1 (6 chip 3570 60×68mil)",
+    "Công suất": "30W (±2W)",
+    "Nhiệt màu": "3000K – 5500K (chỉnh trên app)",
+    "Điện áp": "9V – 18V",
+    "Chân đèn": "H4",
+    "Chống nước": "IP65",
+    "Nhiệt độ hoạt động": "-40°C đến +90°C"
+   },
+   "vehicleImages": {},
+   "active": true
   }
  ],
  "banners": [
@@ -1532,5 +1726,5 @@
   "tiktok2": "https://www.tiktok.com/@_superlightshop_",
   "mapUrl": "https://www.google.com/maps/place/SUPERLIGHTSHOP/@10.8043472,106.7101415,17z/data=!4m6!3m5!1s0x317529001f4e1eb7:0xf6c3433ab829efc7!8m2!3d10.8043457!4d106.7106266"
  },
- "publishedAt": "2026-10-27T02:17:01.932Z"
+ "publishedAt": "2026-10-27T02:23:37.875Z"
 }

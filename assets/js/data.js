@@ -133,6 +133,31 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
     T("tt-bong-led-a7-ultra", "Bóng LED Titan A7 Ultra", "titan-bong-led", 2200000, "Công suất ~70W · 6000K · Tăng sáng 300%.", {"warranty": "2 năm", "specs": {"Công suất": "~70W", "Chân bóng": "H4, H7, H11, 9005", "Nhiệt màu": "6000K", "Vật liệu tản nhiệt": "Quạt + 2 Ống đồng + Lá tản nhiệt", "Đặc điểm nổi bật": "Tăng sáng 300%"}}),
   ];
 
+  /* Aozoom — thông số theo aozoom.com.vn */
+  const AOZOOM_CATEGORIES = [
+    { id: 'aozoom', name: 'Đèn Aozoom', icon: '◈', desc: 'Đèn gầm Extra 2, Extra 3, Extra Sapphire · Bi LED mini PI05' },
+  ];
+  const A = (id, name, price, short, warranty, specs) => ({
+    id, name, cat: 'aozoom', vehicles: ['Tất cả dòng xe'], price, oldPrice: 0, image: `assets/img/aozoom/${id}.webp`,
+    gallery: [2, 3, 4].map(i => `assets/img/aozoom/${id}-${i}.webp`), video: '', tiktok: '', featured: false, isNew: true, warranty,
+    short, desc: `${name} — ${short}
+
+Sản phẩm chính hãng Aozoom, lắp đặt và test sáng trực tiếp tại TS SUPERLIGHT. Liên hệ Hotline/Zalo để được tư vấn theo dòng xe.`,
+    specs: { 'Thương hiệu': 'Aozoom', ...specs }, vehicleImages: {}, active: true,
+  });
+  const AOZOOM_PRODUCTS = [
+    A('az-ex2', 'Đèn gầm Aozoom Extra 2 (EX2)', 4400000, 'Đèn gầm dạng rời 2 bi nhỏ gọn: cos chiếu rộng bao quát mặt đường và góc cua, pha chiếu xa tập trung.', '2 năm',
+      { 'Nguồn sáng': '6 + 3 + 3', 'Cos': '1 chip 6 nhân 55×55mil + 1 chip 3 nhân 78×78mil', 'Pha': '1 chip 3 nhân 78×78mil', 'Công suất': '35W – 60W (±2W)', 'Nhiệt màu': '5000K', 'Điện áp': '9V – 16V', 'CRI': '85', 'Chống nước': 'IP67', 'Nhiệt độ hoạt động': '-40°C đến +105°C', 'Tuổi thọ': '> 20.000 giờ' }),
+    A('az-ex3', 'Đèn gầm Aozoom Extra 3 (EX3)', 5200000, 'Đèn gầm dạng rời 3 bi, kết hợp Double Cup và Single Direct Shot — sáng xa, vùng sáng rộng mà không chói xe ngược chiều.', '2 năm',
+      { 'Công nghệ': 'Double Cup & Single Direct Shot', 'Nguồn sáng': '6 + 6 + 3 + 3', 'Cos': '2 chip 6 nhân 50×55mil + 1 chip 3 nhân 60×68mil', 'Pha': '1 chip 3 nhân 60×68mil', 'Công suất': '60W – 95W (±2W)', 'Nhiệt màu': '3000K / 4500K / 5000K', 'Điện áp': '9V – 16V', 'CRI': '85', 'Chống nước': 'IP67', 'Nhiệt độ hoạt động': '-40°C đến +105°C', 'Tuổi thọ': '20.000 giờ' }),
+    A('az-sapphire', 'Đèn gầm Aozoom Extra Sapphire', 8550000, 'Đèn gầm cao cấp nhất của Aozoom: Dual Cup & Direct Beam, chùm sáng Ellipse Hyper-Spot 5000K rõ nét, bám đường.', '2 năm',
+      { 'Công nghệ': 'Dual Cup & Direct Beam', 'Cos': '2 chip 6 nhân 55×55mil + 2 chip 3 nhân 55×55mil', 'Pha': '2 chip đơn 50×66mil', 'Công suất': '62W (cos) – 98W (pha) ±2W', 'Nhiệt màu': '5000K', 'Điện áp': '9V – 16V', 'Bảo vệ nhiệt': 'Cảm biến NTC', 'CRI': '85', 'Chống nước': 'IP67', 'Nhiệt độ hoạt động': '-40°C đến +105°C', 'Tuổi thọ': '> 25.000 giờ' }),
+    A('az-pi05', 'Bi LED mini Aozoom PI05', 3250000, 'Bi LED mini chân H4 cắm zin cho xe dùng đèn halogen — không cần cắt chóa, sáng rõ hơn hẳn bóng zin.', '18 tháng',
+      { 'Công nghệ': 'Dual Cup', 'Nguồn sáng': '6 + 1 (cos 6 chip 3570, pha 1 chip 5050)', 'Công suất': '60W – 70W', 'Nhiệt màu': '5500K', 'Điện áp': '9V – 18V', 'Chân đèn': 'H4', 'Chống nước': 'IP65', 'Nhiệt độ hoạt động': '-40°C đến +90°C' }),
+    A('az-pi05-app', 'Bi LED mini Aozoom PI05 APP', 3600000, 'Bản PI05 điều khiển bằng app điện thoại: tự chỉnh nhiệt màu 3000K – 5500K và độ sáng theo điều kiện đi đường.', '18 tháng',
+      { 'Công nghệ': 'Single Cup, điều khiển qua app', 'Nguồn sáng': '6 + 1 (6 chip 3570 60×68mil)', 'Công suất': '30W (±2W)', 'Nhiệt màu': '3000K – 5500K (chỉnh trên app)', 'Điện áp': '9V – 18V', 'Chân đèn': 'H4', 'Chống nước': 'IP65', 'Nhiệt độ hoạt động': '-40°C đến +90°C' }),
+  ];
+
   // Nhận cả cách viết tắt/sai chính tả hay gặp trong caption TikTok: Ab/Airbalde → Air Blade, Fuled → Future…
   // Tên xe viết liền đời xe vẫn nhận: "Ab2026", "Sh2025", "Lead125" (sau tên xe không được là chữ cái)
   const VIDEO_VEH_RE = {
@@ -142,7 +167,8 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
   };
   /* Loại đèn trong video — đoán từ caption ("hậu a7", "bicau", "1 bi s600"…) */
   const VIDEO_LAMP_RE = {
-    'Bi cầu': /bi ?c[aầ]u|\b\d ?bi\b|\bbi s\d|kenzo|aozoom|\bex ?3\b|cb150|\bs ?[5-9]00/,
+    'Bi cầu': /bi ?c[aầ]u|\b\d ?bi\b|\bbi s\d|kenzo|cb150|\bs ?[5-9]00|\bpi ?05/,
+    'Đèn gầm / trợ sáng': /trợ ?sáng|đèn gầm|\bex ?[23]\b|extra ?[23]\b|sapphire|saphia/,
     'Audi': /audi|\ba[78] ?pro|\ba[78]\b/,
     'Đèn hậu': /hậu|hâj/,
     'Bảng LED / Demi': /bảng led|demi/,
@@ -210,10 +236,10 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
   };
 
   const seed = () => ({
-    version: 13,
-    categories: [...KENZO_CATEGORIES, ...TITAN_CATEGORIES],
+    version: 14,
+    categories: [...KENZO_CATEGORIES, ...TITAN_CATEGORIES, ...AOZOOM_CATEGORIES],
     vehicles: VEHICLES,
-    products: [...KENZO_PRODUCTS, ...TITAN_PRODUCTS],
+    products: [...KENZO_PRODUCTS, ...TITAN_PRODUCTS, ...AOZOOM_PRODUCTS],
     banners: BANNERS,
     sideAds: SIDE_ADS,
     promos: PROMOS,
@@ -248,6 +274,7 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       this.migrate11();
       this.migrate12();
       this.migrate13();
+      this.migrate14();
       if (this.data.settings.tiktok2 == null) this.data.settings.tiktok2 = SETTINGS.tiktok2;
       if (this.data.settings.mapUrl == null) this.data.settings.mapUrl = SETTINGS.mapUrl;
       // Địa chỉ cũ 38/8 → 38/8A (bản nháp Admin lưu trên máy còn địa chỉ cũ)
@@ -385,6 +412,15 @@ Sản phẩm chính hãng Titan Moto, lắp đặt và test sáng trực tiếp 
       if ((d.version || 1) >= 13) return;
       if (d.promos.popup) d.promos.popup.active = false;
       d.version = 13;
+      this.persistDraft();
+    },
+    /* v14: thêm danh mục + sản phẩm Aozoom, giữ nguyên dữ liệu đã có */
+    migrate14() {
+      const d = this.data;
+      if ((d.version || 1) >= 14) return;
+      AOZOOM_CATEGORIES.forEach(c => { if (!d.categories.some(x => x.id === c.id)) d.categories.push({ ...c }); });
+      AOZOOM_PRODUCTS.forEach(p => { if (!d.products.some(x => x.id === p.id)) d.products.push(JSON.parse(JSON.stringify(p))); });
+      d.version = 14;
       this.persistDraft();
     },
     save() {
