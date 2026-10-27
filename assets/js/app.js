@@ -197,7 +197,7 @@
       <section class="policies">
         <div class="policy"><i>🔧</i><div><b>Lắp đặt miễn phí</b><small>Tại shop Bình Thạnh</small></div></div>
         <div class="policy"><i>💡</i><div><b>Test sáng trước khi lắp</b><small>Hài lòng mới thanh toán</small></div></div>
-        <div class="policy"><i>🛡</i><div><b>Bảo hành đến 24 tháng</b><small>1 đổi 1 trong 7 ngày</small></div></div>
+        <div class="policy"><i>🛡</i><div><b>Hàng chính hãng</b><small>Kenzo · Titan Moto · Aozoom</small></div></div>
         <div class="policy"><i>💬</i><div><b>Tư vấn miễn phí</b><small>Gọi / Zalo ${phoneFmt(S().hotline)}</small></div></div>
       </section>
 
@@ -481,7 +481,6 @@
         </div>
         ${p.video ? `<div data-pane="video" class="hidden"><video src="${esc(p.video)}" poster="${esc(p.image)}" controls playsinline style="max-height:70vh;margin:0 auto;border-radius:10px"></video><p style="text-align:center"><a href="${esc(p.tiktok)}" target="_blank" rel="noopener" class="muted">Xem trên TikTok ↗</a></p></div>` : ''}
         <div data-pane="policy" class="hidden desc">• Bảo hành ${esc(p.warranty)} cho lỗi kỹ thuật (không áp dụng khi va chạm, vào nước do độ chế sai cách).
-• 1 đổi 1 trong 7 ngày đầu nếu lỗi nhà sản xuất.
 • Hỗ trợ kiểm tra, cân chỉnh vệt sáng miễn phí trọn đời tại shop.
 • Mang xe đến shop để được bảo hành.</div>
       </section>
@@ -531,7 +530,7 @@
     app.innerHTML = `
       <nav class="crumbs"><a href="#/">Trang chủ</a><span>Chính sách</span></nav>
       <section class="panel desc">
-<h2 style="margin-top:0">Chính sách bảo hành</h2>• Bảo hành 12 – 24 tháng tuỳ sản phẩm (ghi rõ tại trang chi tiết).
+<h2 style="margin-top:0">Chính sách bảo hành</h2>• Thời gian bảo hành tuỳ sản phẩm (ghi rõ tại trang chi tiết).
 • Không bảo hành khi sản phẩm bị va chạm, cháy nổ do tự ý đấu nối sai.
 
 <h2>Mua hàng &amp; lắp đặt</h2>• Giá sản phẩm tuỳ đời xe — vui lòng liên hệ Hotline/Zalo ${phoneFmt(S().hotline)} để được tư vấn, báo giá.

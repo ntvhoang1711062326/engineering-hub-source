@@ -220,7 +220,7 @@ Sản phẩm chính hãng Aozoom, lắp đặt và test sáng trực tiếp tạ
       items: [], // thêm sản phẩm Flash Sale trong Admin
     },
     popup: { active: false, title: 'Tư vấn lắp đèn miễn phí', text: 'Chọn mẫu đèn ưng ý rồi gọi hoặc nhắn Zalo để được tư vấn, báo giá theo dòng xe. Lắp đặt miễn phí tại shop Bình Thạnh!', image: kimg('kz-s700-pro'), link: '#/category/all' },
-    topbar: { active: true, text: '🔥 Lắp đặt miễn phí tại shop · Test sáng trước khi lắp · Bảo hành đến 24 tháng' },
+    topbar: { active: true, text: '🔥 Lắp đặt miễn phí tại shop · Test sáng trước khi lắp · Hàng chính hãng' },
   };
 
   const SETTINGS = {
@@ -279,6 +279,9 @@ Sản phẩm chính hãng Aozoom, lắp đặt và test sáng trực tiếp tạ
       if (this.data.settings.mapUrl == null) this.data.settings.mapUrl = SETTINGS.mapUrl;
       // Địa chỉ cũ 38/8 → 38/8A (bản nháp Admin lưu trên máy còn địa chỉ cũ)
       if (this.data.settings.address === '38/8 Đường Đinh Bộ Lĩnh, Bình Thạnh, Hồ Chí Minh') this.data.settings.address = SETTINGS.address;
+      // Bỏ câu "Bảo hành đến 24 tháng" khỏi thanh thông báo mặc định (giữ nguyên nếu chủ shop đã tự sửa chữ khác)
+      const tb = this.data.promos.topbar;
+      if (tb?.text === '🔥 Lắp đặt miễn phí tại shop · Test sáng trước khi lắp · Bảo hành đến 24 tháng') tb.text = PROMOS.topbar.text;
       return this.data;
     },
     /* v2: bỏ giao hàng, chuyển sang đặt chỗ + cọc */
