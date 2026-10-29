@@ -1,8 +1,9 @@
 {
- "syncedAt": "2026-10-28T22:12:07.591Z",
+ "syncedAt": "2026-10-29T04:28:47.515Z",
  "request": "mvpijkqg",
  "added": 0,
- "updated": 22,
+ "updated": 12,
+ "error": "@_superlightshop_: TikTok trả về lỗi 429",
  "channels": {
   "ts.superlight": {
    "name": "TS SUPERLIGHT 🇻🇳",
@@ -21,13 +22,13 @@
   {
    "id": "7701281026391280904",
    "cap": "Audi A7pro v3 AB2026 🥰",
-   "views": 6275,
+   "views": 6459,
    "ch": "ts.superlight"
   },
   {
    "id": "7700953249678970119",
    "cap": "Full combo Audi + bicau AB2020-2025 bao nhiêu nhỉ🤔?",
-   "views": 1289,
+   "views": 1294,
    "ch": "ts.superlight"
   },
   {
@@ -45,7 +46,7 @@
   {
    "id": "7700495481079713042",
    "cap": "Combo Audi trước sau A7prov3 2₫5🙋🏻. Chốt ngay deal hời thôi nào ☎️",
-   "views": 26800,
+   "views": 27000,
    "ch": "ts.superlight"
   },
   {
@@ -99,7 +100,7 @@
   {
    "id": "7688304356801662226",
    "cap": "Audi A8pro Ngôi Sao Vario 🤍🙋🏻",
-   "views": 3430,
+   "views": 3432,
    "ch": "ts.superlight"
   },
   {
@@ -111,19 +112,19 @@
   {
    "id": "7676341375083793682",
    "cap": "Kenzo s600prov3 + mắt xoay sharigan Ab 2026 🥰",
-   "views": 1227,
+   "views": 1228,
    "ch": "ts.superlight"
   },
   {
    "id": "7675338859588193543",
    "cap": "AB 2020-2025 lên Audi a7 + Bi cầu kenzo S700pro v2 🔥",
-   "views": 2851,
+   "views": 2854,
    "ch": "ts.superlight"
   },
   {
    "id": "7670084619982916882",
    "cap": "Airblade 2026 lên 1 cặp Bicau + Audi đổi màu 🔥🔥",
-   "views": 27700,
+   "views": 27800,
    "ch": "ts.superlight"
   },
   {
@@ -141,7 +142,7 @@
   {
    "id": "7623989432148053269",
    "cap": "Vario mẫu mới đèn mới cho ae tham khảo 🔥",
-   "views": 79300,
+   "views": 79400,
    "ch": "ts.superlight"
   },
   {
