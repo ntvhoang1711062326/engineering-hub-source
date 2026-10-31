@@ -1,93 +1,99 @@
 {
- "syncedAt": "2026-10-31T11:43:21.283Z",
+ "syncedAt": "2026-10-31T16:50:57.643Z",
  "request": "mvpijkqg",
- "added": 0,
- "updated": 22,
+ "added": 1,
+ "updated": 21,
  "channels": {
   "ts.superlight": {
    "name": "TS SUPERLIGHT 🇻🇳",
-   "followers": 842,
+   "followers": 843,
    "likes": 16300,
    "avatar": "assets/img/avatar-ts.superlight.jpg"
   },
   "_superlightshop_": {
    "name": "Nguyễn Thanh Sang",
-   "followers": 186100,
+   "followers": 186000,
    "likes": 4200000,
    "avatar": "assets/img/avatar-_superlightshop_.jpg"
   }
  },
  "videos": [
   {
+   "id": "7702810300147338517",
+   "cap": "Audi a7 ab2026 🔥",
+   "views": 1708,
+   "ch": "_superlightshop_"
+  },
+  {
    "id": "7702053710855294228",
    "cap": "Vario của ae lên đèn chưa 🔥",
-   "views": 2369,
+   "views": 2437,
    "ch": "_superlightshop_"
   },
   {
    "id": "7701281026391280904",
    "cap": "Audi A7pro v3 AB2026 🥰",
-   "views": 8190,
+   "views": 8357,
    "ch": "ts.superlight"
   },
   {
    "id": "7700953249678970119",
    "cap": "Full combo Audi + bicau AB2020-2025 bao nhiêu nhỉ🤔?",
-   "views": 1384,
+   "views": 1392,
    "ch": "ts.superlight"
   },
   {
    "id": "7700952365851053332",
    "cap": "Ab 2026 lên đèn thì nhìn ngầu luôn 🔥",
-   "views": 6026,
+   "views": 6116,
    "ch": "_superlightshop_"
   },
   {
    "id": "7700567066268634389",
    "cap": "Audi trước sau lead 🔥",
-   "views": 1516,
+   "views": 1532,
    "ch": "_superlightshop_"
   },
   {
    "id": "7700495481079713042",
    "cap": "Combo Audi trước sau A7prov3 2₫5🙋🏻. Chốt ngay deal hời thôi nào ☎️",
-   "views": 29300,
+   "views": 29600,
    "ch": "ts.superlight"
   },
   {
    "id": "7700456596832406805",
    "cap": "Audi scoopy 2017 🔥",
-   "views": 1309,
+   "views": 1324,
    "ch": "_superlightshop_"
   },
   {
    "id": "7700219851813489941",
    "cap": "Ab2026 lên đèn nhìn ngầu ae nhỉ 🔥",
-   "views": 9524,
+   "views": 9620,
    "ch": "_superlightshop_"
   },
   {
    "id": "7700083453294923029",
    "cap": "Scoopy lên đèn này thì khỏi đụng hàng luôn 🔥",
-   "views": 1720,
+   "views": 1741,
    "ch": "_superlightshop_"
   },
   {
    "id": "7699829779364646164",
    "cap": "Combo đèn ab 2026 🔥",
-   "views": 3981,
+   "views": 4036,
    "ch": "_superlightshop_"
   },
   {
    "id": "7699085583418854677",
    "cap": "Ab2026 1 cặp S700prov2 + TCĐ 🔥",
-   "views": 2510,
+   "views": 2523,
    "ch": "_superlightshop_"
   },
   {
    "id": "7698690937119067413",
    "cap": "Audi A7pro V3 lên xe Ab 2026🥰",
-   "views": 8931,
+   "views": 9016,
    "ch": "_superlightshop_"
   },
   {
@@ -105,7 +111,7 @@
   {
    "id": "7688304356801662226",
    "cap": "Audi A8pro Ngôi Sao Vario 🤍🙋🏻",
-   "views": 3516,
+   "views": 3525,
    "ch": "ts.superlight"
   },
   {
@@ -117,25 +123,25 @@
   {
    "id": "7676341375083793682",
    "cap": "Kenzo s600prov3 + mắt xoay sharigan Ab 2026 🥰",
-   "views": 1272,
+   "views": 1284,
    "ch": "ts.superlight"
   },
   {
    "id": "7675338859588193543",
    "cap": "AB 2020-2025 lên Audi a7 + Bi cầu kenzo S700pro v2 🔥",
-   "views": 2915,
+   "views": 2923,
    "ch": "ts.superlight"
   },
   {
    "id": "7670084619982916882",
    "cap": "Airblade 2026 lên 1 cặp Bicau + Audi đổi màu 🔥🔥",
-   "views": 28500,
+   "views": 28600,
    "ch": "ts.superlight"
   },
   {
    "id": "7669377741594103058",
    "cap": "Full đèn ab 2026 🥰",
-   "views": 896,
+   "views": 897,
    "ch": "ts.superlight"
   },
   {
@@ -147,7 +153,7 @@
   {
    "id": "7623989432148053269",
    "cap": "Vario mẫu mới đèn mới cho ae tham khảo 🔥",
-   "views": 79700,
+   "views": 79800,
    "ch": "ts.superlight"
   },
   {
@@ -159,7 +165,7 @@
   {
    "id": "7477175155995757831",
    "cap": "Lên Full combo Audi trước sau + Zhipat dành cho ae vision 2017-2019 🔥",
-   "views": 116900,
+   "views": 117000,
    "ch": "ts.superlight"
   }
  ]
