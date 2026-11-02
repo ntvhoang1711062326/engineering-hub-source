@@ -30,7 +30,7 @@
     },
     setCfg(c) { try { localStorage.setItem(GH_CFG, JSON.stringify(c)); } catch (e) {} },
     ready() { return !!this.cfg().token; },
-    siteUrl() { const { owner, repo } = this.cfg(); return `https://${owner}.github.io/${repo}/`; },
+    siteUrl() { return "https://www.supperlightshop.com/"; },
     async api(path, { method = 'GET', body, raw } = {}) {
       const { owner, repo, token } = this.cfg();
       const res = await fetch(`https://api.github.com/repos/${owner}/${repo}${path}`, {
