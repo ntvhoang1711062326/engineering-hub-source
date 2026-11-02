@@ -1700,7 +1700,7 @@
   "flash": {
    "active": true,
    "title": "Flash Sale cuối tuần",
-   "endsAt": "2026-11-02T08:51",
+   "endsAt": "2026-11-09T05:15",
    "items": []
   },
   "popup": {
@@ -1722,9 +1722,9 @@
   "hotline": "0769678981",
   "address": "38/8A Đường Đinh Bộ Lĩnh, Bình Thạnh, Hồ Chí Minh",
   "hours": "8:00 – 20:00 (Cả T7 & CN)",
+  "mapUrl": "https://www.google.com/maps/place/SUPERLIGHTSHOP/@10.8043472,106.7101415,17z/data=!4m6!3m5!1s0x317529001f4e1eb7:0xf6c3433ab829efc7!8m2!3d10.8043457!4d106.7106266",
   "tiktok": "https://www.tiktok.com/@ts.superlight",
-  "tiktok2": "https://www.tiktok.com/@_superlightshop_",
-  "mapUrl": "https://www.google.com/maps/place/SUPERLIGHTSHOP/@10.8043472,106.7101415,17z/data=!4m6!3m5!1s0x317529001f4e1eb7:0xf6c3433ab829efc7!8m2!3d10.8043457!4d106.7106266"
+  "tiktok2": "https://www.tiktok.com/@_superlightshop_"
  },
- "publishedAt": "2026-10-27T02:23:37.875Z"
+ "publishedAt": "2026-11-02T05:17:03.949Z"
 }
