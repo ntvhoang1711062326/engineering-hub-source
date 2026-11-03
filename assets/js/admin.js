@@ -224,17 +224,16 @@
       <div class="login">
         <form class="login-box" id="loginForm">
           <div class="logo"><img class="logo-img" src="assets/img/logo2.webp" alt="TS SUPERLIGHT"><span class="logo-text"><small style="color:var(--muted)">Trang quản trị</small></span></div>
-          <div class="field"><label>GitHub token (quyền Contents: Read and write)</label><input id="lt" type="password" autocomplete="off" placeholder="github_pat_…"></div>
-          <div class="field"><label>Repo</label><input id="lr" value="${esc(c.owner + '/' + c.repo)}"></div>
+          <div class="field"><label>Key Đăng nhập</label><input id="lt" type="password" autocomplete="off"></div>
           <div class="msg err" id="lmsg" style="margin-top:8px"></div>
           <button class="btn btn-brand btn-block btn-lg" style="margin-top:12px">Đăng nhập</button>
-          <div class="note">Token chỉ lưu trong trình duyệt trên máy này. Cách tạo token: file <b>HUONG-DAN-DUA-LEN-WEB.md</b> mục 4.<br><a href="index.html" style="color:var(--brand-2)">← Về trang bán hàng</a></div>
+          <div class="note"><a href="index.html" style="color:var(--brand-2)">← Về trang bán hàng</a></div>
         </form>
       </div>`;
     $('#loginForm').onsubmit = async e => {
       e.preventDefault();
-      const [owner, repo] = $('#lr').value.trim().split('/'), token = $('#lt').value.trim(), msg = $('#lmsg'), btn = e.target.querySelector('button');
-      if (!token || !owner || !repo) { msg.textContent = 'Nhập GitHub token và repo dạng tài-khoản/tên-repo'; return; }
+      const { owner, repo } = GH.cfg(), token = $('#lt').value.trim(), msg = $('#lmsg'), btn = e.target.querySelector('button');
+      if (!token) { msg.textContent = 'Nhập GitHub token'; return; }
       btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Đang kiểm tra với GitHub…';
       GH.setCfg({ ...GH.cfg(), owner, repo, token });
       try {
