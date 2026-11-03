@@ -233,7 +233,7 @@
     $('#loginForm').onsubmit = async e => {
       e.preventDefault();
       const { owner, repo } = GH.cfg(), token = $('#lt').value.trim(), msg = $('#lmsg'), btn = e.target.querySelector('button');
-      if (!token) { msg.textContent = 'Nhập GitHub token'; return; }
+      if (!token) { msg.textContent = 'Nhập lại key đăng nhập. Hoặc liên hệ Hoàng.'; return; }
       btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Đang kiểm tra với GitHub…';
       GH.setCfg({ ...GH.cfg(), owner, repo, token });
       try {
