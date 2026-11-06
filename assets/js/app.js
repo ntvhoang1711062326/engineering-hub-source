@@ -116,6 +116,7 @@
         </ul>
       </li>
       <li class="nav-item"><a href="#/policy" data-nav="policy">Bảo hành</a></li>
+      <li class="nav-item"><a href="#/blog" data-nav="blog">Blog</a></li>
       <li class="nav-item"><a href="${zaloLink()}" target="_blank" rel="noopener">Liên hệ</a></li>`;
     $('#footer').innerHTML = `
       <div>
@@ -130,6 +131,7 @@
       <div><h5>Hỗ trợ</h5><ul>
         <li><a href="#/policy">Chính sách bảo hành</a></li>
         <li><a href="#/videos">Video lắp đèn theo xe</a></li>
+        <li><a href="#/blog">Blog – kinh nghiệm độ đèn</a></li>
         <li><a href="tel:${esc(s.hotline)}">Gọi tư vấn ${phoneFmt(s.hotline)}</a></li>
       </ul></div>
       <div class="contact"><h5>Liên hệ</h5><ul>
@@ -539,6 +541,90 @@
       </section>`;
   }
 
+  /* ---------------- Blog ---------------- */
+  // Ngày đăng: "06 Tháng 11, 2026"
+  const postDay = d => { const [y, m, dd] = String(d || '').split('-'); return y && m && dd ? { d: dd, m: `Tháng ${m}`, y, full: `${dd} Tháng ${m}, ${y}` } : { d: '', m: '', y: '', full: '' }; };
+  // Đoạn văn trong bài: dòng "## " = tiêu đề, "### " = tiêu đề nhỏ, "- " = gạch đầu dòng, **chữ đậm**, dòng trống = đoạn mới
+  function richText(s) {
+    const inline = t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    return String(s || '').replace(/\r/g, '').split(/\n{2,}/).map(par => {
+      const lines = par.split('\n').filter(l => l.trim());
+      if (!lines.length) return '';
+      let out = '', list = [], text = [];
+      const flushList = () => { if (list.length) out += `<ul>${list.map(l => `<li>${inline(l)}</li>`).join('')}</ul>`; list = []; };
+      const flushText = () => { if (text.length) out += `<p>${text.map(inline).join('<br>')}</p>`; text = []; };
+      lines.forEach(l => {
+        const t = l.trim();
+        if (/^###\s/.test(t)) { flushList(); flushText(); out += `<h3>${inline(t.slice(4))}</h3>`; }
+        else if (/^##\s/.test(t)) { flushList(); flushText(); out += `<h2>${inline(t.slice(3))}</h2>`; }
+        else if (/^[-•]\s/.test(t)) { flushText(); list.push(t.slice(2)); }
+        else { flushList(); text.push(t); }
+      });
+      flushList(); flushText();
+      return out;
+    }).join('');
+  }
+  // Tóm tắt tự động: bỏ ký hiệu định dạng (## tiêu đề, - gạch đầu dòng, **in đậm**), giữ nguyên chữ
+  const postExcerpt = p => p.excerpt || (p.blocks || []).filter(b => b.type === 'text').map(b => b.text).join('\n')
+    .replace(/\*\*/g, '').replace(/^\s*(#{2,3}|[-•])\s+/gm, '').replace(/\s+/g, ' ').trim().slice(0, 170);
+  function postCard(p) {
+    const d = postDay(p.date);
+    return `
+      <article class="post-card">
+        <a class="post-img" href="#/blog/${encodeURIComponent(p.slug)}">
+          ${p.cover ? `<img src="${esc(p.cover)}" alt="${esc(p.title)}" loading="lazy">` : '<span class="ph">💡</span>'}
+          ${d.d ? `<span class="post-date"><b>${d.d}</b>${d.m}</span>` : ''}
+        </a>
+        <div class="post-body">
+          <a class="post-title" href="#/blog/${encodeURIComponent(p.slug)}">${esc(p.title)}</a>
+          <p>${esc(postExcerpt(p))}</p>
+          <a class="post-more" href="#/blog/${encodeURIComponent(p.slug)}">Chi tiết →</a>
+        </div>
+      </article>`;
+  }
+  const POSTS_PER_LOAD = 12;
+  function pageBlog() {
+    setNav('blog');
+    const all = DB.posts();
+    let shown = Math.min(POSTS_PER_LOAD, all.length);
+    app.innerHTML = `
+      <nav class="crumbs"><a href="#/">Trang chủ</a><span>Blog</span></nav>
+      <section class="blog-hero"><h1>Blog</h1><p>Kinh nghiệm độ đèn, so sánh Bi LED – trợ sáng và các xe vừa lắp tại TS SUPERLIGHT</p></section>
+      <section class="section" style="margin-top:18px">
+        ${all.length ? `<div class="posts">${all.slice(0, shown).map(postCard).join('')}</div>
+          ${shown < all.length ? '<div class="load-more"><button class="btn btn-dark btn-lg" id="postMore">Xem thêm bài viết</button></div>' : ''}`
+        : `<div class="empty panel"><div class="big">📝</div><p>Chưa có bài viết nào. Quay lại sau nhé!</p><a class="btn btn-dark" href="#/">Về trang chủ</a></div>`}
+      </section>`;
+    const more = $('#postMore');
+    if (more) more.onclick = () => {
+      $('#app .posts').insertAdjacentHTML('beforeend', all.slice(shown, shown + POSTS_PER_LOAD).map(postCard).join(''));
+      shown = Math.min(shown + POSTS_PER_LOAD, all.length);
+      if (shown >= all.length) more.parentElement.remove();
+    };
+  }
+  function pagePost(slug) {
+    const p = DB.post(decodeURIComponent(slug));
+    if (!p) return pageNotFound();
+    setNav('blog');
+    const d = postDay(p.date), others = DB.posts().filter(x => x.slug !== p.slug).slice(0, 3);
+    app.innerHTML = `
+      <nav class="crumbs"><a href="#/">Trang chủ</a><span><a href="#/blog">Blog</a></span><span>${esc(p.title)}</span></nav>
+      <article class="panel post">
+        <h1>${esc(p.title)}</h1>
+        <div class="post-meta">${d.full ? `🗓 ${d.full} · ` : ''}${esc(S().shopName)}</div>
+        ${p.cover ? `<img class="post-cover" src="${esc(p.cover)}" alt="${esc(p.title)}">` : ''}
+        <div class="post-content">${(p.blocks || []).map(b => b.type === 'image'
+          ? (b.src ? `<figure><img src="${esc(b.src)}" alt="${esc(b.caption || p.title)}" loading="lazy">${b.caption ? `<figcaption>${esc(b.caption)}</figcaption>` : ''}</figure>` : '')
+          : richText(b.text)).join('')}</div>
+        <div class="post-cta">
+          <div><b>Cần tư vấn độ đèn cho xe của bạn?</b><span>Lắp đặt miễn phí, test sáng trước khi lắp tại shop.</span></div>
+          <a class="btn btn-brand" href="tel:${String(S().hotline || '').replace(/\D/g, '')}">📞 Gọi ${phoneFmt(S().hotline)}</a>
+          <a class="btn btn-zalo" href="${zaloLink()}" target="_blank" rel="noopener">💬 Zalo</a>
+        </div>
+      </article>
+      ${others.length ? `<section class="section"><div class="section-head"><h3>Bài viết khác</h3><a href="#/blog">Tất cả bài viết →</a></div><div class="posts">${others.map(postCard).join('')}</div></section>` : ''}`;
+  }
+
   function pageNotFound() {
     app.innerHTML = `<div class="empty panel" style="margin-top:20px"><div class="big">🔦</div><h3>Không tìm thấy trang</h3><a class="btn btn-brand" href="#/">Về trang chủ</a></div>`;
   }
@@ -594,6 +680,7 @@
     ({
       '': pageHome, category: () => pageCategory(b || 'all'), vehicle: () => pageVehicle(b), vehicles: pageVehicles,
       search: () => pageSearch(b), product: () => pageProduct(b), videos: pageVideos, policy: pagePolicy,
+      blog: () => b ? pagePost(b) : pageBlog(),
     }[a || ''] || pageNotFound)();
     window.scrollTo(0, 0);
   }

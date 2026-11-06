@@ -76,15 +76,23 @@
   const markPublished = () => { try { localStorage.setItem(PUBLISHED, JSON.stringify(DB.catalog())); } catch (e) {} };
 
   // Ảnh tải lên trong Admin đang ở dạng data:… → tách thành file assets/img/uploads/*.jpg khi xuất bản
+  const DATA_IMG = /^data:image\/(\w+);base64,(.+)$/;
+  const uploadPath = url => { const m = DATA_IMG.exec(url || ''); return m ? `assets/img/uploads/${hashStr(m[2])}.${m[1] === 'png' ? 'png' : 'jpg'}` : url; };
+  // Ảnh trong bài viết Blog (ảnh bìa + ảnh chèn trong bài)
+  const eachPostImage = (posts, fn) => (posts || []).forEach(p => {
+    p.cover = fn(p.cover);
+    (p.blocks || []).forEach(b => { if (b.type === 'image') b.src = fn(b.src); });
+  });
   function catalogForWeb() {
     const cat = JSON.parse(JSON.stringify(DB.catalog())), files = new Map();
     const conv = url => {
-      const m = /^data:image\/(\w+);base64,(.+)$/.exec(url || '');
+      const m = DATA_IMG.exec(url || '');
       if (!m) return url;
-      const path = `assets/img/uploads/${hashStr(m[2])}.${m[1] === 'png' ? 'png' : 'jpg'}`;
+      const path = uploadPath(url);
       files.set(path, m[2]);
       return path;
     };
+    eachPostImage(cat.posts, conv);
     cat.products.forEach(p => {
       p.image = conv(p.image); p.gallery = (p.gallery || []).map(conv);
       Object.keys(p.vehicleImages || {}).forEach(v => { p.vehicleImages[v] = conv(p.vehicleImages[v]); });
@@ -112,6 +120,8 @@
       // Ảnh bìa đã thành file trên web → bỏ bản data:… khỏi nháp cho nhẹ bộ nhớ trình duyệt
       (D().tiktok || []).forEach(x => { delete x.cover; });
       Object.entries(D().tiktokChannels || {}).forEach(([user, c]) => { if (/^data:/.test(c.avatar || '')) c.avatar = `assets/img/avatar-${user}.jpg`; });
+      // Ảnh bài viết đã lên web → nháp trỏ tới file, giải phóng bộ nhớ trình duyệt cho bài sau
+      eachPostImage(D().posts, uploadPath);
       DB.save();
       markPublished();
       toast(sha ? `Đã xuất bản <b>✓</b> — web khách cập nhật sau khoảng 1 phút` : 'Web đã là bản mới nhất <b>✓</b>');
@@ -177,7 +187,7 @@
   }
 
   /* Chọn ảnh từ thư viện TikTok hoặc tải lên */
-  function pickImage(cb, { multi = false } = {}) {
+  function pickImage(cb, { multi = false, max = 800 } = {}) {
     const sel = new Set();
     const m = modal(`
       <div class="m-head">Thư viện ảnh TikTok @ts.superlight (${MEDIA().length})</div>
@@ -209,7 +219,7 @@
     if (multi) $('#libOk', m).onclick = () => { cb([...sel].map(id => `assets/img/${id}.jpg`)); m.remove(); };
     $('#libUp', m).onchange = async e => {
       const files = [...e.target.files];
-      const urls = await Promise.all(files.map(f => readImage(f)));
+      const urls = await Promise.all(files.map(f => readImage(f, max)));
       cb(multi ? urls : urls[0]); m.remove();
     };
   }
@@ -249,7 +259,7 @@
   /* ---------------- Shell ---------------- */
   const MENU = [
     ['dashboard', '📊', 'Tổng quan'], ['products', '💡', 'Sản phẩm'], ['categories', '📂', 'Danh mục'],
-    ['banners', '🖼', 'Banner & Quảng cáo'], ['promos', '🏷', 'Khuyến mãi'], ['media', '🎬', 'Thư viện TikTok'], ['settings', '⚙', 'Cài đặt'],
+    ['banners', '🖼', 'Banner & Quảng cáo'], ['blog', '📝', 'Blog'], ['promos', '🏷', 'Khuyến mãi'], ['media', '🎬', 'Thư viện TikTok'], ['settings', '⚙', 'Cài đặt'],
   ];
   function renderShell() {
     root.innerHTML = `
@@ -526,7 +536,8 @@
     const opts = [['#/', 'Trang chủ'],['#/videos', 'Video theo xe: Tất cả'],
       ...DB.videoVehicleList().filter(v => DB.videosFor(v).length).map(v => [`#/vehicle/${encodeURIComponent(v)}`, `Video theo xe: ${v}`]),
       ...D().categories.map(c => [`#/category/${c.id}`, `Danh mục: ${c.name}`]),
-      ...D().products.map(p => [`#/product/${p.id}`, `SP: ${p.name}`])];
+      ...D().products.map(p => [`#/product/${p.id}`, `SP: ${p.name}`]),
+      ['#/blog', 'Blog: Tất cả bài viết'], ...(D().posts || []).map(p => [`#/blog/${encodeURIComponent(p.slug)}`, `Bài viết: ${p.title}`])];
     return opts.map(([v, l]) => `<option value="${esc(v)}" ${cur === v ? 'selected' : ''}>${esc(l)}</option>`).join('');
   }
   function bannerForm(kind, idx) {
@@ -559,9 +570,158 @@
     };
   }
 
+  /* ---------------- Blog ----------------
+     Bài viết = tiêu đề + ảnh bìa + các khối nội dung (đoạn văn / hình ảnh) xếp theo thứ tự.
+     Ảnh tải lên lưu nháp dạng data:…, khi xuất bản tách thành file assets/img/uploads/*.jpg */
+  const todayStr = () => new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+  const dmy = s => { const [y, m, d] = String(s || '').split('-'); return y ? `${d}/${m}/${y}` : '—'; };
+  const BLOG_IMG_MAX = 1200;
+  function viewBlog() {
+    const ps = [...(D().posts || [])].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    $('#admTopActions').innerHTML = `<button class="btn btn-brand" id="postAdd">+ Viết bài mới</button>`;
+    $('#postAdd').onclick = () => postForm(null);
+    $('#view').innerHTML = `
+      <div class="card-a">
+        <h3>📝 Bài viết Blog<span class="sp"></span><span class="muted" style="font-size:13px;font-weight:500">${ps.length} bài · ${ps.filter(p => p.active).length} đang hiện</span></h3>
+        <p class="muted" style="margin-top:-6px">Bài viết hiện ở menu <b>Blog</b> trên web khách, mới nhất xếp trước. Viết / sửa xong bấm <b>🚀 Xuất bản lên web</b>.</p>
+        ${ps.length ? `<div class="tbl-wrap"><table class="tbl">
+          <thead><tr><th></th><th>Bài viết</th><th>Ngày đăng</th><th class="num">Ảnh</th><th>Hiển thị</th><th></th></tr></thead>
+          <tbody>${ps.map(p => `<tr>
+            <td><img class="thumb" src="${esc(p.cover || '')}" alt="" style="width:72px;height:48px"></td>
+            <td class="nm" style="max-width:420px">${esc(p.title)}<br><small class="muted">#/blog/${esc(p.slug)}</small></td>
+            <td>${dmy(p.date)}</td>
+            <td class="num">${(p.blocks || []).filter(b => b.type === 'image').length + (p.cover ? 1 : 0)}</td>
+            <td><label class="switch"><input type="checkbox" data-poston="${esc(p.id)}" ${p.active ? 'checked' : ''}><span></span></label></td>
+            <td class="acts"><button class="ib" data-postedit="${esc(p.id)}">Sửa</button> <a class="ib" href="${esc(GH.siteUrl())}#/blog/${encodeURIComponent(p.slug)}" target="_blank" title="Xem trên web (sau khi xuất bản)">↗</a> <button class="ib danger" data-postdel="${esc(p.id)}" title="Xoá">🗑</button></td>
+          </tr>`).join('')}</tbody></table></div>`
+        : '<div class="empty">Chưa có bài viết nào — bấm <b>+ Viết bài mới</b> để bắt đầu.</div>'}
+      </div>`;
+    const find = id => D().posts.find(p => p.id === id);
+    $$('[data-poston]').forEach(c => c.onchange = () => { find(c.dataset.poston).active = c.checked; save(c.checked ? 'Đã <b>hiện</b> bài viết' : 'Đã <b>ẩn</b> bài viết'); });
+    $$('[data-postedit]').forEach(b => b.onclick = () => postForm(find(b.dataset.postedit)));
+    $$('[data-postdel]').forEach(b => b.onclick = () => {
+      const p = find(b.dataset.postdel);
+      if (!confirm(`Xoá bài viết "${p.title}"?`)) return;
+      D().posts = D().posts.filter(x => x.id !== p.id); save('Đã xoá bài viết'); viewBlog();
+    });
+  }
+  function postForm(p) {
+    const isNew = !p;
+    const d = p ? JSON.parse(JSON.stringify(p)) : { id: DB.uid('bv'), slug: '', title: '', date: todayStr(), cover: '', excerpt: '', blocks: [{ type: 'text', text: '' }], active: true };
+    if (!d.blocks) d.blocks = [];
+    const m = modal(`
+      <div class="m-head">${isNew ? 'Viết bài mới' : 'Sửa bài: ' + esc(d.title)}</div>
+      <div class="m-body">
+        <div class="form-grid">
+          <div class="field full"><label>Tiêu đề bài viết *</label><input id="poTitle" value="${esc(d.title)}" placeholder="VD: Vario 2025 độ Bi LED Kenzo S600 Pro V3 + đèn gầm Aozoom"></div>
+          <div class="field"><label>Ngày đăng</label><input id="poDate" type="date" value="${esc(d.date)}"></div>
+          <div class="field"><label>Đường dẫn</label><input id="poSlug" value="${esc(d.slug)}" placeholder="Tự tạo theo tiêu đề">
+            <div class="hint">${isNew ? 'Chữ không dấu, số, dấu gạch ngang.' : 'Đổi đường dẫn thì link cũ đã chia sẻ sẽ không mở được.'}</div></div>
+        </div>
+        <div class="field" style="margin-top:12px"><label>Ảnh bìa</label>
+          <div class="img-pick">
+            <img class="pv" id="poCover" src="${esc(d.cover)}" alt="" style="width:176px">
+            <div class="btns">
+              <button type="button" class="btn btn-outline" id="poPickCover">🖼 Chọn từ TikTok / tải ảnh lên</button>
+              <div class="hint">Ảnh ngang đẹp nhất (tỉ lệ 16:10). Hiện ở danh sách bài và đầu bài viết.</div>
+              <button type="button" class="ib" id="poRmCover" style="justify-self:start;${d.cover ? '' : 'display:none'}">Bỏ ảnh bìa</button>
+            </div>
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px"><label>Mô tả ngắn</label><textarea id="poExcerpt" rows="2" placeholder="1–2 câu tóm tắt, hiện dưới tiêu đề ở danh sách bài. Để trống sẽ tự lấy đầu bài viết.">${esc(d.excerpt)}</textarea></div>
+        <div class="field" style="margin-top:12px"><label>Nội dung bài viết</label>
+          <div class="hint" style="margin:0 0 8px">Thêm các khối <b>Đoạn văn</b> và <b>Hình ảnh</b>, dùng ↑ ↓ để sắp xếp. Trong đoạn văn: dòng bắt đầu <code>## </code> là tiêu đề, <code>- </code> là gạch đầu dòng, <code>**chữ**</code> là in đậm, cách 1 dòng trống để sang đoạn mới.</div>
+          <div class="blks" id="poBlocks"></div>
+          <div class="blk-add">
+            <button type="button" class="btn btn-outline" id="poAddText">+ Đoạn văn</button>
+            <button type="button" class="btn btn-outline" id="poAddImg">+ Hình ảnh</button>
+          </div>
+        </div>
+        <div class="checks" style="margin-top:14px"><label><input type="checkbox" id="poActive" ${d.active ? 'checked' : ''}> Hiển thị trên web</label></div>
+      </div>
+      <div class="m-foot"><button class="btn btn-outline" data-close>Huỷ</button><button class="btn btn-brand" id="poSave">${isNew ? 'Đăng bài' : 'Lưu thay đổi'}</button></div>`, { wide: true });
+
+    // Đường dẫn tự theo tiêu đề (bài mới, khi chưa tự sửa đường dẫn)
+    let slugTouched = !isNew;
+    $('#poSlug', m).oninput = () => { slugTouched = true; };
+    $('#poTitle', m).oninput = e => { if (!slugTouched) $('#poSlug', m).value = e.target.value.trim() ? postSlug(e.target.value) : ''; };
+
+    const setCover = url => { d.cover = url; $('#poCover', m).src = url; $('#poRmCover', m).style.display = url ? '' : 'none'; };
+    $('#poPickCover', m).onclick = () => pickImage(url => setCover(url), { max: BLOG_IMG_MAX });
+    $('#poRmCover', m).onclick = () => setCover('');
+
+    // Chèn cú pháp vào ô đoạn văn tại vị trí con trỏ
+    const fmtText = (ta, kind) => {
+      const { selectionStart: s, selectionEnd: e, value: v } = ta;
+      if (kind === 'b') { const sel = v.slice(s, e) || 'chữ in đậm'; ta.setRangeText(`**${sel}**`, s, e, 'select'); }
+      else { const ls = v.lastIndexOf('\n', s - 1) + 1; ta.setRangeText(kind === 'h' ? '## ' : '- ', ls, ls, 'end'); }
+      ta.focus(); ta.dispatchEvent(new Event('input'));
+    };
+    const drawBlocks = () => {
+      const n = d.blocks.length;
+      $('#poBlocks', m).innerHTML = d.blocks.map((b, i) => `
+        <div class="blk">
+          <div class="blk-head">
+            <b>${b.type === 'image' ? '🖼 Hình ảnh' : '📝 Đoạn văn'}</b>
+            ${b.type === 'text' ? `<span class="blk-fmt"><button type="button" class="ib" data-kfmt="${i}:h" title="Dòng tiêu đề">Tiêu đề</button><button type="button" class="ib" data-kfmt="${i}:l" title="Gạch đầu dòng">• Ý</button><button type="button" class="ib" data-kfmt="${i}:b" title="In đậm chữ đang chọn"><b>B</b></button></span>` : ''}
+            <span class="sp"></span>
+            <button type="button" class="ib" data-kmove="${i}:-1" ${i ? '' : 'disabled'} title="Lên">↑</button>
+            <button type="button" class="ib" data-kmove="${i}:1" ${i < n - 1 ? '' : 'disabled'} title="Xuống">↓</button>
+            <button type="button" class="ib danger" data-krm="${i}" title="Xoá khối">✕</button>
+          </div>
+          ${b.type === 'image' ? `
+          <div class="blk-img">
+            <img src="${esc(b.src)}" alt="">
+            <div class="blk-img-side">
+              <button type="button" class="btn btn-outline" data-kimg="${i}">Đổi ảnh</button>
+              <input data-kcap="${i}" value="${esc(b.caption || '')}" placeholder="Chú thích ảnh (không bắt buộc)">
+            </div>
+          </div>` : `<textarea data-ktext="${i}" rows="6" placeholder="Viết nội dung…">${esc(b.text)}</textarea>`}
+        </div>`).join('') || '<div class="empty" style="padding:24px">Chưa có nội dung — thêm đoạn văn hoặc hình ảnh bên dưới.</div>';
+      $$('[data-ktext]', m).forEach(t => t.oninput = () => { d.blocks[+t.dataset.ktext].text = t.value; });
+      $$('[data-kcap]', m).forEach(t => t.oninput = () => { d.blocks[+t.dataset.kcap].caption = t.value; });
+      $$('[data-kfmt]', m).forEach(btn => btn.onclick = () => { const [i, k] = btn.dataset.kfmt.split(':'); fmtText($(`[data-ktext="${i}"]`, m), k); });
+      $$('[data-kmove]', m).forEach(btn => btn.onclick = () => {
+        const [i, dir] = btn.dataset.kmove.split(':').map(Number), j = i + dir;
+        [d.blocks[i], d.blocks[j]] = [d.blocks[j], d.blocks[i]]; drawBlocks();
+      });
+      $$('[data-krm]', m).forEach(btn => btn.onclick = () => {
+        const b = d.blocks[+btn.dataset.krm];
+        if ((b.type === 'text' ? b.text.trim() : b.src) && !confirm('Xoá khối này?')) return;
+        d.blocks.splice(+btn.dataset.krm, 1); drawBlocks();
+      });
+      $$('[data-kimg]', m).forEach(btn => btn.onclick = () => pickImage(url => { d.blocks[+btn.dataset.kimg].src = url; drawBlocks(); }, { max: BLOG_IMG_MAX }));
+    };
+    drawBlocks();
+    $('#poAddText', m).onclick = () => { d.blocks.push({ type: 'text', text: '' }); drawBlocks(); $$('[data-ktext]', m).pop()?.focus(); };
+    // Chọn nhiều ảnh một lúc → mỗi ảnh một khối
+    $('#poAddImg', m).onclick = () => pickImage(urls => { d.blocks.push(...[].concat(urls).map(src => ({ type: 'image', src, caption: '' }))); drawBlocks(); }, { multi: true, max: BLOG_IMG_MAX });
+
+    $('#poSave', m).onclick = () => {
+      const title = $('#poTitle', m).value.trim();
+      if (!title) { $('#poTitle', m).focus(); return toast('Nhập <b>tiêu đề bài viết</b>'); }
+      d.blocks = d.blocks.filter(b => b.type === 'image' ? b.src : b.text.trim());
+      if (!d.blocks.length) return toast('Bài viết chưa có <b>nội dung</b>');
+      // Đường dẫn không trùng bài khác
+      const base = postSlug($('#poSlug', m).value || title);
+      let slug = base, k = 2;
+      while (D().posts.some(x => x.id !== d.id && x.slug === slug)) slug = `${base}-${k++}`;
+      Object.assign(d, { title, slug, date: $('#poDate', m).value || todayStr(), excerpt: $('#poExcerpt', m).value.trim(), active: $('#poActive', m).checked });
+      const i = D().posts.findIndex(x => x.id === d.id);
+      if (i >= 0) D().posts[i] = d; else D().posts.unshift(d);
+      if (DB.save()) { m.remove(); toast(isNew ? 'Đã đăng bài <b>✓</b> — bấm 🚀 Xuất bản để đưa lên web' : 'Đã lưu <b>✓</b>'); viewBlog(); }
+      else if (i < 0) D().posts.shift(); // bộ nhớ trình duyệt đầy → không giữ bài lỗi trong nháp
+    };
+  }
+
   /* ---------------- Categories ----------------
      Mã danh mục (id) nằm trong đường dẫn #/category/<id> nên giữ nguyên khi đổi tên; chỉ tạo khi thêm mới. */
   const slugify = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'danh-muc';
+  // Đường dẫn bài viết: dài hơn, cắt ở ranh giới từ (không để "…-pro-v3-s")
+  const postSlug = s => {
+    const full = String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return (full.length <= 80 ? full : full.slice(0, 81).replace(/-[^-]*$/, '')) || 'bai-viet';
+  };
   const catCount = id => D().products.filter(p => p.cat === id).length;
   function viewCategories() {
     const cs = D().categories;
@@ -834,7 +994,7 @@
   }
 
   /* ---------------- Router ---------------- */
-  const VIEWS = { dashboard: viewDashboard, products: viewProducts, categories: viewCategories, banners: viewBanners, promos: viewPromos, media: viewMedia, settings: viewSettings };
+  const VIEWS = { dashboard: viewDashboard, products: viewProducts, categories: viewCategories, banners: viewBanners, blog: viewBlog, promos: viewPromos, media: viewMedia, settings: viewSettings };
   function route() {
     if (!isAuthed()) return renderLogin();
     if (!$('.adm')) renderShell();

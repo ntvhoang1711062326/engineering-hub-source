@@ -10,7 +10,7 @@
   const CATALOG_URL = 'assets/data/catalog.json';
   const TIKTOK_FEED_URL = 'assets/data/tiktok.json'; // GitHub Actions tự đồng bộ video TikTok vào đây
   const CATALOG_CACHE = 'tsl_catalog_cache';   // bản catalog khách tải gần nhất (hiện ngay khi mở lại)
-  const CATALOG_KEYS = ['version', 'categories', 'vehicles', 'products', 'banners', 'sideAds', 'promos', 'settings', 'tiktok', 'tiktokChannels'];
+  const CATALOG_KEYS = ['version', 'categories', 'vehicles', 'products', 'banners', 'sideAds', 'promos', 'settings', 'tiktok', 'tiktokChannels', 'posts'];
   const IS_ADMIN = !!window.IS_ADMIN;
   const IS_LOCAL = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
   const readJSON = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
@@ -244,6 +244,7 @@ Sản phẩm chính hãng Aozoom, lắp đặt và test sáng trực tiếp tạ
     sideAds: SIDE_ADS,
     promos: PROMOS,
     settings: SETTINGS,
+    posts: [], // Bài viết Blog — soạn ở Admin → Blog
   });
 
   const DB = {
@@ -275,6 +276,7 @@ Sản phẩm chính hãng Aozoom, lắp đặt và test sáng trực tiếp tạ
       this.migrate12();
       this.migrate13();
       this.migrate14();
+      if (!Array.isArray(this.data.posts)) this.data.posts = [];
       if (this.data.settings.tiktok2 == null) this.data.settings.tiktok2 = SETTINGS.tiktok2;
       if (this.data.settings.mapUrl == null) this.data.settings.mapUrl = SETTINGS.mapUrl;
       // Địa chỉ cũ 38/8 → 38/8A (bản nháp Admin lưu trên máy còn địa chỉ cũ)
@@ -451,6 +453,9 @@ Sản phẩm chính hãng Aozoom, lắp đặt và test sáng trực tiếp tạ
       } catch (e) { /* mất mạng / mở file:// → giữ bản đang có */ }
     },
     product(id) { return this.data.products.find(p => p.id === id); },
+    /* Blog: bài đang hiện, mới nhất trước */
+    posts() { return (this.data.posts || []).filter(p => p.active).sort((a, b) => String(b.date).localeCompare(String(a.date))); },
+    post(slug) { return (this.data.posts || []).find(p => p.slug === slug && p.active); },
     category(id) { return this.data.categories.find(c => c.id === id); },
     /* Ảnh sản phẩm theo dòng xe đã chọn (không có thì dùng ảnh đại diện) */
     imageFor(p, vehicle) { return (vehicle && p.vehicleImages?.[vehicle]) || p.image; },

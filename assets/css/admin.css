@@ -140,3 +140,19 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 .pub-box { padding: 12px 14px; display: grid; gap: 6px; }
 .pub-box small { color: #9aa3b2; font-size: 11.5px; text-align: center; }
 .pub-box small.dirty { color: var(--brand); font-weight: 600; }
+
+/* Soạn bài Blog: các khối đoạn văn / hình ảnh */
+.blks { display: grid; gap: 10px; }
+.blk { border: 1.5px solid var(--line); border-radius: 10px; padding: 10px; background: #fafbfc; }
+.blk-head { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+.blk-head > b { font-size: 13px; }
+.blk-head .sp { flex: 1; }
+.blk-fmt { display: inline-flex; gap: 4px; margin-left: 6px; }
+.blk textarea { width: 100%; border: 1.5px solid var(--line); border-radius: 8px; padding: 10px 12px; font: inherit; font-size: 14px; line-height: 1.6; resize: vertical; background: #fff; outline: none; }
+.blk textarea:focus, .blk-img input:focus { border-color: var(--brand-2); }
+.blk-img { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+.blk-img img { width: 220px; max-width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 8px; background: var(--dark); }
+.blk-img-side { flex: 1; min-width: 200px; display: grid; gap: 8px; align-content: start; }
+.blk-img-side .btn { justify-self: start; }
+.blk-img input { border: 1.5px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; outline: none; }
+.blk-add { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
