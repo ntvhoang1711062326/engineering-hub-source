@@ -56,7 +56,7 @@ button { cursor: pointer; }
 .header { background: var(--dark); color: #fff; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 20px rgba(0,0,0,.3); }
 .header-main { display: flex; align-items: center; gap: 28px; padding: 10px 16px; min-height: 66px; }
 .logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.logo-img { display: block; height: 60px; width: auto; }
+.logo-img { display: block; height: 60px; width: auto; border-radius: 8px; }
 .logo-text b { display: block; font-size: 19px; letter-spacing: .5px; line-height: 1.1; }
 .logo-text b span { color: var(--brand); }
 .logo-text small { color: #9aa3b2; font-size: 11px; }
