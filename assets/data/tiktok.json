@@ -1,13 +1,13 @@
 {
- "syncedAt": "2026-11-28T01:06:37.189Z",
+ "syncedAt": "2026-11-28T15:04:01.883Z",
  "request": "mvyt2z2u",
- "added": 0,
- "updated": 22,
+ "added": 1,
+ "updated": 21,
  "channels": {
   "ts.superlight": {
    "name": "TS SUPERLIGHT 🇻🇳",
-   "followers": 900,
-   "likes": 17700,
+   "followers": 902,
+   "likes": 17800,
    "avatar": "assets/img/avatar-ts.superlight.jpg"
   },
   "_superlightshop_": {
@@ -19,63 +19,69 @@
  },
  "videos": [
   {
+   "id": "7713177640655441173",
+   "cap": "Combo Audi A8pro Trước Sau AB2026 🥰",
+   "views": 627,
+   "ch": "_superlightshop_"
+  },
+  {
    "id": "7712459777237847316",
    "cap": "Bicau Aozoom Ex3 lên choá đèn Lead 4val 😍",
-   "views": 1126,
+   "views": 1207,
    "ch": "_superlightshop_"
   },
   {
    "id": "7712069710686342420",
    "cap": "Scoopy lên cụm đèn này thì ai cũng phải nhìn 😍",
-   "views": 2022,
+   "views": 2279,
    "ch": "_superlightshop_"
   },
   {
    "id": "7712063236878781704",
    "cap": "Lên đèn đón tết thôi nào 🥰 AB2026 lên full combo Audi A7 + Bicau + bảng led 😍",
-   "views": 3290,
+   "views": 3585,
    "ch": "ts.superlight"
   },
   {
    "id": "7711692609823051028",
    "cap": "Lâu quá không lên Vario cho ae tham khảo 🔥",
-   "views": 1785,
+   "views": 1837,
    "ch": "_superlightshop_"
   },
   {
    "id": "7711327595031235846",
    "cap": "Ab 2026 lên audi nhìn ngầu quá 🔥",
-   "views": 6929,
+   "views": 7338,
    "ch": "_superlightshop_"
   },
   {
    "id": "7710607892646284596",
    "cap": "Lead lên audi a7 quá đẹp 🔥🔥",
-   "views": 1858,
+   "views": 1891,
    "ch": "_superlightshop_"
   },
   {
    "id": "7710216792160996609",
    "cap": "Hậu audi ab 2020-2026",
-   "views": 1442,
+   "views": 1477,
    "ch": "_superlightshop_"
   },
   {
    "id": "7709868413920824596",
    "cap": "Lên đèn AB2026 full combo Audi a7 trước sau + bicau aozoom ex2 🤩📸",
-   "views": 27600,
+   "views": 28400,
    "ch": "_superlightshop_"
   },
   {
    "id": "7709486431206411540",
    "cap": "Ab2026 audi a7 + aozoom ex2 . Combo vừa đẹp vừa sáng 🔥",
-   "views": 10500,
+   "views": 10900,
    "ch": "_superlightshop_"
   },
   {
    "id": "7709102803897093397",
    "cap": "Mẫu hậu Ab này còn hot không ta 🔥",
-   "views": 4232,
+   "views": 4349,
    "ch": "_superlightshop_"
   },
   {
@@ -111,7 +117,7 @@
   {
    "id": "7705758321097051410",
    "cap": "Lên đèn AB2026 🥰",
-   "views": 441,
+   "views": 446,
    "ch": "ts.superlight"
   },
   {
@@ -123,7 +129,7 @@
   {
    "id": "7705350858128624903",
    "cap": "Nguyên cụm hậu AB2020-2026 1₫8 🥰. Liên hệ shop chốt liền tay ☎️☎️",
-   "views": 2754,
+   "views": 2804,
    "ch": "ts.superlight"
   },
   {
@@ -165,13 +171,13 @@
   {
    "id": "7701281026391280904",
    "cap": "Audi A7pro v3 AB2026 🥰",
-   "views": 22500,
+   "views": 22800,
    "ch": "ts.superlight"
   },
   {
    "id": "7700953249678970119",
    "cap": "Full combo Audi + bicau AB2020-2025 bao nhiêu nhỉ🤔?",
-   "views": 1868,
+   "views": 1881,
    "ch": "ts.superlight"
   },
   {
@@ -189,7 +195,7 @@
   {
    "id": "7700495481079713042",
    "cap": "Combo Audi trước sau A7prov3 2₫5🙋🏻. Chốt ngay deal hời thôi nào ☎️",
-   "views": 46900,
+   "views": 47300,
    "ch": "ts.superlight"
   },
   {
@@ -243,19 +249,19 @@
   {
    "id": "7688304356801662226",
    "cap": "Audi A8pro Ngôi Sao Vario 🤍🙋🏻",
-   "views": 4698,
+   "views": 4749,
    "ch": "ts.superlight"
   },
   {
    "id": "7681273723789495560",
    "cap": "NVX lên 1 cặp CB150pro + Audi A8pro 🔥🥰",
-   "views": 1029,
+   "views": 1031,
    "ch": "ts.superlight"
   },
   {
    "id": "7676341375083793682",
    "cap": "Kenzo s600prov3 + mắt xoay sharigan Ab 2026 🥰",
-   "views": 1467,
+   "views": 1470,
    "ch": "ts.superlight"
   },
   {
@@ -285,7 +291,7 @@
   {
    "id": "7623989432148053269",
    "cap": "Vario mẫu mới đèn mới cho ae tham khảo 🔥",
-   "views": 83400,
+   "views": 83500,
    "ch": "ts.superlight"
   },
   {
@@ -297,7 +303,7 @@
   {
    "id": "7477175155995757831",
    "cap": "Lên Full combo Audi trước sau + Zhipat dành cho ae vision 2017-2019 🔥",
-   "views": 120500,
+   "views": 120600,
    "ch": "ts.superlight"
   }
  ]
